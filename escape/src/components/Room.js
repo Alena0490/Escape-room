@@ -1,9 +1,28 @@
-import React, { useEffect, useRef } from "react";
+import  { useState, useEffect, useRef } from "react";
 import "./Room.css";
+import { IoClose } from "react-icons/io5";
 
 const Room = () => {
   const wrapRef = useRef(null);
   const roomRef = useRef(null);
+  const [rugUp, setRugUp] = useState(false);
+
+  
+const showComment = (text, className = "") => {
+  const dialog = document.querySelector("#dialog");
+  dialog.innerHTML = ""; // vždy smaže starý komentář
+
+  const div = document.createElement("div");
+  div.innerHTML = text;
+  if (className) div.className = className;
+
+  dialog.appendChild(div);
+
+  setTimeout(() => {
+    div.style.opacity = "0";
+    setTimeout(() => div.remove(), 500);
+  }, 8000); // zmizí po 8s
+};
 
   useEffect(() => {
     const roomWrap = wrapRef.current;
@@ -170,34 +189,31 @@ const Room = () => {
         const text = el.getAttribute("data-comment");
         if (text) addComment(text);
         });
-    });
-
-    // hint tlačítko
-    const hints = [
-        "Talk to the old spirits.",
-        "Admire the art.",
-        "Get the code first.",
-        "Don't forget to look into boxes.",
-        "I need to search all the stuff.",
-        "Always look on the bright side.",
-        "Play sports.",
-        "Read the book.", // tvoje nová nápověda
-    ];
-    document.querySelector("#hint").addEventListener("click", () => {
-        addComment(hints[Math.floor(Math.random() * hints.length)], "hint");
-    });
+      });
     };
 
 
     const initUtilities = () => {
         const switchEl = document.querySelector(".switch");
+        const mirrorEl = document.querySelector(".mirror");
+
         if (switchEl) {
             switchEl.addEventListener("click", () => {
-            roomCanvas.classList.toggle("dark");
+            const isDark = roomCanvas.classList.toggle("dark");
             switchEl.classList.toggle("on"); // vlastní stav vypínače
+            
+              if (mirrorEl) {
+                if (!isDark) {
+                  // světla zapnutá
+                  mirrorEl.classList.add("lit");
+                } else {
+                  // světla zhasnutá
+                  mirrorEl.classList.remove("lit");
+                }
+              }
             });
-        }
-    };
+          }
+};
 
 
     const initItems = () => {
@@ -212,18 +228,20 @@ const Room = () => {
             };
         });
 
-        // --- Hint tlačítko ---
-        const hints = [
-            "Ask again later.",
-            "Think for yourself.",
-            "Don't leave the house today.",
-            "Stay asleep.",
-            "Have you seen the exit?",
-            "Always look on the bright side.",
-            "Go outside.",
-            "Read the book."
-        ];
-
+       // hint tlačítko
+    const hints = [
+        "Talk to the old spirits.",
+        "Admire the art.",
+        "Get the code first.",
+        "Don't forget to look into boxes.",
+        "You need to search all the stuff.",
+        "Play sports.",
+        "Read the book.",
+        "It's allways better with lights on.",
+        "Don't be afraid of ghosts.", 
+        "Don't forget to check under the rug.",
+    ];
+ 
         const hintBtn = document.getElementById("hint");
         if (hintBtn) {
             hintBtn.onclick = () => {
@@ -232,23 +250,6 @@ const Room = () => {
             };
         }
     };
-
-
-const showComment = (text, className = "") => {
-  const dialog = document.querySelector("#dialog");
-  dialog.innerHTML = ""; // vždy smaže starý komentář
-
-  const div = document.createElement("div");
-  div.innerHTML = text;
-  if (className) div.className = className;
-
-  dialog.appendChild(div);
-
-  setTimeout(() => {
-    div.style.opacity = "0";
-    setTimeout(() => div.remove(), 500);
-  }, 8000); // zmizí po 8s
-};
 
     const init = () => {
         updateView();
@@ -276,7 +277,7 @@ const showComment = (text, className = "") => {
             <div
                   className="item painting"
                   data-title="What a nice painting!"
-                  data-comment="What am I missing?"
+                  data-comment="Who is the guy? I have a feeling like he was missing something."
                 ></div>
           </div>
             <div className="wall wall-left">
@@ -315,7 +316,7 @@ const showComment = (text, className = "") => {
                 <div
                   className="item book"
                   data-title="An old book"
-                  data-comment="He gazed up at the enormous face. Forty years it had taken him to learn what kind of smile was hidden beneath the dark moustache. O cruel, needless misunderstanding! O stubborn, self-willed exile from the loving breast! Two gin-scented tears trickled down the sides of his nose. But it was all right, everything was all right, the struggle was finished. He had won the victory over himself. He loved Big Brother."
+                  data-comment="`He gazed up at the enormous face. Forty years it had taken him to learn what kind of smile was hidden beneath the dark moustache. O cruel, needless misunderstanding! O stubborn, self-willed exile from the loving breast! Two gin-scented tears trickled down the sides of his nose. But it was all right, everything was all right, the struggle was finished. He had won the victory over himself. He loved Big Brother.` I know this book!"
                 >
                   <div className="item-inner item"></div>
                 </div>
@@ -324,11 +325,11 @@ const showComment = (text, className = "") => {
                 <div
                   className="item item-cube left-cube"
                   id="hover-not"
-                  data-title="Minecraft!"
-                  data-comment="<q class='green'>Creeper? Aw man!</q>"
+                  data-title="An army Medical Kit"
+                  data-comment="I hope there is something useful inside. Ouch, My finger! Luckily there is the medical kit in the shelf."
                 >
                   <div 
-                    className="cube minecraft item"
+                    className="cube medical-chest item"
                     id="hover-not"></div>
                 </div>
                 <div
@@ -344,7 +345,10 @@ const showComment = (text, className = "") => {
               </div>
             </div>
           </div>
-            <div className="wall wall-back">
+            <div className="wall wall-back">            
+              <div className="flat lock item" data-title="Door lock" data-comment="It says: 'Please, enter the code'">              
+              </div>
+
                 <div className="flat door inner"></div>
                 <div className="flat door item" data-title="Locked Door" data-comment="Is's locked."></div>
                 <div className="flat switch item" data-title="Light Switch" data-comment="Much better."></div>
@@ -352,22 +356,44 @@ const showComment = (text, className = "") => {
           <div className="wall wall-right">
             <div className="poster item" 
                 data-title="Some old poster"
-                data-comment="Faded letters, barely readable..."></div>
+                data-comment="What is the chainsaw commercial doing there?"></div>
+
+                <div className="mirror item" 
+                data-title="An old mirror"
+                data-comment="How do I look? Eh, hello Mr.Ghost, please don't kill me."></div>
           </div>
           <div className="wall wall-top"></div>
-          <div className="wall wall-bottom"></div>
+          <div className="wall wall-bottom">
+            <div 
+            className={`rug flat item ${rugUp ? "rug-up" : ""}`}
+            data-title="Some old rug." 
+            data-comment="Yuck, It's so dirty. Wait, there is a radio under. There are some scratched letters: 'BIG EAR' Maybe I could try this frequency.WOW! I've got the signal, it's so weird."
+            onClick={(e) => { setRugUp(!rugUp); const comment = e.currentTarget.getAttribute("data-comment"); if (comment) showComment(comment);}}></div>
+          </div>
           <div className="cube cardbox" 
             data-title="A random box"
-            data-comment='There is just a piece of paper. It says: "KEY: book, ball, painting, cassette, skull"'>
+            data-comment='There is just a piece of paper. It says: "KEY: book, ball, mirror, cassette, skull, rug"'>
           </div>
           <div
             className="item cube ouija"
             data-title="OUIJA"
             data-comment="To get out of the room you need to solve the riddles. You need to use just one(last) number or letter from each one. But first you need to find the key."
           ></div>
-          <div className="cube table" data-title="A weird table"      data-comment='Wait, what is there?'></div>
+          <div className="cube table" data-title="A weird table"      data-comment="Nice, I really need this to my living room. Wait, what is there?"></div>
         </div>
       </div>
+
+      <form className="code-lock">
+        <IoClose className="close" />
+        <input 
+          type="text"
+          inputMode="numeric" 
+          pattern="\d*"  
+          maxLength="6" 
+          className="code-input"
+          placeholder="******" />
+        <button type="submit" className="code-submit">Confirm</button>
+        </form>
 
       <nav className="room-nav">
         <button id="turnLeft" data-title="Turn Left">

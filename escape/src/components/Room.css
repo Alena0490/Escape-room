@@ -167,6 +167,7 @@ body {
   background-size: 75%;
   background-repeat: repeat;
   background-position: top right;
+  filter: sepia(0.2) brightness(0.8) contrast(1.1);
 }
 
 .room-wrap.rotating *,
@@ -476,8 +477,10 @@ body {
   bottom: 0;
   left: 20%;
   transform: translateZ(2vmin);
+  filter: brightness(0.9) sepia(0.3);
   transition: all 0.3s ease;
   cursor: pointer;
+  z-index: 1;
 }
 
 .door.open {
@@ -515,14 +518,100 @@ body {
     cursor: pointer;
 }
 
+
+.lock {
+  width: 11vmin;
+  height: 18vmin;
+  background-image: url("../img/code-lock.webp");
+  background-size: contain;
+  bottom: 31vmin;
+  left: 7%;
+  margin: 2rem;
+  cursor: pointer !important;
+  transition: none;
+  backface-visibility: hidden;
+  transform-style: flat;
+  filter: drop-shadow(3px 3px 3px black) sepia(0.3);
+  z-index: 999;
+}
+
+.code-lock {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  left: 50%;
+  transform: translate(-50%);
+  top: 40%;
+  max-width: 15rem;
+  pointer-events: auto;
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.739);
+  border-radius: 0.125rem;
+  background: rgba(0, 0, 0, 0.7);
+  border-radius: 2px;
+  padding: 0.75rem 1rem;
+  z-index: 9999;
+  display: none;
+}
+
+.code-lock input {
+  max-width: 100%;
+  font-size: 1.2rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  text-align: center;
+  vertical-align: middle;
+  padding: 0.2rem 0.5rem;
+  background: #e3e4e8;
+  outline: none;
+  border: 0px outset #454954;
+  border-radius: 0.125rem;
+  margin: 1.75rem 0 1rem;
+}
+
+.code-lock button {
+  font-size: 1.2rem;
+  padding: 0.2rem 0.5rem;
+  cursor: pointer;
+  background-color: #454954;
+  background-image: linear-gradient(180deg, #0000, #0002),
+    radial-gradient(90% 0.125em at 50% 0.125em, #fff7 25%, #fff0 50%);
+  box-shadow: 0.125em 0.125em 0.25em #0007, 0 -0.05em 0 0.05em #0004,
+    0 0.05em 0 0.05em #fff1, -0.125em 0 0.125em #454954 inset,
+    0 0.125em 0.125em #fff4 inset, 0.125em 0 0.125em #fff4 inset,
+    0 -0.125em 0.125em #454954 inset;
+  color: #e3e4e8;
+  text-shadow: 0 0 0.125em #fff7, 0.05em 0.05em 0 black, 0.075em 0.075em 0 black;
+  border: 0px outset #454954;
+  border-radius: 0.25em;
+}
+
+.code-lock .close {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  cursor: pointer;
+  font-size: 1.5rem;
+  color: white;
+  transition: transform 0.2s ease-out;
+}
+
+.code-lock .close:hover {
+  transform: scale(1.2);
+}
+
 .front-view .wall-back .switch,
+.front-view .wall-back .lock,
 .front-view .wall-back .door {
   bottom: -100%;
   margin: 2rem;
   cursor: pointer;
 }
 
-.right-view .wall-back .switch {
+.right-view .wall-back .switch,
+.right-view .wall-back .lock  {
   filter: drop-shadow(-2px -1px 2px black);
   /* border: 4px solid red !important; */
 }
@@ -541,6 +630,48 @@ body {
     box-shadow: 0 0 1px #000a, inset 0 0 1px rgba(0, 0, 0, 0.425);
     border: 0.5vmin solid #222;
     cursor: pointer;
+}
+
+.mirror {
+    width: 65vmin;
+    height: 85vmin;
+    background-image: url("../img/mirror.webp");
+    background-size: contain;
+    background-position: center;
+    filter: sepia(0.2);
+    background-repeat: no-repeat;
+    position: relative;
+    bottom: -10vmin;
+    left: 72vmin;
+    box-shadow: none;
+    border: none;
+    cursor: pointer;
+}
+
+.mirror::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  width: 65vmin;
+  height: 85vmin;
+  background: url("../img/mirror-hover.webp");
+  background-size: contain;
+  background-position: center;
+  background-repeat: no-repeat;
+  filter: brightness(1.2);
+  opacity: 0;
+  transition: opacity 0.4s ease-in;
+}
+
+.mirror.lit::after {
+  background: url("../img/mirror-lit.webp");
+  background-size: contain;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.mirror:hover::after {
+  opacity: 1;
 }
 
 .painting {
@@ -567,6 +698,42 @@ body {
   cursor: pointer;
 }
 
+.rug {
+  background-image: url("../img/rug.webp");
+  width: 40vmin;
+  height: 40vmin;
+  background-size: contain;
+  background-repeat: no-repeat;
+  position: absolute;
+  top: calc(50% - 8vmin);
+  left: calc(50% - 8vmin);
+  filter: drop-shadow(0vmin 0.2vmin 0.6vmin rgba(0, 0, 0)) contrast(1.1) brightness(0.9);
+  z-index: 3;
+  transform: translateZ(2px);
+}
+
+.rug::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: inherit;
+  z-index: 3;
+}
+
+.rug-up {
+  transform: rotate(95deg);
+  background: url(../img/radio.webp);
+  background-size: contain;
+  background-repeat: no-repeat;
+  filter: drop-shadow(-3px -3px 3px black);
+  width: 20vmin;
+  height: 20vmin;
+
+  
+}
 
 /***Item hover ***/
 
@@ -580,6 +747,10 @@ body {
 
 .item:not(#hover-not):hover {
   filter: brightness(1.2) drop-shadow(3px 3px 3px rgb(255, 204, 0));
+}
+
+.flat.door:hover {
+  filter: brightness(1.1) sepia(0.3) drop-shadow(3px 3px 3px rgb(255, 204, 0)) !important;
 }
 
 /*-- SHELF --*/
@@ -724,7 +895,9 @@ body {
 }
 
 .cube .shelf-level > .left-cube {
-  left: 30%;
+  left: 35%;
+  width: 5vmin;
+  height: 10vmin;
 }
 .cube .shelf-level > .right-cube {
   left: unset;
@@ -747,15 +920,17 @@ body {
   background-image: url("../img/metallic-box.webp");
   border: none !important;
 }
-.cube.minecraft > div {
-  background-image: url("https://assets.codepen.io/5896374/grass-side.png");
+.cube.medical-chest > div {
+  background-image: url("../img/medical-chest-side1.webp");
   border: none !important;
 }
-.cube.minecraft > .cube-top {
-  background-image: url("https://assets.codepen.io/5896374/grass-top.png");
+.cube.medical-chest > .cube-top {
+  background-image: url("../img/medical-chest-top.webp");
+  background-size: cover;
+  background-position: -17px center;
 }
-.cube.minecraft > .cube-bottom {
-  background-image: url("https://assets.codepen.io/5896374/grass-bottom.png");
+.cube.medical chest > .cube-bottom {
+  background-image: url("../img/medical-chest-top.webp");
 }
 
 .item .item-inner {
