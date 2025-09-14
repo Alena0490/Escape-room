@@ -1,13 +1,13 @@
 import  { useState, useEffect, useRef } from "react";
 import "./Room.css";
-import { IoClose } from "react-icons/io5";
+import CodeLock from "./CodeLock";
 
 const Room = () => {
   const wrapRef = useRef(null);
   const roomRef = useRef(null);
   const [rugUp, setRugUp] = useState(false);
+  const [showLock, setShowLock] = useState(false);
 
-  
 const showComment = (text, className = "") => {
   const dialog = document.querySelector("#dialog");
   dialog.innerHTML = ""; // vždy smaže starý komentář
@@ -192,28 +192,57 @@ const showComment = (text, className = "") => {
       });
     };
 
-
     const initUtilities = () => {
-        const switchEl = document.querySelector(".switch");
-        const mirrorEl = document.querySelector(".mirror");
+      const switchEl = document.querySelector(".switch");
+      const mirrorEl = document.querySelector(".mirror");
+      const roomCanvas = document.getElementById("room");
 
-        if (switchEl) {
-            switchEl.addEventListener("click", () => {
-            const isDark = roomCanvas.classList.toggle("dark");
-            switchEl.classList.toggle("on"); // vlastní stav vypínače
-            
-              if (mirrorEl) {
-                if (!isDark) {
-                  // světla zapnutá
-                  mirrorEl.classList.add("lit");
-                } else {
-                  // světla zhasnutá
-                  mirrorEl.classList.remove("lit");
-                }
-              }
-            });
+      const onMessages = [
+        "Much better.",
+        "Finally some light!",
+        "Ah, I can see everything clearly now.",
+        "Feels safer with the lights on…"
+      ];
+
+      const offMessages = [
+        "Ugh... it's too dark, I can't see a thing.",
+        "Creepy... I should turn the lights back on.",
+        "Wait, what was that?! Better keep it bright.",
+        "Nope, not staying in the dark!"
+      ];
+
+      let onIndex = 0;
+      let offIndex = 0;
+
+      if (switchEl) {
+        switchEl.addEventListener("click", () => {
+          const isDark = roomCanvas.classList.contains("dark");
+
+          if (isDark) {
+            // 🔦 bylo zhasnuto → teď rozsvítíme
+            roomCanvas.classList.remove("dark");
+            switchEl.classList.add("on");
+            const msg = onMessages[onIndex];
+            switchEl.setAttribute("data-comment", msg);
+            showComment(msg);
+            onIndex = (onIndex + 1) % onMessages.length;
+
+            if (mirrorEl) mirrorEl.classList.add("lit");
+          } else {
+            // 💡 bylo rozsvíceno → teď zhasneme
+            roomCanvas.classList.add("dark");
+            switchEl.classList.remove("on");
+            const msg = offMessages[offIndex];
+            switchEl.setAttribute("data-comment", msg);
+            showComment(msg);
+            offIndex = (offIndex + 1) % offMessages.length;
+
+            if (mirrorEl) mirrorEl.classList.remove("lit");
           }
-};
+        });
+      }
+    };
+
 
 
     const initItems = () => {
@@ -277,46 +306,46 @@ const showComment = (text, className = "") => {
             <div
                   className="item painting"
                   data-title="What a nice painting!"
-                  data-comment="Who is the guy? I have a feeling like he was missing something."
+                  data-comment="Who is this guy? I have a funny feeling that there's something missing about him."
                 ></div>
           </div>
             <div className="wall wall-left">
                 <div className="cube shelf">
                   <div className="cube shelf-level level-1">
-                    <div class="item skull" data-title="A Shiny Skull" data-comment="Wow,it has full set of teeth!">
+                    <div class="item skull" data-title="A Shiny Skull" data-comment="Wow, it has full set of teeth!">
                   <div class="item-inner"></div>
                 </div>
 
                 <div
                   className="item cassette"
-                  data-title="Some olc cassette"
-                  data-comment="What we have there? Bryan Addams - Summer of ..."
+                  data-title="Some old cassette"
+                  data-comment="What do we have there? Bryan Addams - Summer of ... Oh no. Stuck forever in my head."
                 >
                   <div className="item item-inner"></div>
                 </div>
                 <div
                   className="item ball"
                   data-title="A random billiard ball"  
-                  data-comment="What number is it?"
+                  data-comment="What number is this? Does it matter? It's just a&nbsp;ball."
                 >
                   <div className=" item item-inner"></div>
                 </div>
               </div>
               <div className="cube shelf-level level-2">
-                <div class="item globe" data-title="An old globe" data-comment="Where is the Czechia?">
+                <div class="item globe" data-title="An old globe" data-comment="Where is Czechia? Europe, right? Damn, I&nbsp;hate geography.">
                   <div class="item-inner item"></div>
                 </div>
                 <div
                   className="item phone"
                   data-title="Ancient Technology"
-                  data-comment="Maybe it still works? I'll call my mom. 6-0-2 Oh no! My finger got stuck!"
+                  data-comment="Maybe it still works? I'll call my&nbsp;mom. 6-0-2 Oh no! My finger got stuck!"
                 >
                   <div className="item-inner item"></div>
                 </div>
                 <div
                   className="item book"
                   data-title="An old book"
-                  data-comment="`He gazed up at the enormous face. Forty years it had taken him to learn what kind of smile was hidden beneath the dark moustache. O cruel, needless misunderstanding! O stubborn, self-willed exile from the loving breast! Two gin-scented tears trickled down the sides of his nose. But it was all right, everything was all right, the struggle was finished. He had won the victory over himself. He loved Big Brother.` I know this book!"
+                  data-comment="`He gazed up at the enormous face. Forty years it had taken him to learn what kind of smile was hidden beneath the dark moustache. O cruel, needless misunderstanding! O&nbsp;stubborn, self-willed exile from the loving breast! Two gin-scented tears trickled down the sides of his nose. But it was all right, everything was all right, the struggle was finished. He&nbsp;had won the victory over himself. He loved Big Brother.` I&nbsp;know this book!"
                 >
                   <div className="item-inner item"></div>
                 </div>
@@ -326,7 +355,7 @@ const showComment = (text, className = "") => {
                   className="item item-cube left-cube"
                   id="hover-not"
                   data-title="An army Medical Kit"
-                  data-comment="I hope there is something useful inside. Ouch, My finger! Luckily there is the medical kit in the shelf."
+                  data-comment="I hope there is something useful inside. Ouch, my&nbsp;finger! Thank goodness I&nbsp;have this first aid kit."
                 >
                   <div 
                     className="cube medical-chest item"
@@ -336,7 +365,7 @@ const showComment = (text, className = "") => {
                   className="item item-cube right-cube"
                   id="hover-not"
                   data-title="An army metal box"
-                  data-comment="No way I could open this!"
+                  data-comment="No way I&nbsp;could open this!"
                 >
                   <div 
                     className="cube metal-box item"
@@ -346,54 +375,69 @@ const showComment = (text, className = "") => {
             </div>
           </div>
             <div className="wall wall-back">            
-              <div className="flat lock item" data-title="Door lock" data-comment="It says: 'Please, enter the code'">              
+              <div className="flat lock item" 
+                data-title="Door lock" 
+                data-comment="It says: 'Please, enter the code'"
+                onClick={() => setShowLock(true)}>              
               </div>
 
                 <div className="flat door inner"></div>
-                <div className="flat door item" data-title="Locked Door" data-comment="Is's locked."></div>
+                <div 
+                  className="flat door item" 
+                  data-title="Locked Door" 
+                  data-comment="It's locked."
+                  onClick={(e) => {
+                    if (e.currentTarget.classList.contains("open")) {
+                      const msg = "It was a&nbsp;long day... Let's get out of&nbsp;here. Finally, fresh air!";
+                      e.currentTarget.setAttribute("data-comment", msg);
+                      showComment(msg);
+                    } else {
+                      const msg = "It's locked.";
+                      e.currentTarget.setAttribute("data-comment", msg);
+                      showComment(msg);
+                    }
+                  }}
+                ></div>
+
                 <div className="flat switch item" data-title="Light Switch" data-comment="Much better."></div>
             </div>
           <div className="wall wall-right">
             <div className="poster item" 
                 data-title="Some old poster"
-                data-comment="What is the chainsaw commercial doing there?"></div>
+                data-comment="What is the&nbsp;chainsaw commercial doing there?"></div>
 
                 <div className="mirror item" 
                 data-title="An old mirror"
-                data-comment="How do I look? Eh, hello Mr.Ghost, please don't kill me."></div>
+                data-comment="How do I&nbsp;look? Eh, hello, Mr.Ghost, please don't kill me."></div>
           </div>
           <div className="wall wall-top"></div>
           <div className="wall wall-bottom">
             <div 
             className={`rug flat item ${rugUp ? "rug-up" : ""}`}
             data-title="Some old rug." 
-            data-comment="Yuck, It's so dirty. Wait, there is a radio under. There are some scratched letters: 'BIG EAR' Maybe I could try this frequency.WOW! I've got the signal, it's so weird."
+            data-comment="Yuck, it's so dirty. Wait, there is a&nbsp;radio under. There are some scratched letters: 'BIG EAR'. Maybe I&nbsp;could try this frequency. WOW! I've got the signal, it's so weird."
             onClick={(e) => { setRugUp(!rugUp); const comment = e.currentTarget.getAttribute("data-comment"); if (comment) showComment(comment);}}></div>
           </div>
           <div className="cube cardbox" 
             data-title="A random box"
-            data-comment='There is just a piece of paper. It says: "KEY: book, ball, mirror, cassette, skull, rug"'>
+            data-comment="There is just a&nbsp;piece of&nbsp;paper. It says: `KEY: book, ball, mirror, cassette, skull, rug`">
           </div>
           <div
             className="item cube ouija"
             data-title="OUIJA"
-            data-comment="To get out of the room you need to solve the riddles. You need to use just one(last) number or letter from each one. But first you need to find the key."
+            data-comment="Oh, what, the pointer is moving! Creepy... 
+            `T - O - G - E - T out of the room, you need to solve the riddles. You need to use just one last or&nbsp;the&nbsp;only number from each one. But first you need to find the key.` 
+            Because why make it easy, right?"
           ></div>
-          <div className="cube table" data-title="A weird table"      data-comment="Nice, I really need this to my living room. Wait, what is there?"></div>
+          <div className="cube table" data-title="A weird table"      data-comment="Nice, I really need this for my&nbsp;living room. Wait, what is there?"></div>
         </div>
       </div>
 
-      <form className="code-lock">
-        <IoClose className="close" />
-        <input 
-          type="text"
-          inputMode="numeric" 
-          pattern="\d*"  
-          maxLength="6" 
-          className="code-input"
-          placeholder="******" />
-        <button type="submit" className="code-submit">Confirm</button>
-        </form>
+      <CodeLock
+        showLock={showLock}
+        setShowLock={setShowLock}
+        showComment={showComment}>
+      </CodeLock>
 
       <nav className="room-nav">
         <button id="turnLeft" data-title="Turn Left">
@@ -416,7 +460,11 @@ const showComment = (text, className = "") => {
 
       <div id="tooltip"></div>
       <div id="itemCur"></div>
-      <div id="dialog"></div>
+      <div 
+        id="dialog" 
+        role="status"
+        aria-live="polite">
+      </div>
     </div>
   );
 };

@@ -1,0 +1,95 @@
+.code-lock {
+  position: absolute;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  left: 50%;
+  transform: translate(-50%);
+  top: 40%;
+  max-width: 17rem;
+  pointer-events: auto;
+  color: var(--color-text-main);
+  border: 1px solid var(--color-text-dim);
+  background: var(--color-bg-panel);
+  border-radius: var(--border-radius);
+  padding: 0.75rem 1rem;
+  z-index: 9999;
+  display: none;
+}
+
+.code-lock.active {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.code-lock h3 {
+  margin-bottom: 0;
+  padding: 0 0.5rem;
+  font-size: var(--font-large);
+  text-transform: uppercase;
+}
+
+.code-lock input {
+  max-width: 100%;
+  font-size: var(--font-middle);
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var( --color-bg-light);
+  text-align: center;
+  vertical-align: middle;
+  padding: 0.2rem 0.5rem;
+  background: var(--color-ash);
+  outline: none;
+  border: 0px outset var(--color-border);
+  border-radius: var(--border-radius);
+  margin: 1.75rem 0 1rem;
+}
+
+.code-lock button {
+  font-size: var(--font-middle);
+  padding: 0.2rem 0.5rem;
+  cursor: pointer;
+  background-color: var(--color-bg-floor);
+  background-image: linear-gradient(180deg, #0000, #0002),
+    radial-gradient(90% 0.125em at 50% 0.125em, #fff7 25%, #fff0 50%);
+  box-shadow: 0.125em 0.125em 0.25em #0007, 0 -0.05em 0 0.05em #0004,
+    0 0.05em 0 0.05em #fff1, -0.125em 0 0.125em #454954 inset,
+    0 0.125em 0.125em #fff4 inset, 0.125em 0 0.125em #fff4 inset,
+    0 -0.125em 0.125em #454954 inset;
+  color: var(--color-text-main);
+  text-shadow: 0 0 0.125em #fff7, 0.05em 0.05em 0 black, 0.075em 0.075em 0 black;
+  border: 0px outset #454954;
+  border-radius: 0.25em;
+  transition: all 0.3s ease-out;
+}
+
+.code-lock button:hover {
+    background-color: var(--color-accent);
+    background-image: linear-gradient(180deg, #0003, #0005),
+    radial-gradient(90% 0.125em at 50% 0.125em, #fff7 25%, #fff0 50%);
+  box-shadow: 0.125em 0.125em 0.25em #0007, 0 -0.05em 0 0.05em #0004,
+    0 0.05em 0 0.05em #fff1, -0.125em 0 0.125em #454954 inset,
+    0 0.125em 0.125em #fff4 inset, 0.125em 0 0.125em #fff4 inset,
+    0 -0.125em 0.125em #454954 inset;
+    text-shadow: none;
+    filter: brightness(1.2) contrast(1.2);
+}
+
+.code-lock .close {
+  position: absolute;
+  display: inline-block;
+  top: 0.5rem;
+  right: 0.5rem;
+  cursor: pointer;
+  font-size: var(--font-large);
+  margin-left: 0.5rem;
+  color: var(--color-text-dim);
+  transition: transform 0.2s ease-out;
+}
+
+.code-lock .close:hover {
+    transform: scale(1.2);
+    color: var(--color-text-main);
+}
