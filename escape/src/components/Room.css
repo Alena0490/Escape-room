@@ -540,9 +540,29 @@
   z-index: 1;
 }
 
-.door.open {
-    background-image: url("../img/door-open.webp");
+.door::after {
+  content: "";
+  position: absolute;
+  top: 0;        /* místo bottom: 0 */
+  left: 0;       /* místo left: 23% */
+  width: 100%;   /* místo 31% */
+  height: 100%;  /* místo 60% */
+  background-image: url("../img/door-open.webp");
   background-position: bottom center;
+  background-size: contain;
+  background-repeat: no-repeat;
+  opacity: 0;
+  transition: opacity 2s ease-in;
+  pointer-events: none;
+}
+
+.door.open {
+  background-image: url("../img/door-open.webp");
+  background-position: bottom center;
+}
+
+.door.open::after {
+  opacity: 1;
 }
 
 .door.inner {
@@ -697,14 +717,14 @@
 
 .rug {
   background-image: url("../img/rug.webp");
-  width: 40vmin;
-  height: 40vmin;
+  width: 45vmin;
+  height: 45vmin;
   background-size: contain;
   background-repeat: no-repeat;
   position: absolute;
   top: calc(50% - 8vmin);
   left: calc(50% - 8vmin);
-  filter: drop-shadow(0vmin 0.2vmin 0.6vmin rgba(0, 0, 0)) contrast(1.1) brightness(0.9);
+  filter: drop-shadow(0.1vmin 0.3vmin 0.6vmin rgba(0, 0, 0)) contrast(1.1) brightness(0.9);
   z-index: 3;
   transform: translateZ(2px);
 }
@@ -917,6 +937,13 @@
   background-image: url("../img/metallic-box.webp");
   border: none !important;
 }
+
+.cube.cube.metal-box > .cube-top {
+  background-image: url("../img/metallic-box-top.webp");
+  background-size: cover;
+  background-position: center;
+}
+
 .cube.medical-chest > div {
   background-image: url("../img/medical-chest-side1.webp");
   border: none !important;
@@ -1092,7 +1119,7 @@
   position: fixed;
   z-index: 999;
   pointer-events: none;
-  top: 40%;
+  bottom: 3.5rem;
   left: 0;
   width: 100%;
   max-width: 65ch;

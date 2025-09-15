@@ -1,21 +1,28 @@
 import "./CodeLock.css";
 import { useState } from "react";
 import { IoClose } from "react-icons/io5";
+import Error from "../sounds/error-126627.mp3";
+import DoorOpen from "../sounds/opening-metal-door-98518.mp3";
+import Whoosh from "../sounds/whoosh-blow-flutter-shortwav-14678.mp3";
 
-const CodeLock = ({ showLock, setShowLock, showComment }) => {
+const CodeLock = ({ showLock, setShowLock, showComment, playSound }) => {
   const [code, setCode] = useState("");
 
   const handleSubmit = (e) => {
     e.preventDefault();
     if (code === "483920") {
+        playSound(DoorOpen);
         showComment("The door is now open! You can leave the&nbsp;room.", "success");
         setShowLock(false); // zavřít formulář po zadání správného kódu
 
-        const door = document.querySelector(".door.item");
-        if (door) door.classList.add("open");
+         setTimeout(() => {
+            const door = document.querySelector(".door.item");
+            if (door) door.classList.add("open");
+        }, 1500); // 1.5 sekundy zpoždění   
 
     } else {
-        showComment("Incorrect code. Try again.", "error");
+        playSound(Error);
+        showComment("Incorrect code. Try again.", "error");   
     }
         setCode("");
   };
@@ -26,7 +33,15 @@ const CodeLock = ({ showLock, setShowLock, showComment }) => {
       onSubmit={handleSubmit}
     >
       <h3>Enter the code</h3>
-      <IoClose className="close" onClick={() => setShowLock(false)} />
+      <IoClose 
+        className="close"
+        onClick={() => {
+            setTimeout(() => { 
+                setShowLock(false);
+            },500)   
+            playSound(Whoosh); 
+        }} 
+        />
 
       <input
         type="text"

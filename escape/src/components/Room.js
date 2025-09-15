@@ -1,6 +1,20 @@
 import  { useState, useEffect, useRef } from "react";
 import "./Room.css";
 import CodeLock from "./CodeLock";
+/** Sounds */
+import switchSound from "../sounds/light-switch-382712.mp3";
+import Ghost from "../sounds/ghost-6979.mp3";
+import Phone from "../sounds/old-rotary-phone-1-296475.mp3";
+import Alien from "../sounds/alien-underworld-sound-287342.mp3";
+import Mirror from "../sounds/creepy-moan-87456.mp3";
+import Book from "../sounds/flipping-book-101929.mp3";
+import FirstAid from "../sounds/old-metal-lunch-box-71223.mp3";
+import MetalBox from "../sounds/box-crash-106687.mp3";
+import CardboardBox from "../sounds/cardboard-box-open-182560.mp3";
+import Voices from "../sounds/015922_whispers-39schizophrenic39-or-ghost-like-voices-56253.mp3";
+import Cassette from "../sounds/cassette-34173.mp3"
+import Ball from "../sounds/small-ball-393217.mp3"
+
 
 const Room = () => {
   const wrapRef = useRef(null);
@@ -8,6 +22,20 @@ const Room = () => {
   const [rugUp, setRugUp] = useState(false);
   const [showLock, setShowLock] = useState(false);
 
+  /* *Sound effects  */
+  const playSound = (src, maxDuration) => {
+  const audio = new Audio(src);
+  audio.volume = 0.6;
+  audio.play().catch(() => {});
+  
+  if (maxDuration) {
+    setTimeout(() => {
+      audio.pause();
+    }, maxDuration * 1000);
+  }
+};
+
+/* Comment dialog */
 const showComment = (text, className = "") => {
   const dialog = document.querySelector("#dialog");
   dialog.innerHTML = ""; // vždy smaže starý komentář
@@ -192,58 +220,90 @@ const showComment = (text, className = "") => {
       });
     };
 
-    const initUtilities = () => {
-      const switchEl = document.querySelector(".switch");
-      const mirrorEl = document.querySelector(".mirror");
-      const roomCanvas = document.getElementById("room");
+  const fadeOutAudio = (audio, duration = 1000) => {
+  const startVolume = audio.volume;
+  const fadeStep = startVolume / (duration / 50); // kroky po 50ms
+  
+  const fadeInterval = setInterval(() => {
+    if (audio.volume > fadeStep) {
+      audio.volume -= fadeStep;
+    } else {
+      audio.volume = 0;
+      audio.pause();
+      audio.currentTime = 0;
+      clearInterval(fadeInterval);
+      window.roomAmbientAudio = null;
+    }
+  }, 50);
+};
 
-      const onMessages = [
-        "Much better.",
-        "Finally some light!",
-        "Ah, I can see everything clearly now.",
-        "Feels safer with the lights on…"
-      ];
+  const initUtilities = () => {
+    const switchEl = document.querySelector(".switch");
+    const mirrorEl = document.querySelector(".mirror");
+    const roomCanvas = document.getElementById("room");
 
-      const offMessages = [
-        "Ugh... it's too dark, I can't see a thing.",
-        "Creepy... I should turn the lights back on.",
-        "Wait, what was that?! Better keep it bright.",
-        "Nope, not staying in the dark!"
-      ];
+    const onMessages = [
+      "Much better.",
+      "Finally some light!",
+      "Ah, I can see everything clearly now.",
+      "Feels safer with the lights on…"
+    ];
 
-      let onIndex = 0;
-      let offIndex = 0;
+    const offMessages = [
+      "Ugh... it's too dark, I can't see a thing.",
+      "Creepy... I should turn the lights back on.",
+      "Wait, what was that?! Better keep it bright.",
+      "Nope, not staying in the dark!"
+    ];
 
-      if (switchEl) {
-        switchEl.addEventListener("click", () => {
-          const isDark = roomCanvas.classList.contains("dark");
+    let onIndex = 0;
+    let offIndex = 0;
 
-          if (isDark) {
-            // 🔦 bylo zhasnuto → teď rozsvítíme
+    if (switchEl) {
+      switchEl.addEventListener("click", () => {
+        const isDark = roomCanvas.classList.contains("dark");
+        
+        playSound(switchSound);
+        
+        if (isDark) {
+          setTimeout(() => {
             roomCanvas.classList.remove("dark");
             switchEl.classList.add("on");
+            if (mirrorEl) mirrorEl.classList.add("lit");
+
+            // Zastavit ambient zvuk okamžitě při rozsvícení
+            if (window.roomAmbientAudio) {
+              fadeOutAudio(window.roomAmbientAudio, 800); // 800ms fade out
+            }
+            
             const msg = onMessages[onIndex];
             switchEl.setAttribute("data-comment", msg);
             showComment(msg);
             onIndex = (onIndex + 1) % onMessages.length;
-
-            if (mirrorEl) mirrorEl.classList.add("lit");
-          } else {
-            // 💡 bylo rozsvíceno → teď zhasneme
+          }, 300);
+          
+        } else {
+          setTimeout(() => {
             roomCanvas.classList.add("dark");
             switchEl.classList.remove("on");
+            if (mirrorEl) mirrorEl.classList.remove("lit");
+            
+            if (!window.roomAmbientAudio) {
+              window.roomAmbientAudio = new Audio(Voices);
+              window.roomAmbientAudio.loop = true;
+              window.roomAmbientAudio.volume = 0.3;
+              window.roomAmbientAudio.play().catch(() => {});
+            }
+            
             const msg = offMessages[offIndex];
             switchEl.setAttribute("data-comment", msg);
             showComment(msg);
             offIndex = (offIndex + 1) % offMessages.length;
-
-            if (mirrorEl) mirrorEl.classList.remove("lit");
-          }
-        });
-      }
-    };
-
-
+          }, 300);
+        }
+      });
+    }
+  };
 
     const initItems = () => {
         const roomItems = document.querySelectorAll("#room [data-comment]");
@@ -320,6 +380,11 @@ const showComment = (text, className = "") => {
                   className="item cassette"
                   data-title="Some old cassette"
                   data-comment="What do we have there? Bryan Addams - Summer of ... Oh no. Stuck forever in my head."
+                  onClick={(e) => {
+                    playSound(Cassette, 1);
+                    const msg = e.currentTarget.getAttribute("data-comment");
+                    if (msg) showComment(msg);
+                  }}
                 >
                   <div className="item item-inner"></div>
                 </div>
@@ -327,6 +392,10 @@ const showComment = (text, className = "") => {
                   className="item ball"
                   data-title="A random billiard ball"  
                   data-comment="What number is this? Does it matter? It's just a&nbsp;ball."
+                  onClick={(e) => {playSound(Ball)
+                    const msg = e.currentTarget.getAttribute("data-comment");
+                    if (msg) showComment(msg);
+                  }}
                 >
                   <div className=" item item-inner"></div>
                 </div>
@@ -339,6 +408,10 @@ const showComment = (text, className = "") => {
                   className="item phone"
                   data-title="Ancient Technology"
                   data-comment="Maybe it still works? I'll call my&nbsp;mom. 6-0-2 Oh no! My finger got stuck!"
+                  onClick={(e) => {playSound(Phone);
+                    const msg = e.currentTarget.getAttribute("data-comment");
+                    if (msg) showComment(msg);
+                  }}
                 >
                   <div className="item-inner item"></div>
                 </div>
@@ -346,6 +419,11 @@ const showComment = (text, className = "") => {
                   className="item book"
                   data-title="An old book"
                   data-comment="`He gazed up at the enormous face. Forty years it had taken him to learn what kind of smile was hidden beneath the dark moustache. O cruel, needless misunderstanding! O&nbsp;stubborn, self-willed exile from the loving breast! Two gin-scented tears trickled down the sides of his nose. But it was all right, everything was all right, the struggle was finished. He&nbsp;had won the victory over himself. He loved Big Brother.` I&nbsp;know this book!"
+                  onClick={(e) => {
+                    playSound(Book); // zvuk
+                    const msg = e.currentTarget.getAttribute("data-comment");
+                    if (msg) showComment(msg);   // komentář
+                  }}
                 >
                   <div className="item-inner item"></div>
                 </div>
@@ -356,6 +434,10 @@ const showComment = (text, className = "") => {
                   id="hover-not"
                   data-title="An army Medical Kit"
                   data-comment="I hope there is something useful inside. Ouch, my&nbsp;finger! Thank goodness I&nbsp;have this first aid kit."
+                  onClick={(e) => {playSound(FirstAid)
+                    const msg = e.currentTarget.getAttribute("data-comment");
+                    if (msg) showComment(msg);
+                  }}
                 >
                   <div 
                     className="cube medical-chest item"
@@ -365,7 +447,11 @@ const showComment = (text, className = "") => {
                   className="item item-cube right-cube"
                   id="hover-not"
                   data-title="An army metal box"
-                  data-comment="No way I&nbsp;could open this!"
+                  onClick={(e) => {playSound(MetalBox);
+                    const msg = e.currentTarget.getAttribute("data-comment");
+                    if (msg) showComment(msg);
+                  }
+                  }
                 >
                   <div 
                     className="cube metal-box item"
@@ -408,7 +494,11 @@ const showComment = (text, className = "") => {
 
                 <div className="mirror item" 
                 data-title="An old mirror"
-                data-comment="How do I&nbsp;look? Eh, hello, Mr.Ghost, please don't kill me."></div>
+                data-comment="How do I&nbsp;look? Eh, hello, Mr.Ghost, please don't kill me."
+                onClick={(e) => {playSound(Mirror)
+                  const msg = e.currentTarget.getAttribute("data-comment");
+                    if (msg) showComment(msg);
+                }}></div>
           </div>
           <div className="wall wall-top"></div>
           <div className="wall wall-bottom">
@@ -416,11 +506,18 @@ const showComment = (text, className = "") => {
             className={`rug flat item ${rugUp ? "rug-up" : ""}`}
             data-title="Some old rug." 
             data-comment="Yuck, it's so dirty. Wait, there is a&nbsp;radio under. There are some scratched letters: 'BIG EAR'. Maybe I&nbsp;could try this frequency. WOW! I've got the signal, it's so weird."
-            onClick={(e) => { setRugUp(!rugUp); const comment = e.currentTarget.getAttribute("data-comment"); if (comment) showComment(comment);}}></div>
+            onClick={(e) => { setRugUp(!rugUp); const comment = e.currentTarget.getAttribute("data-comment"); if (comment) showComment(comment);
+            playSound(Alien, 9.5);
+            }}
+            ></div>
           </div>
           <div className="cube cardbox" 
             data-title="A random box"
-            data-comment="There is just a&nbsp;piece of&nbsp;paper. It says: `KEY: book, ball, mirror, cassette, skull, rug`">
+            data-comment="There is just a&nbsp;piece of&nbsp;paper. It says: `KEY: book, ball, mirror, cassette, skull, rug`"
+            onClick={(e) => {playSound(CardboardBox)
+              const msg = e.currentTarget.getAttribute("data-comment");
+                    if (msg) showComment(msg);
+            }}>
           </div>
           <div
             className="item cube ouija"
@@ -428,6 +525,10 @@ const showComment = (text, className = "") => {
             data-comment="Oh, what, the pointer is moving! Creepy... 
             `T - O - G - E - T out of the room, you need to solve the riddles. You need to use just one last or&nbsp;the&nbsp;only number from each one. But first you need to find the key.` 
             Because why make it easy, right?"
+            onClick={(e) => {playSound(Ghost)
+              const msg = e.currentTarget.getAttribute("data-comment");
+                    if (msg) showComment(msg);
+            }}
           ></div>
           <div className="cube table" data-title="A weird table"      data-comment="Nice, I really need this for my&nbsp;living room. Wait, what is there?"></div>
         </div>
@@ -436,7 +537,8 @@ const showComment = (text, className = "") => {
       <CodeLock
         showLock={showLock}
         setShowLock={setShowLock}
-        showComment={showComment}>
+        showComment={showComment}
+        playSound={playSound}>
       </CodeLock>
 
       <nav className="room-nav">
