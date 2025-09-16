@@ -459,6 +459,11 @@
   z-index: 10;
 }
 
+.item:active {
+  transform: scale(0.95);
+  transition: transform 0.1s;
+}
+
 .item.ouija {
   /* position: absolute; */
   bottom: calc(1.2 * var(--cubescale));
