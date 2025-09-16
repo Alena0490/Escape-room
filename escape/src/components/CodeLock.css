@@ -65,7 +65,8 @@
   transition: all 0.3s ease-out;
 }
 
-.code-lock button:hover {
+.code-lock button:hover,
+.code-lock button:active {
     background-color: var(--color-accent);
     background-image: linear-gradient(180deg, #0003, #0005),
     radial-gradient(90% 0.125em at 50% 0.125em, #fff7 25%, #fff0 50%);
@@ -89,7 +90,8 @@
   transition: transform 0.2s ease-out;
 }
 
-.code-lock .close:hover {
+.code-lock .close:hover,
+.code-lock .close:active {
     transform: scale(1.2);
     color: var(--color-text-main);
 }

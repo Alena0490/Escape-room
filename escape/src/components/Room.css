@@ -301,7 +301,8 @@
   border-radius: var(--border-radius);
 }
 
-.room-nav button:hover {
+.room-nav button:hover,
+.room-nav button:active {
   background-color: var(--);
   filter: brightness(1.3) contrast(1.2);
 }
@@ -684,11 +685,13 @@
   pointer-events: none;
 }
 
-.mirror:hover::after {
+.mirror:hover::after,
+.mirror:active::after {
   animation: ghostFlash 1.5s ease forwards;
 }
 
-.mirror.lit:hover::after {
+.mirror.lit:hover::after,
+.mirror.lit:active::after {
   animation: ghostFlash 5s ease forwards;
 }
 
@@ -763,11 +766,13 @@
   transition: none !important;
 }
 
-.item:not(#hover-not):hover {
+.item:not(#hover-not):hover,
+.item:not(#hover-not):active {
   filter: brightness(1.2) drop-shadow(3px 3px 3px var(--color-warning));
 }
 
-.flat.door:hover {
+.flat.door:hover,
+.flat.door:active {
   filter: brightness(1.1) sepia(0.3) drop-shadow(3px 3px 3px var(--color-warning)) !important;
 }
 
@@ -1067,6 +1072,26 @@
   opacity: 0;
 }
 
+#win {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  background: rgba(0,0,0,0.85);
+  color: white;
+  z-index: 2000;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 1s ease;
+}
+
+#win.win {
+  opacity: 1;
+  pointer-events: all;
+}
+
 .win {
   position: fixed;
   top: 0%;
@@ -1080,6 +1105,7 @@
   background-color: var(--color-bg-panel);
   pointer-events: none;
   z-index: 99999;
+  opacity: 1;
 }
 
 .win p.win-content {
@@ -1099,6 +1125,7 @@
   font-size: clamp(2rem, 4vw, 4rem);
   font-family: "Orbitron", sans-serif;
   line-height: 1.5em; 
+  animation: popIn 1.2s ease forwards;
 }
 
 .win-stats {
@@ -1106,6 +1133,7 @@
   text-align: left;
   font-size: var(--font-middle);
   font-family: "Orbitron", sans-serif;
+  animation: popIn 1.4s ease forwards;
 }
 
 .win-stats h3 {
@@ -1144,7 +1172,8 @@
   pointer-events: all;
 }
 
-.win-button:hover{
+.win-button:hover,
+.win-button:active {
   background-color: var(--color-accent);
     background-image: linear-gradient(180deg, #0003, #0005),
     radial-gradient(90% 0.125em at 50% 0.125em, #fff7 25%, #fff0 50%);
@@ -1175,7 +1204,7 @@
 .overlay.darkness {
   opacity: 0;
   pointer-events: none;
-  transition: opacity 0.3s ease;
+  transition: opacity 0.8s ease-in-out;
 }
 
 /* Flickering lights */
@@ -1272,7 +1301,8 @@
   line-height: 1.5em;
 }
 
-#dialog > div:hover {
+#dialog > div:hover,
+#dialog > div:active {
   opacity: 0.8;
 }
 
@@ -1309,10 +1339,15 @@
   justify-content: flex-start;
  }
 
- 
   .win p.win-content {
     width: unset;
         padding: 0.5rem 0.1rem;
+  }
+
+  .room-nav button {
+    font-size: 2.2rem;
+    width: 1.7em;
+    height: 1.7em;
   }
 }
 
@@ -1352,16 +1387,22 @@
 }
 
  @keyframes lightFlicker {
-  0%    { opacity: 0; }        /* Světlo svítí normálně */
-  15%   { opacity: 0.3; }      /* Začne se ztmavovat */
-  25%   { opacity: 0.1; }      /* Krátce se rozsvítí */
-  35%   { opacity: 0.4; }      /* Zase slabě */
-  50%   { opacity: 0.05; }     /* Téměř se rozsvítí */
-  65%   { opacity: 0.35; }     /* Ale zase slábne */
-  80%   { opacity: 0.2; }      /* Pokouší se */
-  90%   { opacity: 0.1; }      /* Skoro to má */
-  100%  { opacity: 0; }       /* Konec */       
+  0%    { opacity: 0; }      
+  15%   { opacity: 0.3; }
+  25%   { opacity: 0.1; }
+  35%   { opacity: 0.4; }
+  50%   { opacity: 0.05; }
+  65%   { opacity: 0.35; }
+  80%   { opacity: 0.2; }
+  90%   { opacity: 0.1; }
+  100%  { opacity: 0; }    
   }
+
+  @keyframes popIn {
+  0%   { transform: scale(0.6); opacity: 0; }
+  60%  { transform: scale(1.1); opacity: 1; }
+  100% { transform: scale(1); }
+}
 
 
 
