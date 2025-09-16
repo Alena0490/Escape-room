@@ -1115,7 +1115,7 @@
   opacity: 0;
   pointer-events: none;
   z-index: 99999;
-  animation: lightFlicker 1.5s ease-in-out forwards;
+  animation: lightFlicker 1.2s ease-out forwards;
 }
 
 /* lights off*/
@@ -1244,14 +1244,17 @@
   100% { opacity: 0; }
 }
 
-@keyframes lightFlicker {
-  0%   { opacity: 0.6; }
-  20%  { opacity: 1; }
-  40%  { opacity: 0.7; }
-  60%  { opacity: 1; }
-  80%  { opacity: 0.8; }
-  100% { opacity: 1; }
-}
+ @keyframes lightFlicker {
+  0%    { opacity: 0; }        /* Světlo svítí normálně */
+  15%   { opacity: 0.3; }      /* Začne se ztmavovat */
+  25%   { opacity: 0.1; }      /* Krátce se rozsvítí */
+  35%   { opacity: 0.4; }      /* Zase slabě */
+  50%   { opacity: 0.05; }     /* Téměř se rozsvítí */
+  65%   { opacity: 0.35; }     /* Ale zase slábne */
+  80%   { opacity: 0.2; }      /* Pokouší se */
+  90%   { opacity: 0.1; }      /* Skoro to má */
+  100%  { opacity: 0; }       /* Konec */       
+  }
 
 
 

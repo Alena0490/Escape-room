@@ -390,7 +390,7 @@ const Room = () => {
                 setIsFlickering(true);
                 setTimeout(() => {
                   setIsFlickering(false);
-                }, 800)
+                }, 1200)
 
             if (mirrorEl) mirrorEl.classList.add("lit");
             setGameState(prev => ({ ...prev, lightsOn: true }));
