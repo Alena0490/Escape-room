@@ -23,12 +23,16 @@ import Click from "../sounds/mouse-click-290204.mp3"
 const Room = () => {
   const wrapRef = useRef(null);
   const roomRef = useRef(null);
+  const [isFlickering, setIsFlickering] = useState(false);
   const [gameState, setGameState] = useState({
     rugUp: false,
     lightsOn: false,
-    doorOpen: false
+    doorOpen: false,
+    isFlickering: false,
   });
   const [showLock, setShowLock] = useState(false);
+  
+  
 
   // Destructure state for convenience
   const { rugUp, lightsOn} = gameState;
@@ -372,37 +376,33 @@ const Room = () => {
       let offIndex = 0;
 
       if (switchEl) {
-          let firstSwitch = true;
         switchEl.addEventListener("click", () => {
           const isDark = roomCanvas.classList.contains("dark");
           
           playSound(switchSound);
           
           if (isDark) {
-            setTimeout(() => {
-              roomCanvas.classList.remove("dark");
-              switchEl.classList.add("on");
-              if (mirrorEl) mirrorEl.classList.add("lit");
+          setTimeout(() => {
+            roomCanvas.classList.remove("dark");
+            switchEl.classList.add("on");
 
-              setGameState(prev => ({ ...prev, lightsOn: true }));
+            // ✨ Přidáme flicker efekt
+                setIsFlickering(true);
+                setTimeout(() => {
+                  setIsFlickering(false);
+                }, 800)
 
-             // 🎇 First switch - light flickering
-              if (firstSwitch) {
-        roomCanvas.classList.add("flicker");
-        setTimeout(() => {
-          roomCanvas.classList.remove("flicker");
-        }, 1200); // trvání animace
-        firstSwitch = false;
-      }
+            if (mirrorEl) mirrorEl.classList.add("lit");
+            setGameState(prev => ({ ...prev, lightsOn: true }));
 
-      if (window.roomAmbientAudio) fadeOutAudio(window.roomAmbientAudio, 800);
-
-      const msg = onMessages[onIndex];
-      switchEl.setAttribute("data-comment", msg);
-      showComment(msg);
-      onIndex = (onIndex + 1) % onMessages.length;
-    }, 300);
+            if (window.roomAmbientAudio) fadeOutAudio(window.roomAmbientAudio, 800);
             
+            const msg = onMessages[onIndex];
+            switchEl.setAttribute("data-comment", msg);
+            showComment(msg);
+            onIndex = (onIndex + 1) % onMessages.length;
+          }, 300);
+         
           } else {
             setTimeout(() => {
               roomCanvas.classList.add("dark");
@@ -478,7 +478,12 @@ const Room = () => {
   }, []);
 
   return (
-    <div id="room" className={lightsOn ? "" : "dark"}>
+    <div id="room" 
+  className={`
+    ${lightsOn ? "" : "dark"}
+    ${isFlickering ? "lights-glitch" : ""}
+  `.trim()}
+>
       <div className="overlay darkness"></div>
       <div className="overlay zoom"></div>
       <div className="room-wrap" ref={wrapRef}>
