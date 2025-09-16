@@ -936,12 +936,14 @@
 .cube.metal-box > div {
   background-image: url("../img/metallic-box.webp");
   border: none !important;
+  cursor: pointer;
 }
 
-.cube.cube.metal-box > .cube-top {
+.cube.cube.metal-box > .cube-right {
   background-image: url("../img/metallic-box-top.webp");
   background-size: cover;
   background-position: center;
+  cursor: pointer;
 }
 
 .cube.medical-chest > div {
@@ -1209,3 +1211,17 @@
   50%  { opacity: 0.5; }
   100% { opacity: 0; }
 }
+
+@keyframes lightFlicker {
+  0%, 18%, 22%, 25%, 53%, 57%, 100% {
+    opacity: 1;
+  }
+  20%, 24%, 55% {
+    opacity: 0.2;
+  }
+}
+
+.flicker {
+  animation: lightFlicker 1s linear forwards;
+}
+

@@ -4,14 +4,18 @@ import { IoClose } from "react-icons/io5";
 import Error from "../sounds/error-126627.mp3";
 import DoorOpen from "../sounds/opening-metal-door-98518.mp3";
 import Whoosh from "../sounds/whoosh-blow-flutter-shortwav-14678.mp3";
+import Win from "../sounds/success-fanfare-trumpets-6185.mp3"
 
-const CodeLock = ({ showLock, setShowLock, showComment, playSound }) => {
+const CodeLock = ({ showLock, setShowLock, showComment, playSound, playSequence }) => {
   const [code, setCode] = useState("");
 
   const handleSubmit = (e) => {
     e.preventDefault();
     if (code === "483920") {
-        playSound(DoorOpen);
+        playSequence([
+                    { DoorOpen, options: {fadeIn: 0.2, duration: 2.5 } },
+                    { Win, options: { volume: 1, start: 0.1} }
+                  ]);
         showComment("The door is now open! You can leave the&nbsp;room.", "success");
         setShowLock(false); // zavřít formulář po zadání správného kódu
 
@@ -21,7 +25,7 @@ const CodeLock = ({ showLock, setShowLock, showComment, playSound }) => {
         }, 1500); // 1.5 sekundy zpoždění   
 
     } else {
-        playSound(Error);
+        playSound(Error, {start: 0.4, volume: 1});
         showComment("Incorrect code. Try again.", "error");   
     }
         setCode("");
@@ -38,8 +42,8 @@ const CodeLock = ({ showLock, setShowLock, showComment, playSound }) => {
         onClick={() => {
             setTimeout(() => { 
                 setShowLock(false);
-            },500)   
-            playSound(Whoosh); 
+            },600)   
+            playSound(Whoosh, {start: 0.1}); 
         }} 
         />
 
