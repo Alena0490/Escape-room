@@ -71,6 +71,12 @@ const getItemsClicked = () => {
   return localStorage.getItem('itemsClicked') || '0';
 };
 
+/** Clicked items */
+ const incrementItemClicks = () => {
+      let count = parseInt(localStorage.getItem("itemsClicked") || "0");
+      localStorage.setItem("itemsClicked", count + 1);
+  };
+
 
   /** Load game state from localStorage on component mount */
   useEffect(() => {
@@ -482,7 +488,6 @@ const getItemsClicked = () => {
         };
       });
 
-
       const hints = [
         "Talk to the old spirits.",
         "Admire the art.",
@@ -540,7 +545,14 @@ const getItemsClicked = () => {
               className="item painting"
               data-title="What a nice painting!"
               data-comment="Who is this guy? I have a funny feeling that there's something missing about him."
-            ></div>
+              onClick={(e) => {
+                incrementItemClicks();
+                const msg = e.currentTarget.getAttribute("data-comment");
+                if (msg) showComment(msg);
+              }}
+            >
+                <span className="visually-hidden">A Van Goth self portrait</span>
+            </div>
           </div>
           
           <div className="wall wall-left">
@@ -551,13 +563,16 @@ const getItemsClicked = () => {
                   data-title="A Shiny Skull" 
                   data-comment="Wow, it has full set of teeth!"
                   onClick={(e) => {
+                    incrementItemClicks();
                     playSound(Pickup);
                     triggerVibration(30);
                     const msg = e.currentTarget.getAttribute("data-comment");
                     if (msg) showComment(msg);
                   }}
                 >
-                  <div className="item-inner"></div>
+                  <div className="item-inner">
+                    <span className="visually-hidden">A metalis skull</span>
+                  </div>
                 </div>
 
                 <div
@@ -566,12 +581,15 @@ const getItemsClicked = () => {
                   data-comment="What do we have there? Bryan Adams - Summer of ... Oh no. Stuck forever in my head."
                   onClick={(e) => {
                     playSound(Cassette, {duration: 2});
+                    incrementItemClicks();
                     const msg = e.currentTarget.getAttribute("data-comment");
                     if (msg) showComment(msg);
                     triggerVibration(30);
                   }}
                 >
-                  <div className="item item-inner"></div>
+                  <div className="item item-inner">
+                    <span className="visually-hidden">Old cassette</span>
+                  </div>
                 </div>
                 
                 <div
@@ -580,12 +598,15 @@ const getItemsClicked = () => {
                   data-comment="What number is this? Does it matter? It's just a ball."
                   onClick={(e) => {
                     playSound(Ball);
+                    incrementItemClicks();
                     const msg = e.currentTarget.getAttribute("data-comment");
                     if (msg) showComment(msg);
                     triggerVibration(30);
                   }}
                 >
-                  <div className="item item-inner"></div>
+                  <div className="item item-inner">
+                    <span className="visually-hidden">Black billiard ball with number 8</span>
+                  </div>
                 </div>
               </div>
               
@@ -596,12 +617,15 @@ const getItemsClicked = () => {
                   data-comment="Where is Czechia? Europe, right? Damn, I hate geography."
                   onClick={(e) => {
                     playSound(Pickup);
+                    incrementItemClicks();
                     const msg = e.currentTarget.getAttribute("data-comment");
                     if (msg) showComment(msg);
                     triggerVibration(30);
                   }}
                 >
-                  <div className="item-inner item"></div>
+                  <div className="item-inner item">
+                    <span className="visually-hidden">An Old Globe</span>
+                  </div>
                 </div>
                 
                 <div
@@ -610,12 +634,15 @@ const getItemsClicked = () => {
                   data-comment="Maybe it still works? I'll call my mom. 6-0-2 Oh no! My finger got stuck!"
                   onClick={(e) => {
                     playSound(Phone, {duration: 4.2});
+                    incrementItemClicks();
                     const msg = e.currentTarget.getAttribute("data-comment");
                     if (msg) showComment(msg);
                     triggerVibration(30);
                   }}
                 >
-                  <div className="item-inner item"></div>
+                  <div className="item-inner item">
+                    <span className="visually-hidden">Old rotary phone</span>
+                  </div>
                 </div>
                 
                 <div
@@ -624,12 +651,15 @@ const getItemsClicked = () => {
                   data-comment="He gazed up at the enormous face. Forty years it had taken him to learn what kind of smile was hidden beneath the dark moustache. O cruel, needless misunderstanding! O stubborn, self-willed exile from the loving breast! Two gin-scented tears trickled down the sides of his nose. But it was all right, everything was all right, the struggle was finished. He had won the victory over himself. He loved Big Brother. I know this book!"
                   onClick={(e) => {
                     playSound(Book);
+                    incrementItemClicks();
                     const msg = e.currentTarget.getAttribute("data-comment");
                     if (msg) showComment(msg);
                     triggerVibration(30);
                   }}
                 >
-                  <div className="item-inner item"></div>
+                  <div className="item-inner item">
+                    <span className="visually-hidden">Old book</span>
+                  </div>
                 </div>
               </div>
               
@@ -641,12 +671,15 @@ const getItemsClicked = () => {
                   data-comment="I hope there is something useful inside. Ouch, my finger! Thank goodness I have this first aid kit."
                   onClick={(e) => {
                     playSound(FirstAid, {duration: 6});
+                    incrementItemClicks();
                     const msg = e.currentTarget.getAttribute("data-comment");
                     if (msg) showComment(msg);
                     triggerVibration(30);
                   }}
                 >
-                  <div className="cube medical-chest item" id="hover-not"></div>
+                  <div className="cube medical-chest item" id="hover-not">
+                    <span className="visually-hidden">Old army medical kit</span>
+                  </div>
                 </div>
                 
                 <div
@@ -655,12 +688,15 @@ const getItemsClicked = () => {
                   data-title="An army metal box"
                   onClick={(e) => {
                     playSound(MetalBox);
+                    incrementItemClicks();
                     const msg = e.currentTarget.getAttribute("data-comment");
                     if (msg) showComment(msg);
                     triggerVibration(30);
                   }}
                 >
-                  <div className="cube metal-box item" id="hover-not"></div>
+                  <div className="cube metal-box item" id="hover-not">
+                    <span className="visually-hidden">Dark metal box with black and yellow striped edges</span>
+                  </div>
                 </div>
               </div>
             </div>
@@ -672,6 +708,9 @@ const getItemsClicked = () => {
               data-comment="It says: 'Please, enter the code'"
               onClick={(e) => {
                 playSound(Click, {fadeIn: 0.2});
+                const msg = e.currentTarget.getAttribute("data-comment");
+                    if (msg) showComment(msg);
+                incrementItemClicks();
                 setTimeout(() => {
                   setShowLock(true);
                 }, 200);  
@@ -679,13 +718,16 @@ const getItemsClicked = () => {
               }}
             ></div>
 
-            <div className="flat door inner"></div>
+            <div className="flat door inner">
+              <span className="visually-hidden">Numeric lock</span>
+            </div>
             
             <div 
               className="flat door item" 
               data-title="Locked Door" 
               data-comment="It's locked."
               onClick={(e) => {
+                incrementItemClicks();
                 if (e.currentTarget.classList.contains("open")) {
                   const msg = "It was a long day... Let's get out of here. Finally, fresh air!";
                   e.currentTarget.setAttribute("data-comment", msg);
@@ -697,27 +739,48 @@ const getItemsClicked = () => {
                   playSound(Door, {start: 0.2});
                 }
               }}
-            ></div>
+            >
+              <span className="visually-hidden">Heavy metal door</span>
+            </div>
 
-            <div className="flat switch item" data-title="Light Switch" data-comment="Much better."></div>
+            <div className="flat switch item" data-title="Light Switch" data-comment="Much better."
+            onClick={(e) => {
+                playSound(switchSound);
+                const msg = e.currentTarget.getAttribute("data-comment");
+                    if (msg) showComment(msg);
+                incrementItemClicks();
+                triggerVibration(30);
+              }}>
+              <span className="visually-hidden">Light switch</span>
+            </div>
           </div>
           
           <div className="wall wall-right">
             <div className="poster item" 
               data-title="Some old poster"
               data-comment="What is the chainsaw commercial doing there?"
-            ></div>
+              onClick={(e) => {
+                const msg = e.currentTarget.getAttribute("data-comment");
+                    if (msg) showComment(msg);
+                incrementItemClicks();
+              }}
+            >
+              <span className="visually-hidden">Old faded poster</span>
+            </div>
 
             <div className="mirror item" 
               data-title="An old mirror"
               data-comment="How do I look? Eh, hello, Mr. Ghost, please don't kill me."
               onClick={(e) => {
                 playSound(Mirror);
+                incrementItemClicks();
                 const msg = e.currentTarget.getAttribute("data-comment");
                 if (msg) showComment(msg);
                 triggerVibration(30);
               }}
-            ></div>
+            >
+              <span className="visually-hidden">Old mirror flasting letters Friday 13th</span>
+            </div>
           </div>
           
           <div className="wall wall-top"></div>
@@ -728,6 +791,7 @@ const getItemsClicked = () => {
               data-title="Some old rug"              
               data-comment="Yuck, it's so dirty. Wait, there is a radio under. There are some scratched letters: 'BIG EAR'. Maybe I could try this frequency. WOW! I've got the signal, it's so weird."
               onClick={(e) => { 
+                incrementItemClicks();
                 setGameState(prev => ({ ...prev, rugUp: !prev.rugUp }));
                 const comment = e.currentTarget.getAttribute("data-comment"); 
                 if (comment) showComment(comment);
@@ -742,7 +806,9 @@ const getItemsClicked = () => {
                 }
                 triggerVibration(30);
               }}
-            ></div>
+            >
+              <span className="visually-hidden">Dirty fur rug</span>
+            </div>
           </div>
           
           <div className="cube cardbox" 
@@ -755,9 +821,12 @@ const getItemsClicked = () => {
               ]);
               const msg = e.currentTarget.getAttribute("data-comment");
               if (msg) showComment(msg);
+              incrementItemClicks();
               triggerVibration(30);
             }}
-          ></div>
+          >
+            <span className="visually-hidden">Cardboard box</span>
+          </div>
           
           <div
             className="item cube ouija"
@@ -765,13 +834,18 @@ const getItemsClicked = () => {
             data-comment="Oh, what, the pointer is moving! Creepy... 'T - O - G - E - T out of the room, you need to solve the riddles. You need to use just one last or the only number from each one. But first you need to find the key.' Because why make it easy, right?"
             onClick={(e) => {
               playSound(Ghost);
+              incrementItemClicks();
               const msg = e.currentTarget.getAttribute("data-comment");
               if (msg) showComment(msg);
               triggerVibration(30);
             }}
-          ></div>
+          >
+            <span className="visually-hidden">OUIJA board</span>
+          </div>
           
-          <div className="cube table" data-title="A weird table" data-comment="Nice, I really need this for my living room. Wait, what is there?"></div>
+          <div className="cube table" data-title="A weird table" data-comment="Nice, I really need this for my living room. Wait, what is there?">
+            <span className="visually-hidden">A wooden table with skull decoration</span>
+          </div>
         </div>
       </div>
 
@@ -785,24 +859,22 @@ const getItemsClicked = () => {
         getHintsUsed={getHintsUsed}
         getItemsClicked={getItemsClicked}
         calculateGameTime={calculateGameTime}
-
-
       />
 
       <nav className="room-nav">
-        <button id="turnLeft" data-title="Turn Left">
+        <button id="turnLeft" data-title="Turn Left" aria-label="Turn left">
           <i>👈</i>
           <span className="hidden">Turn Left</span>
         </button>
-        <button id="turnRight" data-title="Turn Right">
+        <button id="turnRight" data-title="Turn Right" aria-label="Turn right">
           <i>👉</i>
           <span className="hidden">Turn Right</span>
         </button>
-        <button id="zoom" data-title="Look">
+        <button id="zoom" data-title="Look" aria-label="Zoom">
           <i>🔎</i>
           <span className="hidden">Look</span>
         </button>
-        <button id="hint" data-title="Hint!">
+        <button id="hint" data-title="Hint!" aria-label="Show hint">
           <i>💡</i>
           <span className="hidden">Hint</span>
         </button>

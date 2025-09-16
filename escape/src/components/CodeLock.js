@@ -35,17 +35,24 @@ const CodeLock = ({ showLock, setShowLock, showComment, playSound, playSequence,
             if (door) {
                 door.classList.add("win");
                 door.innerHTML = `<p class="win-content">Congratulations</p>
-                 <div class="win-stats">
-                <h3>Statistics:</h3>
-                <p>Time: ${calculateGameTime()}</p>
-                <p>Hints Used: ${getHintsUsed()}</p>
-                <p>Items Searched: ${getItemsClicked()}</p>
-                </div>
-                <button class="win-button" onclick="window.location.reload()">
-                Play again
-                </button>`;
-                    }
-                }, 2700); 
+                    <div class="win-stats">
+                        <h3>Statistics:</h3>
+                        <p>Time: ${calculateGameTime()}</p>
+                        <p>Hints Used: ${getHintsUsed()}</p>
+                        <p>Items Searched: ${getItemsClicked()}</p>
+                    </div>
+                    <button 
+                        className="win-button" 
+                        aria-label="New Game"
+                        onClick={() => {
+                            localStorage.clear(); 
+                            window.location.reload();
+                        }}
+                        >
+                        Play again
+                    </button>`;
+                }
+            }, 2700); 
 
     } else {
         playSound(Error, {start: 0.4, volume: 1});
@@ -62,6 +69,7 @@ const CodeLock = ({ showLock, setShowLock, showComment, playSound, playSequence,
       <h3>Enter the code</h3>
       <IoClose 
         className="close"
+        aria-label="close form"
         onClick={() => {
             setTimeout(() => { 
                 setShowLock(false);
