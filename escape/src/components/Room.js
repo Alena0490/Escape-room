@@ -44,6 +44,34 @@ const Room = () => {
     }
   };
 
+  /** Start time -Save to LocalStorage */
+  useEffect(() => {
+      if (!localStorage.getItem("gameStartTime")) {
+        localStorage.setItem("gameStartTime", Date.now());
+      }
+    }, []);
+
+  /*** ENDING SCREEN  */
+  // Pomocné funkce pro statistiky
+const calculateGameTime = () => {
+  const startTime = localStorage.getItem('gameStartTime');
+  if (!startTime) return '00:00';
+  
+  const elapsed = Date.now() - parseInt(startTime);
+  const minutes = Math.floor(elapsed / 60000);
+  const seconds = Math.floor((elapsed % 60000) / 1000);
+  return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+};
+
+const getHintsUsed = () => {
+  return localStorage.getItem('hintsUsed') || '0';
+};
+
+const getItemsClicked = () => {
+  return localStorage.getItem('itemsClicked') || '0';
+};
+
+
   /** Load game state from localStorage on component mount */
   useEffect(() => {
     const savedState = localStorage.getItem('escapeRoomState');
@@ -203,6 +231,25 @@ const Room = () => {
     }, 8000);
   };
 
+  /** Audio fadeout */
+
+      const fadeOutAudio = (audio, duration = 1000) => {
+      const startVolume = audio.volume;
+      const fadeStep = startVolume / (duration / 50);
+      
+      const fadeInterval = setInterval(() => {
+        if (audio.volume > fadeStep) {
+          audio.volume -= fadeStep;
+        } else {
+          audio.volume = 0;
+          audio.pause();
+          audio.currentTime = 0;
+          clearInterval(fadeInterval);
+          window.roomAmbientAudio = null;
+        }
+      }, 50);
+    };
+
   useEffect(() => {
     const roomWrap = wrapRef.current;
     const room = roomRef.current;
@@ -336,23 +383,6 @@ const Room = () => {
       });
     };
 
-    const fadeOutAudio = (audio, duration = 1000) => {
-      const startVolume = audio.volume;
-      const fadeStep = startVolume / (duration / 50);
-      
-      const fadeInterval = setInterval(() => {
-        if (audio.volume > fadeStep) {
-          audio.volume -= fadeStep;
-        } else {
-          audio.volume = 0;
-          audio.pause();
-          audio.currentTime = 0;
-          clearInterval(fadeInterval);
-          window.roomAmbientAudio = null;
-        }
-      }, 50);
-    };
-
     const initUtilities = () => {
       const switchEl = document.querySelector(".switch");
       const mirrorEl = document.querySelector(".mirror");
@@ -440,6 +470,19 @@ const Room = () => {
         };
       });
 
+      /* Items clicked */
+      roomItems.forEach((item) => {
+        item.onclick = () => {
+          const comment = item.getAttribute("data-comment");
+          if (comment) showComment(comment);
+
+          // 📝 počítadlo kliků
+          const clicks = parseInt(localStorage.getItem("itemsClicked") || "0", 10);
+          localStorage.setItem("itemsClicked", clicks + 1);
+        };
+      });
+
+
       const hints = [
         "Talk to the old spirits.",
         "Admire the art.",
@@ -458,6 +501,9 @@ const Room = () => {
         hintBtn.onclick = () => {
           const random = hints[Math.floor(Math.random() * hints.length)];
           showComment(random, "hint");
+          // 📝 Save hints used
+          const used = parseInt(localStorage.getItem("hintsUsed") || "0", 10);
+          localStorage.setItem("hintsUsed", used + 1);
         };
       }
     };
@@ -486,6 +532,7 @@ const Room = () => {
 >
       <div className="overlay darkness"></div>
       <div className="overlay zoom"></div>
+      <div id="win"></div>
       <div className="room-wrap" ref={wrapRef}>
         <div className="room" ref={roomRef}>
           <div className="wall wall-front">
@@ -734,6 +781,12 @@ const Room = () => {
         showComment={showComment}
         playSound={playSound}
         playSequence={playSequence}
+        fadeOutAudio={fadeOutAudio}
+        getHintsUsed={getHintsUsed}
+        getItemsClicked={getItemsClicked}
+        calculateGameTime={calculateGameTime}
+
+
       />
 
       <nav className="room-nav">

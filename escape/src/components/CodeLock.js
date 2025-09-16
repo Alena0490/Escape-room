@@ -6,8 +6,9 @@ import DoorOpen from "../sounds/opening-metal-door-98518.mp3";
 import Whoosh from "../sounds/whoosh-blow-flutter-shortwav-14678.mp3";
 import Win from "../sounds/success-fanfare-trumpets-6185.mp3"
 
-const CodeLock = ({ showLock, setShowLock, showComment, playSound, playSequence }) => {
+const CodeLock = ({ showLock, setShowLock, showComment, playSound, playSequence, fadeOutAudio, incrementItemClicks, calculateGameTime, getHintsUsed, getItemsClicked, restartGame,  }) => {
   const [code, setCode] = useState("");
+
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -16,6 +17,11 @@ const CodeLock = ({ showLock, setShowLock, showComment, playSound, playSequence 
                     { DoorOpen, options: {fadeIn: 0.2, duration: 2.5 } },
                     { Win, options: { volume: 1, start: 0.1} }
                   ]);
+
+                  if (window.roomAmbientAudio) {
+                    fadeOutAudio(window.roomAmbientAudio, 1500); // 1.5 s fade-out
+                }
+
         showComment("The door is now open! You can leave the&nbsp;room.", "success");
         setShowLock(false); // zavřít formulář po zadání správného kódu
 
@@ -23,6 +29,23 @@ const CodeLock = ({ showLock, setShowLock, showComment, playSound, playSequence 
             const door = document.querySelector(".door.item");
             if (door) door.classList.add("open");
         }, 1500); // 1.5 sekundy zpoždění   
+
+        setTimeout(() => {
+            const door = document.getElementById("win");
+            if (door) {
+                door.classList.add("win");
+                door.innerHTML = `<p class="win-content">Congratulations</p>
+                 <div class="win-stats">
+                <h3>Statistics:</h3>
+                <p>Time: ${calculateGameTime()}</p>
+                <p>Hints Used: ${getHintsUsed()}</p>
+                <p>Items Searched: ${getItemsClicked()}</p>
+                </div>
+                <button class="win-button" onclick="window.location.reload()">
+                Play again
+                </button>`;
+                    }
+                }, 2700); 
 
     } else {
         playSound(Error, {start: 0.4, volume: 1});
