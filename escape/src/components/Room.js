@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import "./Room.css";
 import CodeLock from "./CodeLock";
 /** Sounds */
@@ -20,12 +20,18 @@ import Rug from "../sounds/object-dragged-on-carpet-140497.mp3"
 import Paper from "../sounds/paper-rustle-81855.mp3"
 import Click from "../sounds/mouse-click-290204.mp3"
 import JumpScare from "../sounds/075283_quotbehind-youquot-whisper-86744.mp3"
+import RadioTune from "../sounds/am-tuning-104200.mp3"
+/** Random sounds**/
 import EmptyRoom from "../sounds/empty-room-horror-sound-sfx-333924.mp3"
+import VoicesShort from "../sounds/schizophrenic-voices-62486.mp3"
+import Steps from "../sounds/steps-approaching-in-the-darkness-234016.mp3"
+
 
 const Room = () => {
   const wrapRef = useRef(null);
   const roomRef = useRef(null);
   const [isFlickering, setIsFlickering] = useState(false);
+  const [soundQueue, setSoundQueue] = useState([]);
   const [gameState, setGameState] = useState({
     rugUp: false,
     lightsOn: false,
@@ -117,7 +123,7 @@ const getItemsClicked = () => {
   }, [gameState]);
 
   /** Sound effects with fade in/out support */
-  const playSound = (src, options = {}) => {
+  const playSound = useCallback((src, options = {}) => {
     // Parse options
     const settings = typeof options === "number" 
       ? { duration: options } 
@@ -191,7 +197,7 @@ const getItemsClicked = () => {
     };
 
     return audio;
-  };
+  }, []);
 
   /** Play sequence of sounds with Promise support */
   const playSequence = async (sounds) => {
@@ -208,6 +214,7 @@ const getItemsClicked = () => {
       }
       
       const audio = playSound(src, options);
+
       
       // Wait for sound to finish
       await new Promise(resolve => {
@@ -221,6 +228,86 @@ const getItemsClicked = () => {
       });
     }
   };
+
+  /** Pick random sound */
+  const createShuffledQueue = useCallback(() => {
+    const sounds = [EmptyRoom, VoicesShort, Steps];
+    const shuffled = [...sounds];
+    
+    // Fisher-Yates shuffle algoritmus
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    
+    console.log("🔄 Nová fronta zvuků vytvořena:", shuffled.map(s => s.split('/').pop()));
+    return shuffled;
+  }, []);
+
+  // Random sounds
+    useEffect(() => {
+      const spookySounds = [EmptyRoom, VoicesShort, Steps];
+      let currentQueue = [...spookySounds];
+      
+      // Fisher-Yates shuffle
+      const shuffleQueue = () => {
+        const shuffled = [...spookySounds];
+        for (let i = shuffled.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+        }
+        return shuffled;
+      };
+
+      const playRandomSpooky = () => {
+        if (currentQueue.length === 0) {
+          currentQueue = shuffleQueue();
+          console.log("🔄 New queue created:", currentQueue.map(s => s.split('/').pop()));
+        }
+        
+        const soundToPlay = currentQueue.shift(); // Remove first sound
+        console.log("🎵 Playing sound:", soundToPlay.split('/').pop());
+        console.log("📊 Remaining in queue:", currentQueue.length);
+        
+        try {
+          playSound(soundToPlay, { volume: 0.3 });
+        } catch (error) {
+          console.error("❌ Error playing sound:", error);
+        }
+      };
+
+      const interval = setInterval(() => {
+        console.log("🔄 Interval check - lightsOn:", lightsOn);
+        
+        const randomCheck = Math.random();
+        let shouldPlay = false;
+        
+        if (lightsOn) {
+          // With lights - more frequent playback (40% chance)
+          shouldPlay = randomCheck < 0.85;
+          console.log("💡 Lights ON - random ambient sounds");
+        } else {
+          // In darkness - less frequent (15% chance, background already playing)
+          shouldPlay = randomCheck < 0.2;
+          console.log("🌙 Lights OFF - rare sounds (background playing)");
+        }
+        
+        console.log("🎲 Random number:", randomCheck.toFixed(3));
+        console.log("✅ Should play sound:", shouldPlay);
+
+        if (shouldPlay) {
+          console.log("🎵 Playing random sound!");
+          playRandomSpooky();
+        } else {
+          console.log("❌ Condition not met");
+        }
+      }, 25000); // 25 seconds
+
+      return () => {
+        console.log("🧹 Clearing interval");
+        clearInterval(interval);
+      };
+    }, [lightsOn, playSound]); // REMOVED soundQueue from dependencies
 
   /** Display comment dialog */
   const showComment = (text, className = "") => {
@@ -236,11 +323,10 @@ const getItemsClicked = () => {
     setTimeout(() => {
       div.style.opacity = "0";
       setTimeout(() => div.remove(), 500);
-    }, 8000);
-  };
+    }, 15000);
+   };
 
   /** Audio fadeout */
-
       const fadeOutAudio = (audio, duration = 1000) => {
       const startVolume = audio.volume;
       const fadeStep = startVolume / (duration / 50);
@@ -802,7 +888,8 @@ const getItemsClicked = () => {
                 if (!rugUp) {
                   playSequence([
                     { Rug, options: { duration: 1, fadeIn: 0.2 } },
-                    { Alien, options: { volume: 0.5, start: 1.2} }
+                    {RadioTune, options: { duration: 4.2, fadeIn: 0.2 }},
+                    { Alien, options: { volume: 0.3, start: 2} }
                   ]);
                 } else {
                   playSound(Rug, { duration: 0.8, volume: 0.7 });
