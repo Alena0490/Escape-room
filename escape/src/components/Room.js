@@ -31,7 +31,6 @@ const Room = () => {
   const wrapRef = useRef(null);
   const roomRef = useRef(null);
   const [isFlickering, setIsFlickering] = useState(false);
-  const [soundQueue, setSoundQueue] = useState([]);
   const [gameState, setGameState] = useState({
     rugUp: false,
     lightsOn: false,
@@ -142,6 +141,7 @@ const getItemsClicked = () => {
     audio.volume = fadeIn > 0 ? 0 : volume;
     
     // Play audio with error handling
+    // eslint-disable-next-line no-unused-vars
     const playPromise = audio.play().catch(console.warn);
 
     let fadeInInterval, fadeOutTimeout;
@@ -229,92 +229,48 @@ const getItemsClicked = () => {
     }
   };
 
-  /** Pick random sound */
-  const createShuffledQueue = useCallback(() => {
-    const sounds = [EmptyRoom, VoicesShort, Steps];
-    const shuffled = [...sounds];
+  // Random sounds
+useEffect(() => {
+  const spookySounds = [EmptyRoom, VoicesShort, Steps];
+
+  const playRandomSpooky = () => {
+    // Always pick completely random sound, no queue needed
+    const randomIndex = Math.floor(Math.random() * spookySounds.length);
+    const soundToPlay = spookySounds[randomIndex];
     
-    // Fisher-Yates shuffle algoritmus
-    for (let i = shuffled.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    console.log("🎵 Playing random sound:", soundToPlay.split('/').pop());
+    
+    // Set louder volume only for Steps sound
+    let volume = 0.3;
+    if (soundToPlay === Steps) {
+      volume = 0.6;
     }
     
-    console.log("🔄 Nová fronta zvuků vytvořena:", shuffled.map(s => s.split('/').pop()));
-    return shuffled;
-  }, []);
+    try {
+      playSound(soundToPlay, { volume: volume });
+    } catch (error) {
+      console.error("❌ Error playing sound:", error);
+    }
+  };
 
-  // Random sounds
-    useEffect(() => {
-      const spookySounds = [EmptyRoom, VoicesShort, Steps];
-      let currentQueue = [...spookySounds];
-      
-      // Fisher-Yates shuffle
-      const shuffleQueue = () => {
-        const shuffled = [...spookySounds];
-        for (let i = shuffled.length - 1; i > 0; i--) {
-          const j = Math.floor(Math.random() * (i + 1));
-          [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-        }
-        return shuffled;
-      };
+  console.log("🔄 Random sounds initialized - lightsOn:", lightsOn);
 
-      const playRandomSpooky = () => {
-        if (currentQueue.length === 0) {
-          currentQueue = shuffleQueue();
-          console.log("🔄 New queue created:", currentQueue.map(s => s.split('/').pop()));
-        }
-        
-        const soundToPlay = currentQueue.shift(); // Remove first sound
-        console.log("🎵 Playing sound:", soundToPlay.split('/').pop());
-        console.log("📊 Remaining in queue:", currentQueue.length);
-        
-          // Set louder volume only for Steps sound
-          let volume = 0.3; // default volume
-          
-          if (soundToPlay === Steps) {
-            volume = 1; // louder for steps
-          }
+  const interval = setInterval(() => {
+    const randomCheck = Math.random();
+    const shouldPlay = lightsOn ? randomCheck < 0.75 : randomCheck < 0.2;
+    
+    console.log(`🔄 Check - lights: ${lightsOn ? 'ON' : 'OFF'}, random: ${randomCheck.toFixed(3)}, play: ${shouldPlay}`);
 
-        try {
-          playSound(soundToPlay, { volume: volume });
-        } catch (error) {
-          console.error("❌ Error playing sound:", error);
-        }
-      };
+    if (shouldPlay) {
+      playRandomSpooky();
+    }
+  }, 15000);
 
-      const interval = setInterval(() => {
-        console.log("🔄 Interval check - lightsOn:", lightsOn);
-        
-        const randomCheck = Math.random();
-        let shouldPlay = false;
-        
-        if (lightsOn) {
-          // With lights - more frequent playback (40% chance)
-          shouldPlay = randomCheck < 0.85;
-          console.log("💡 Lights ON - random ambient sounds");
-        } else {
-          // In darkness - less frequent (15% chance, background already playing)
-          shouldPlay = randomCheck < 0.2;
-          console.log("🌙 Lights OFF - rare sounds (background playing)");
-        }
-        
-        console.log("🎲 Random number:", randomCheck.toFixed(3));
-        console.log("✅ Should play sound:", shouldPlay);
-
-        if (shouldPlay) {
-          console.log("🎵 Playing random sound!");
-          playRandomSpooky();
-        } else {
-          console.log("❌ Condition not met");
-        }
-      }, 25000); // 25 seconds
-
-      return () => {
-        console.log("🧹 Clearing interval");
-        clearInterval(interval);
-      };
-    }, [lightsOn, playSound]); // REMOVED soundQueue from dependencies
+  return () => {
+    console.log("🧹 Clearing interval");
+    clearInterval(interval);
+  };
+}, [lightsOn, playSound]); // Only necessary dependencies
 
   /** Display comment dialog */
   const showComment = (text, className = "") => {
@@ -621,7 +577,7 @@ const getItemsClicked = () => {
     };
 
     init();
-  }, []);
+  }, [lightsOn, playSound]);
 
   return (
     <div id="room" 
