@@ -269,8 +269,15 @@ const getItemsClicked = () => {
         console.log("🎵 Playing sound:", soundToPlay.split('/').pop());
         console.log("📊 Remaining in queue:", currentQueue.length);
         
+          // Set louder volume only for Steps sound
+          let volume = 0.3; // default volume
+          
+          if (soundToPlay === Steps) {
+            volume = 1; // louder for steps
+          }
+
         try {
-          playSound(soundToPlay, { volume: 0.3 });
+          playSound(soundToPlay, { volume: volume });
         } catch (error) {
           console.error("❌ Error playing sound:", error);
         }
