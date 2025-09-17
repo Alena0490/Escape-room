@@ -19,6 +19,8 @@ import Door from "../sounds/door-handle-1-401153.mp3"
 import Rug from "../sounds/object-dragged-on-carpet-140497.mp3"
 import Paper from "../sounds/paper-rustle-81855.mp3"
 import Click from "../sounds/mouse-click-290204.mp3"
+import JumpScare from "../sounds/075283_quotbehind-youquot-whisper-86744.mp3"
+import EmptyRoom from "../sounds/empty-room-horror-sound-sfx-333924.mp3"
 
 const Room = () => {
   const wrapRef = useRef(null);
@@ -550,6 +552,7 @@ const getItemsClicked = () => {
                 const msg = e.currentTarget.getAttribute("data-comment");
                 if (msg) showComment(msg);
               }}
+              onMouseEnter={() => playSound(JumpScare, { duration: 2.5, volume: 0.7 })} 
             >
                 <span className="visually-hidden">A Van Goth self portrait</span>
             </div>
@@ -843,7 +846,11 @@ const getItemsClicked = () => {
             <span className="visually-hidden">OUIJA board</span>
           </div>
           
-          <div className="cube table" data-title="A weird table" data-comment="Nice, I really need this for my living room. Wait, what is there?">
+          <div 
+          className="cube table" 
+          data-title="A weird table" 
+          data-comment="Nice, I really need this for my living room. Wait, what is there?"
+          >
             <span className="visually-hidden">A wooden table with skull decoration</span>
           </div>
         </div>
