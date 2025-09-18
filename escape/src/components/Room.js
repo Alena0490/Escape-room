@@ -59,7 +59,18 @@ const Room = () => {
     }, []);
 
   /*** ENDING SCREEN  */
-  // Pomocné funkce pro statistiky
+  /** Stop audio */
+  useEffect(() => {
+  return () => {
+    if (window.roomAmbientAudio) {
+      window.roomAmbientAudio.pause();
+      window.roomAmbientAudio.currentTime = 0;
+      window.roomAmbientAudio = null;
+    }
+  };
+}, []);
+
+  // Statistics functions
 const calculateGameTime = () => {
   const startTime = localStorage.getItem('gameStartTime');
   if (!startTime) return '00:00';

@@ -95,3 +95,13 @@
     transform: scale(1.2);
     color: var(--color-text-main);
 }
+
+/** Win */
+.win-message {
+  margin: 0 0 2rem;
+  font-size: var(--font-xlarge);
+  font-style: italic;
+  color: var(--color-text-dim);
+  text-align: center;
+  max-width: 50ch;
+}

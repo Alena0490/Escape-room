@@ -53,6 +53,13 @@ const CodeLock = ({
   };
 
   const handleRestart = () => {
+    /* Stop ambient sound */
+      if (window.roomAmbientAudio) {
+      window.roomAmbientAudio.pause();
+      window.roomAmbientAudio.currentTime = 0;
+      window.roomAmbientAudio = null;
+    }
+    /* Reset LocalStorage */
     localStorage.clear();
     window.location.reload();
   };
@@ -94,6 +101,9 @@ const CodeLock = ({
       {showWinScreen && (
         <div id="win" className="win">
           <p className="win-content">Congratulations</p>
+          <p className="win-message">
+      It was a long day... Let's get out of here. Finally, fresh air!
+    </p>
           <div className="win-stats">
             <h3>Statistics:</h3>
             <p>Time: {calculateGameTime()}</p>
