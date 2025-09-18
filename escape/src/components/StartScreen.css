@@ -13,6 +13,7 @@
     filter: contrast(1.1);
     text-align: center;
     position: relative;
+    animation: focusIn 3.5s ease-in forwards;
     isolation: isolate;
 }
 
@@ -27,7 +28,8 @@
     height: 160vh;
     width: 160vw;
     z-index: 100;
-    animation: smoothWakeUp 4s cubic-bezier(0.4, 0.0, 0.2, 1) forwards;
+    animation: 
+    smoothWakeUp 4s cubic-bezier(0.4, 0.0, 0.2, 1) forwards;
 }
 
 .start-screen::after {
@@ -145,6 +147,14 @@
 /* Keyframes */
 @keyframes fadeUp {
   to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes focusIn {
+  0%   { filter: blur(4px); }
+  40%  { filter: blur(3px); }
+  55%  { filter: blur(1px); }
+  80%  { filter: blur(0.5px); }
+  100% { filter: blur(0px); }
 }
 
 @keyframes smoothWakeUp {

@@ -601,6 +601,9 @@ useEffect(() => {
       <div className="overlay darkness"></div>
       <div className="overlay zoom"></div>
       <div id="win"></div>
+      <div class="ouija-overlay">
+          <span className="visually-hidden">Old Ouija boardwith pointer</span>
+      </div>
       <div className="room-wrap" ref={wrapRef}>
         <div className="room" ref={roomRef}>
           <div className="wall wall-front">
@@ -903,6 +906,12 @@ useEffect(() => {
               const msg = e.currentTarget.getAttribute("data-comment");
               if (msg) showComment(msg);
               triggerVibration(30);
+              // show detail
+             const overlay = document.querySelector(".ouija-overlay");
+              overlay.classList.add("active");
+              setTimeout(() => {
+                overlay.classList.remove("active");
+              }, 5500); // ⏳ remove detail
             }}
           >
             <span className="visually-hidden">OUIJA board</span>
