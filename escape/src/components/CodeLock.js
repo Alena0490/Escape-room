@@ -36,13 +36,19 @@ const CodeLock = ({
       showComment("The door is now open! You can leave the&nbsp;room.", "success");
       setShowLock(false);
 
-      // otevření dveří po animaci
+      // Opening the door
       setTimeout(() => {
         const door = document.querySelector(".door.item");
         if (door) door.classList.add("open");
       }, 1500);
 
-      // zobrazit win screen
+      // Stop the random sounds
+      setTimeout(() => {
+          setShowWinScreen(true);
+          window.gameEnded = true;
+        }, 2700);
+
+      // Show the win screen
       setTimeout(() => {
         setShowWinScreen(true);
       }, 2700);
@@ -54,13 +60,13 @@ const CodeLock = ({
   };
 
   const handleRestart = () => {
-    /* Stop ambient sound */
+    // Stop ambient sound 
       if (window.roomAmbientAudio) {
       window.roomAmbientAudio.pause();
       window.roomAmbientAudio.currentTime = 0;
       window.roomAmbientAudio = null;
     }
-    /* Reset LocalStorage */
+    // Reset LocalStorage
     localStorage.clear();
     window.location.reload();
   };

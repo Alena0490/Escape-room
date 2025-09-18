@@ -1239,25 +1239,12 @@
 }
 
 @media (max-width: 750px) {
- .win {
-  justify-content: flex-start;
- }
-
-  .win p.win-content {
-    width: unset;
-        padding: 0.5rem 0.1rem;
-  }
-
   .room-nav button {
     font-size: 2.2rem;
     width: 1.7em;
     height: 1.7em;
   }
 }
-
-  .win-button {
-    margin-top: 2rem;
-  }
 
 @media (max-width: 548px) {
 
@@ -1301,12 +1288,6 @@
   90%   { opacity: 0.1; }
   100%  { opacity: 0; }    
   }
-
-  @keyframes popIn {
-  0%   { transform: scale(0.6); opacity: 0; }
-  60%  { transform: scale(1.1); opacity: 1; }
-  100% { transform: scale(1); }
-}
 
 
 

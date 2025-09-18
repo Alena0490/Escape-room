@@ -267,6 +267,7 @@ useEffect(() => {
   console.log("🔄 Random sounds initialized - lightsOn:", lightsOn);
 
   const interval = setInterval(() => {
+    if (window.gameEnded) return; // check if the game has not been ended
     const randomCheck = Math.random();
     const shouldPlay = lightsOn ? randomCheck < 0.75 : randomCheck < 0.2;
     
