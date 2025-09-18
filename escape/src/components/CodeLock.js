@@ -1,4 +1,5 @@
 import "./CodeLock.css";
+import WinScreen from "./WinScreen"; //
 import { useState } from "react";
 import { IoClose } from "react-icons/io5";
 import Error from "../sounds/error-126627.mp3";
@@ -99,21 +100,12 @@ const CodeLock = ({
       )}
 
       {showWinScreen && (
-        <div id="win" className="win">
-          <p className="win-content">Congratulations</p>
-          <p className="win-message">
-      It was a long day... Let's get out of here. Finally, fresh air!
-    </p>
-          <div className="win-stats">
-            <h3>Statistics:</h3>
-            <p>Time: {calculateGameTime()}</p>
-            <p>Hints Used: {getHintsUsed()}</p>
-            <p>Items Searched: {getItemsClicked()}</p>
-          </div>
-          <button className="win-button" onClick={handleRestart}>
-            Play again
-          </button>
-        </div>
+        <WinScreen
+          time={calculateGameTime()}
+          hints={getHintsUsed()}
+          items={getItemsClicked()}
+          onRestart={handleRestart}
+        />
       )}
     </>
   );
