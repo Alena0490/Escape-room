@@ -6,7 +6,11 @@
     place-items: center;
     padding: 2rem;
    background-color: var(--color-accent-darker);
+   background-image: url(../img/room.png);
+   background-size: cover;
+   background-position: center center;
     color: var(--color-text-main);
+    filter: contrast(1.1);
     text-align: center;
     position: relative;
     isolation: isolate;

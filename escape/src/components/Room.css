@@ -478,6 +478,13 @@
   pointer-events: all;
 }
 
+.item.ouija.clicked {
+  background-image: url("../img/ouija.webp");
+  background-size: contain;
+  background-position: center center;
+  background-repeat: no-repeat;
+}
+
 .item.ouija div {
   background: none;
   box-shadow: none;

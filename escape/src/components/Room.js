@@ -276,7 +276,7 @@ useEffect(() => {
     if (shouldPlay) {
       playRandomSpooky();
     }
-  }, 20000);
+  }, 30000);
 
   return () => {
     console.log("🧹 Clearing interval");
