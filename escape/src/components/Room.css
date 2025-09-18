@@ -15,7 +15,8 @@
   --color-text-faint: #8B9393;    /* skoro neviditelná */
 
   /* Accents */
-  --color-accent: #72A69C;  
+  --color-accent: #72A69C;
+  --color-accent-darker: #265951;  
   --color-accent-dark: #00211a;      /* tyrkysový highlight */
   --color-accent-bright: #8FD1C4; 
   --color-accent-invert: #735134;

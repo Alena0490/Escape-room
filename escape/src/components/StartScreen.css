@@ -1,0 +1,239 @@
+.start-screen {
+    overflow: hidden;
+    min-height: 100vh;
+    width: 100%;
+    display: grid;
+    place-items: center;
+    padding: 2rem;
+   background-color: var(--color-accent-darker);
+    color: var(--color-text-main);
+    text-align: center;
+    position: relative;
+    isolation: isolate;
+}
+
+.start-screen::before {
+    content: "";
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    transform-origin: center;
+    pointer-events: none;
+    height: 160vh;
+    width: 160vw;
+    z-index: 100;
+    animation: smoothWakeUp 4s cubic-bezier(0.4, 0.0, 0.2, 1) forwards;
+}
+
+.start-screen::after {
+  content: "";
+  position: absolute; inset: 0;
+  background-image: url("../img/noise.webp");
+  opacity: 0.06;
+  mix-blend-mode: overlay;
+  pointer-events: none;
+  z-index: -1;
+  animation: grain 1.2s steps(4) infinite;
+}
+
+.start-title {
+  font-size: clamp(2rem, 6vw, 4rem);
+  letter-spacing: 0.02em;
+  margin: 0 0 1rem;
+  text-shadow: 0 0 12px var(--color-glow);
+}
+
+.start-intro {
+  max-width: 70ch;
+  margin: 0 auto 2rem;
+  display: grid;
+  gap: 0.6rem;
+  color: var(--color-text-dim);
+  line-height: 1.6;
+}
+
+/* Text appearance */
+.start-intro p {
+    font-size: var(--font-middle);
+    line-height: 1.4;
+  opacity: 0;
+  transform: translateY(6px);
+  animation: fadeUp 500ms ease forwards;
+}
+.start-intro p:nth-child(1){ animation-delay: 120ms; }
+.start-intro p:nth-child(2){ animation-delay: 240ms; }
+.start-intro p:nth-child(3){ animation-delay: 360ms; }
+.start-intro p:nth-child(4){ animation-delay: 480ms; }
+
+.start-intro p.last-line {
+    font-weight: 700;
+}
+
+
+.start-btn {
+  font-size: var(--font-xlarge);
+  padding: 0.6rem 1.2rem;
+  cursor: pointer;
+  background-color: var(--color-border);
+  background-image: linear-gradient(180deg, #0000, #0002),
+    radial-gradient(90% 0.125em at 50% 0.125em, #fff7 25%, #fff0 50%);
+  box-shadow: 0.125em 0.125em 0.25em #0007,
+              0 -0.05em 0 0.05em #0004,
+              0 0.05em 0 0.05em #fff1,
+              -0.125em 0 0.125em #454954 inset,
+              0 0.125em 0.125em #fff4 inset,
+              0.125em 0 0.125em #fff4 inset,
+              0 -0.125em 0.125em #454954 inset;
+  color: var(--color-text-main);
+  text-shadow: 0 0 0.125em #fff7,
+               0.05em 0.05em 0 black,
+               0.075em 0.075em 0 black;
+  border: 0px outset #454954;
+  border-radius: var(--border-radius);
+  transition: all 0.3s ease;
+}
+
+.start-btn:hover,
+.start-btn:active {
+  filter: brightness(1.2) contrast(1.1);
+    box-shadow:
+    0 0 0 1px var(--color-overlay) inset,
+    0 10px 24px rgba(0,0,0,.45);
+  transform: translateY(-1px);
+}
+
+.start-btn:active {
+  transform: translateY(0);
+}
+
+
+/** Focus */
+.start-btn {
+  outline: none; 
+}
+
+.start-btn:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 3px;
+}
+
+.start-btn:focus:not(:focus-visible) {
+  outline: none;
+}
+
+.start-btn:hover:not(:focus-visible) {
+  outline: none;
+}
+
+/* Media */
+@media (max-width: 560px) {
+  .start-intro { text-align: left; }
+  .start-btn { width: 100%; max-width: 18rem; }
+}
+
+/* Animation reduced */
+@media (prefers-reduced-motion: reduce) {
+  .start-intro p { animation: none; opacity: 1; transform: none; }
+  .start-screen::after { animation: none; }
+}
+
+/* Keyframes */
+@keyframes fadeUp {
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes smoothWakeUp {
+    0%   { 
+        background: radial-gradient(circle at center,
+                    rgba(0,0,0,0) 25%,
+                    rgba(0,0,0,1) 38%,
+                    rgba(0,0,0,1) 100%);
+    }
+    8%   { 
+        background: radial-gradient(circle at center,
+                    rgba(0,0,0,0) 35%,
+                    rgba(0,0,0,0.95) 48%,
+                    rgba(0,0,0,1) 100%);
+    }
+    12%  { 
+        background: radial-gradient(circle at center,
+                    rgba(0,0,0,0) 45%,
+                    rgba(0,0,0,0.9) 58%,
+                    rgba(0,0,0,1) 100%);
+    }
+    15%  { 
+        background: radial-gradient(circle at center,
+                    rgba(0,0,0,0) 38%,
+                    rgba(0,0,0,0.92) 52%,
+                    rgba(0,0,0,1) 100%);
+    }
+    18%  { 
+        background: radial-gradient(circle at center,
+                    rgba(0,0,0,0) 28%,
+                    rgba(0,0,0,1) 40%,
+                    rgba(0,0,0,1) 100%);
+    }
+    22%  { 
+        background: radial-gradient(circle at center,
+                    rgba(0,0,0,0) 40%,
+                    rgba(0,0,0,0.9) 55%,
+                    rgba(0,0,0,1) 100%);
+    }
+    25%  { 
+        background: radial-gradient(circle at center,
+                    rgba(0,0,0,0) 50%,
+                    rgba(0,0,0,0.85) 65%,
+                    rgba(0,0,0,1) 100%);
+    }
+    28%  { 
+        background: radial-gradient(circle at center,
+                    rgba(0,0,0,0) 42%,
+                    rgba(0,0,0,0.88) 58%,
+                    rgba(0,0,0,1) 100%);
+    }
+    32%  { 
+        background: radial-gradient(circle at center,
+                    rgba(0,0,0,0) 32%,
+                    rgba(0,0,0,0.95) 48%,
+                    rgba(0,0,0,1) 100%);
+    }
+    40%  { 
+        background: radial-gradient(circle at center,
+                    rgba(0,0,0,0) 60%,
+                    rgba(0,0,0,0.8) 78%,
+                    rgba(0,0,0,1) 100%);
+    }
+    50%  { 
+        background: radial-gradient(circle at center,
+                    rgba(0,0,0,0) 75%,
+                    rgba(0,0,0,0.6) 92%,
+                    rgba(0,0,0,0.95) 100%);
+    }
+    65%  { 
+        background: radial-gradient(circle at center,
+                    rgba(0,0,0,0) 80%,
+                    rgba(0,0,0,0.4) 92%,
+                    rgba(0,0,0,0.8) 100%);
+    }
+    80%  { 
+        background: radial-gradient(circle at center,
+                    rgba(0,0,0,0) 95%,
+                    rgba(0,0,0,0.15) 100%,
+                    rgba(0,0,0,0.4) 100%);
+    }
+    100% { 
+        background: radial-gradient(circle at center,
+                    rgba(0,0,0,0) 100%,
+                    rgba(0,0,0,0) 100%,
+                    rgba(0,0,0,0) 100%);
+    }
+}
+
+@keyframes grain {
+  0% { transform: translate(0,0); }
+  25% { transform: translate(-10px, 6px); }
+  50% { transform: translate(8px, -4px); }
+  75% { transform: translate(-6px, 10px); }
+  100% { transform: translate(0,0); }
+}
