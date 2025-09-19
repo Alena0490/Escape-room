@@ -236,8 +236,7 @@ const getEasterEggsCount = () => {
       }
       
       const audio = playSound(src, options);
-
-      
+    
       // Wait for sound to finish
       await new Promise(resolve => {
         const duration = options?.duration;
@@ -331,6 +330,9 @@ useEffect(() => {
     };
 
   useEffect(() => {
+    let cleanupAll = () => {};
+    let cleanupButtons = null;
+
     // wait then elements are ready
   const checkElementsReady = () => {
     const roomWrap = wrapRef.current;
@@ -349,12 +351,17 @@ useEffect(() => {
     let currentRotationY = -90;
 
     const updateRoomTransform = (offsetX, offsetY) => {
-      if (!room) return;
-      room.style.transform = `rotateX(${offsetY}deg) rotateY(${currentRotationY + offsetX}deg)`;
+      // Always read the latest element from the ref (StrictMode can remount)
+      const r = roomRef.current;
+      if (!r) return;
+      r.style.transform = `rotateX(${offsetY}deg) rotateY(${currentRotationY + offsetX}deg)`;
     };
 
     const updateView = (direction) => {
-      if (!roomWrap) return; // přidejte tuto kontrolu
+    // Re-read current nodes every call to avoid null/stale references
+      const roomWrap = wrapRef.current;
+      const room = roomRef.current;
+      if (!roomWrap || !room) return;
       
       if (direction === "left") {
         currentViewIndex = (currentViewIndex + 1) % views.length;
@@ -369,39 +376,43 @@ useEffect(() => {
 
       roomWrap.classList.add("rotating");
       setTimeout(() => {
-        if (roomWrap) roomWrap.classList.remove("rotating"); // další kontrola
+        // Get a fresh node in case of remount
+        const w = wrapRef.current;
+        if (w) w.classList.remove("rotating");
       }, 500);
 
-      document.querySelectorAll(".room div").forEach((wall) =>
-        wall.classList.remove("active")
+      document.querySelectorAll(".room .wall").forEach((el) =>
+        el.classList.remove("active")
       );
-      
-      const activeWall = document.querySelector(`.${walls[currentViewIndex]}`);
-      if (activeWall) activeWall.classList.add("active"); // kontrola existence
+      const activeWall = document.querySelector(`.wall.${walls[currentViewIndex]}`);
+      if (activeWall) activeWall.classList.add("active"); // check if the wall is existing
 
       updateRoomTransform(0, 0);
     };
 
-        const initButtons = () => {
-          document
-            .getElementById("turnLeft")
-            .addEventListener("click", () => updateView("left"));
-          document
-            .getElementById("turnRight")
-            .addEventListener("click", () => updateView("right"));
-          document
-            .getElementById("zoom")
-            .addEventListener("click", () =>
-              roomCanvas.classList.toggle("zoomed")
-            );
-        };
+    const initButtons = () => {
+      const leftBtn = document.getElementById("turnLeft");
+      const rightBtn = document.getElementById("turnRight");
+      const zoomBtn = document.getElementById("zoom");
 
-        const initKeyboardSupport = () => {
-          document.addEventListener("keydown", (e) => {
-            if (e.key === "ArrowLeft") updateView("left");
-            else if (e.key === "ArrowRight") updateView("right");
-          });
-        };
+      leftBtn && leftBtn.addEventListener("click", onLeft);
+      rightBtn && rightBtn.addEventListener("click", onRight);
+      zoomBtn && zoomBtn.addEventListener("click", onZoom);
+
+      // return cleanup after disconnection
+      return () => {
+        leftBtn && leftBtn.removeEventListener("click", onLeft);
+        rightBtn && rightBtn.removeEventListener("click", onRight);
+        zoomBtn && zoomBtn.removeEventListener("click", onZoom);
+      };
+    };
+
+    const initKeyboardSupport = () => {
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "ArrowLeft") updateView("left");
+        else if (e.key === "ArrowRight") updateView("right");
+      });
+    };
 
     const initSwipeSupport = () => {
       let touchStartX = null;
@@ -441,6 +452,7 @@ useEffect(() => {
     };
 
     const initTooltip = () => {
+      // Mirror crack hover
       const tooltip = document.querySelector("#tooltip");
       document.addEventListener("mousemove", (event) => {
         const tooltipPadding = 10;
@@ -590,8 +602,8 @@ useEffect(() => {
     };
 
     const init = () => {
-      updateView();
-      initButtons();
+      requestAnimationFrame(() => updateView());
+      cleanupButtons = initButtons();
       initKeyboardSupport();
       initSwipeSupport();
       initMouseMovement();
@@ -601,12 +613,64 @@ useEffect(() => {
       initUtilities();
     };
 
+    // --- listeners with stable refs ---
+      const onLeft = () => updateView("left");
+      const onRight = () => updateView("right");
+      const onZoom = () => {
+        const rc = document.getElementById("room");
+        if (rc) rc.classList.toggle("zoomed");
+      };
+      const onKey = (e) => {
+        if (e.key === "ArrowLeft") updateView("left");
+        else if (e.key === "ArrowRight") updateView("right");
+      };
+      const onMouseMove = (e) => {
+        const w = wrapRef.current;
+        const r = roomRef.current;
+        if (!w || !r) return;
+        const xPercent = (e.clientX / window.innerWidth - 0.5) * 2;
+        const yPercent = (e.clientY / window.innerHeight - 0.5) * 2;
+        const rotateXOffset = parseFloat((xPercent * 15).toFixed(2));
+        const rotateYOffset = parseFloat((-yPercent * 15).toFixed(2));
+        // použije tvoji updateRoomTransform
+        updateRoomTransform(rotateXOffset, rotateYOffset);
+      };
+      let touchStartX = null;
+      const onTouchStart = (e) => { touchStartX = e.changedTouches[0].screenX; };
+      const onTouchEnd = (e) => {
+        if (touchStartX === null) return;
+        const diffX = touchStartX - e.changedTouches[0].screenX;
+        if (Math.abs(diffX) > 30) (diffX > 0 ? updateView("left") : updateView("right"));
+        touchStartX = null;
+      };
+
+    document.addEventListener("keydown", onKey);
+    roomWrap.addEventListener("mousemove", onMouseMove);
+    roomWrap.addEventListener("touchstart", onTouchStart, { passive: true });
+    roomWrap.addEventListener("touchend", onTouchEnd);
+    document.addEventListener("keydown", onKey);
+    roomWrap.addEventListener("mousemove", onMouseMove);
+    roomWrap.addEventListener("touchstart", onTouchStart, { passive: true });
+    roomWrap.addEventListener("touchend", onTouchEnd);
+
+    cleanupAll = () => {
+      document.removeEventListener("keydown", onKey);
+      if (roomWrap) {
+        roomWrap.removeEventListener("mousemove", onMouseMove);
+        roomWrap.removeEventListener("touchstart", onTouchStart);
+        roomWrap.removeEventListener("touchend", onTouchEnd);
+      }
+      cleanupButtons && cleanupButtons();
+    };
+
     init();
       };
+
+      
       
       // Start the check
       checkElementsReady();
-      
+      return () => cleanupAll();   
   }, [lightsOn, playSound]);
 
   return (
@@ -619,7 +683,7 @@ useEffect(() => {
       <div className="overlay darkness"></div>
       <div className="overlay zoom"></div>
       <div id="win"></div>
-      <div class="ouija-overlay">
+      <div className="ouija-overlay">
           <span className="visually-hidden">Old Ouija boardwith pointer</span>
       </div>
       <div className="room-wrap" ref={wrapRef}>
@@ -855,11 +919,12 @@ useEffect(() => {
           
           <div className="wall wall-right">
             <div className="poster item" 
-              data-title="Some old poster"
-              data-comment="What is the chainsaw commercial doing there?"
+              data-title="Some old poster egg"
+              data-comment="What the hell is the chainsaw commercial doing there? Are they sponsoring this freak show or what?"
               onClick={(e) => {
+                unlockEasterEgg("poster"); // save to LocalStorage
                 const msg = e.currentTarget.getAttribute("data-comment");
-                    if (msg) showComment(msg);
+                    if (msg) showComment(msg, "easter-egg");
                 incrementItemClicks();
               }}
             >

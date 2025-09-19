@@ -27,7 +27,7 @@
   --color-success: #06eba6;       /* sytá zeleno-tyrkysová */
   --color-error: #e83939;         /* jasně červená – lépe viditelná */
   --color-warning: #ffc02c; 
-  --color-info: #3ba9ff;      /* oranžová – upozornění */
+  --color-info: #82e0ff;      /* oranžová – upozornění */
 
   /* Whites – pro "kost/bledě" efekty */
   --color-bone: #F5F5F0;          /* kostní bílá */
@@ -693,6 +693,7 @@
 .mirror::after {
   content: "";
   position: absolute;
+  top: 0;
   left: 0;
   width: 65vmin;
   height: 68vmin;
@@ -1080,8 +1081,8 @@
 }
 
 .mirror-crack {
-   width: 25vmin;
-    height: 28vmin;
+   width: 20vmin;
+    height: 20vmin;
     background-color: transparent;
     /* border: 4px solid red !important; */
     position: absolute;
@@ -1090,14 +1091,15 @@
     border: none;
     z-index: 200;
     cursor: pointer;
+    pointer-events: auto;
 }
 
 .contract {
   position: absolute;
   top: calc(20% - 8vmin);
     left: calc(65% - 4vmin);
-  width: 13%;
-  height: 15%;
+  width: 11%;
+  height: 14%;
   filter: brightness(0.9) sepia(0.3) contrast(1.2)drop-shadow(1px 2px 2px black);
   transform: rotate(20deg);
   background-image: url("../img/contract.webp");
