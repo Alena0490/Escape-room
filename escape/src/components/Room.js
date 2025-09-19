@@ -346,6 +346,8 @@ useEffect(() => {
     };
 
     const updateView = (direction) => {
+      if (!roomWrap) return; // přidejte tuto kontrolu
+      
       if (direction === "left") {
         currentViewIndex = (currentViewIndex + 1) % views.length;
         currentRotationY -= 90;
@@ -358,38 +360,40 @@ useEffect(() => {
       roomWrap.classList.add(views[currentViewIndex]);
 
       roomWrap.classList.add("rotating");
-      setTimeout(() => roomWrap.classList.remove("rotating"), 500);
+      setTimeout(() => {
+        if (roomWrap) roomWrap.classList.remove("rotating"); // další kontrola
+      }, 500);
 
       document.querySelectorAll(".room div").forEach((wall) =>
         wall.classList.remove("active")
       );
-      document
-        .querySelector(`.${walls[currentViewIndex]}`)
-        ?.classList.add("active");
+      
+      const activeWall = document.querySelector(`.${walls[currentViewIndex]}`);
+      if (activeWall) activeWall.classList.add("active"); // kontrola existence
 
       updateRoomTransform(0, 0);
     };
 
-    const initButtons = () => {
-      document
-        .getElementById("turnLeft")
-        .addEventListener("click", () => updateView("left"));
-      document
-        .getElementById("turnRight")
-        .addEventListener("click", () => updateView("right"));
-      document
-        .getElementById("zoom")
-        .addEventListener("click", () =>
-          roomCanvas.classList.toggle("zoomed")
-        );
-    };
+        const initButtons = () => {
+          document
+            .getElementById("turnLeft")
+            .addEventListener("click", () => updateView("left"));
+          document
+            .getElementById("turnRight")
+            .addEventListener("click", () => updateView("right"));
+          document
+            .getElementById("zoom")
+            .addEventListener("click", () =>
+              roomCanvas.classList.toggle("zoomed")
+            );
+        };
 
-    const initKeyboardSupport = () => {
-      document.addEventListener("keydown", (e) => {
-        if (e.key === "ArrowLeft") updateView("left");
-        else if (e.key === "ArrowRight") updateView("right");
-      });
-    };
+        const initKeyboardSupport = () => {
+          document.addEventListener("keydown", (e) => {
+            if (e.key === "ArrowLeft") updateView("left");
+            else if (e.key === "ArrowRight") updateView("right");
+          });
+        };
 
     const initSwipeSupport = () => {
       let touchStartX = null;
@@ -547,8 +551,8 @@ useEffect(() => {
           if (comment) showComment(comment);
 
           // 📝 počítadlo kliků
-          const clicks = parseInt(localStorage.getItem("itemsClicked") || "0", 10);
-          localStorage.setItem("itemsClicked", clicks + 1);
+          // const clicks = parseInt(localStorage.getItem("itemsClicked") || "0", 10);
+          // localStorage.setItem("itemsClicked", clicks + 1);
         };
       });
 
@@ -871,6 +875,7 @@ useEffect(() => {
                   unlockEasterEgg("mirror-crack"); // save to LocalStorage
                   const msg = e.currentTarget.getAttribute("data-comment");
                   if (msg) showComment(msg, "easter-egg");
+                  incrementItemClicks();
                 }}
               >
                 <span className="visually-hidden">Crack in the mirror</span>
@@ -913,6 +918,7 @@ useEffect(() => {
                   unlockEasterEgg("contract"); // save to LocalStorage
                   const msg = e.currentTarget.getAttribute("data-comment");
                   if (msg) showComment(msg, "easter-egg");
+                  incrementItemClicks();
                 }}
               >
               <span className="visually-hidden">Crumpled contract lying on the floor</span>
