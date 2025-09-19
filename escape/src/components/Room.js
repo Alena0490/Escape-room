@@ -331,10 +331,18 @@ useEffect(() => {
     };
 
   useEffect(() => {
+    // wait then elements are ready
+  const checkElementsReady = () => {
     const roomWrap = wrapRef.current;
     const room = roomRef.current;
     const roomCanvas = document.getElementById("room");
-
+    
+    if (!roomWrap || !room || !roomCanvas) {
+      // try again after 50s
+      setTimeout(checkElementsReady, 50);
+      return;
+    }
+    // start initization
     const views = ["back-view", "left-view", "front-view", "right-view"];
     const walls = ["wall-back", "wall-left", "wall-front", "wall-right"];
     let currentViewIndex = 1;
@@ -594,6 +602,11 @@ useEffect(() => {
     };
 
     init();
+      };
+      
+      // Start the check
+      checkElementsReady();
+      
   }, [lightsOn, playSound]);
 
   return (
