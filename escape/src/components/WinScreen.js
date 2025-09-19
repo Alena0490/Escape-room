@@ -3,7 +3,8 @@ import "./WinScreen.css"
 const WinScreen = ({ 
   time, 
   hints, 
-  items, 
+  items,
+  eggCount, 
   onRestart 
 }) => {
     return (
@@ -20,6 +21,7 @@ const WinScreen = ({
         <p>Time: {time}</p>
         <p>Hints Used: {hints}</p>
         <p>Items Searched: {items}</p>
+        <p className="bonus">Bonus points: {eggCount}</p>
       </div>
 
       <button className="win-button" onClick={onRestart}>

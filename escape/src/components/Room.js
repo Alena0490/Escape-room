@@ -38,12 +38,10 @@ const Room = () => {
     isFlickering: false,
   });
   const [showLock, setShowLock] = useState(false);
-  
-  
 
   // Destructure state for convenience
   const { rugUp, lightsOn} = gameState;
-
+  
   /** Vibration feedback for mobile devices */
   const triggerVibration = (duration = 50) => {
     if ('vibrate' in navigator) {
@@ -95,6 +93,19 @@ const getItemsClicked = () => {
       localStorage.setItem("itemsClicked", count + 1);
   };
 
+  /** Easter eggs */
+const unlockEasterEgg = (id) => {
+  let eggs = JSON.parse(localStorage.getItem("easterEggs") || "{}");
+  if (!eggs[id]) {
+    eggs[id] = true;
+    localStorage.setItem("easterEggs", JSON.stringify(eggs));
+  }
+};
+
+const getEasterEggsCount = () => {
+  const eggs = JSON.parse(localStorage.getItem("easterEggs") || "{}");
+  return Object.keys(eggs).length;
+};
 
   /** Load game state from localStorage on component mount */
   useEffect(() => {
@@ -533,16 +544,6 @@ useEffect(() => {
       roomItems.forEach((item) => {
         item.onclick = () => {
           const comment = item.getAttribute("data-comment");
-          if (comment) {
-            showComment(comment);
-          }
-        };
-      });
-
-      /* Items clicked */
-      roomItems.forEach((item) => {
-        item.onclick = () => {
-          const comment = item.getAttribute("data-comment");
           if (comment) showComment(comment);
 
           // 📝 počítadlo kliků
@@ -820,6 +821,19 @@ useEffect(() => {
               }}>
               <span className="visually-hidden">Light switch</span>
             </div>
+              <div
+                className="item chalk-message"
+                data-title="Strange graffiti writing"
+                data-comment="Wait, what: `Smile, you're not the first one here`? Is someone watching me?"
+                onClick={(e) => {
+                  incrementItemClicks();
+                  unlockEasterEgg("chalk1"); // save to LocalStorage
+                  const msg = e.currentTarget.getAttribute("data-comment");
+                  if (msg) showComment(msg, "easter-egg");
+                }}
+              >
+                <span className="visually-hidden">Graffiti text on the wall</span>
+              </div>
           </div>
           
           <div className="wall wall-right">
@@ -848,8 +862,21 @@ useEffect(() => {
             >
               <span className="visually-hidden">Old mirror flasting letters Friday 13th</span>
             </div>
+
+             <div
+                className="item mirror-crack egg"
+                data-title="Crack in the mirror"
+                data-comment="What is it? Is there a fu**ing camera inside…?"
+                onClick={(e) => {
+                  unlockEasterEgg("mirror-crack"); // save to LocalStorage
+                  const msg = e.currentTarget.getAttribute("data-comment");
+                  if (msg) showComment(msg, "easter-egg");
+                }}
+              >
+                <span className="visually-hidden">Crack in the mirror</span>
+              </div>
           </div>
-          
+                 
           <div className="wall wall-top"></div>
           
           <div className="wall wall-bottom">
@@ -877,6 +904,21 @@ useEffect(() => {
             >
               <span className="visually-hidden">Dirty fur rug</span>
             </div>
+
+            <div
+                className="item contract egg"
+                data-title="Some crumpled contract"
+                data-comment="A contract with television… Ten thousand euros. Guess I really signed my life away."
+                onClick={(e) => {
+                  unlockEasterEgg("contract"); // save to LocalStorage
+                  const msg = e.currentTarget.getAttribute("data-comment");
+                  if (msg) showComment(msg, "easter-egg");
+                }}
+              >
+              <span className="visually-hidden">Crumpled contract lying on the floor</span>
+            </div>
+
+
           </div>
           
           <div className="cube cardbox" 
@@ -936,6 +978,7 @@ useEffect(() => {
         fadeOutAudio={fadeOutAudio}
         getHintsUsed={getHintsUsed}
         getItemsClicked={getItemsClicked}
+        getEasterEggsCount={getEasterEggsCount}
         calculateGameTime={calculateGameTime}
       />
 

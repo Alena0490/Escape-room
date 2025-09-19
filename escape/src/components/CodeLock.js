@@ -17,6 +17,7 @@ const CodeLock = ({
   calculateGameTime,
   getHintsUsed,
   getItemsClicked,
+  getEasterEggsCount,
 }) => {
   const [code, setCode] = useState("");
   const [showWinScreen, setShowWinScreen] = useState(false);
@@ -110,6 +111,7 @@ const CodeLock = ({
           time={calculateGameTime()}
           hints={getHintsUsed()}
           items={getItemsClicked()}
+          eggCount={getEasterEggsCount()} 
           onRestart={handleRestart}
         />
       )}

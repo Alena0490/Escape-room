@@ -77,6 +77,11 @@
   line-height: 1.4;
 }
 
+.win-stats p.bonus {
+    font-weight: 700;
+    color: var(--color-warning);
+}
+
 .win-button {
   font-size: var(--font-large);
   padding: 0.4rem 0.6rem;
