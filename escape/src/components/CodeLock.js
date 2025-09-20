@@ -76,6 +76,7 @@ const CodeLock = ({
     <>
       {!showWinScreen && (
         <form
+          name="code-lock"
           className={`code-lock ${showLock ? "active" : ""}`}
           onSubmit={handleSubmit}
         >

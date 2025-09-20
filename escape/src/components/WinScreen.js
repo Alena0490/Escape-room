@@ -21,7 +21,7 @@ const WinScreen = ({
         <p>Time: {time}</p>
         <p>Hints Used: {hints}</p>
         <p>Items Searched: {items}</p>
-        <p className="bonus">Bonus points: {eggCount}</p>
+        <p className="bonus">Bonus points: {eggCount} of 7</p>
       </div>
 
       <button className="win-button" onClick={onRestart}>

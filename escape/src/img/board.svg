@@ -1,0 +1,55 @@
+<!-- Lightbox Sign – SVG (3 řádky, hover glow) -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 210" width="320" height="210" role="img" aria-labelledby="title desc">
+  <title id="title">Lightbox sign</title>
+  <desc id="desc">Three-row illuminated sign with changeable letters</desc>
+
+  <defs>
+    <!-- Záře při hoveru -->
+    <filter id="glow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="4" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <!-- Jemný světelný přechod panelu -->
+    <linearGradient id="panel" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"  stop-color="#fafafa"/>
+      <stop offset="100%" stop-color="#e9e9e9"/>
+    </linearGradient>
+  </defs>
+
+  <style>
+    .frame{ fill:#dcdcdc; }
+    .panel{ fill:url(#panel); }
+    .divider{ fill:#f0f0f0; }
+    .shadow{ fill:#000; opacity:.08; }
+    .letters{
+      font: 700 34px/1 "Roboto Condensed","Helvetica Neue",Arial,sans-serif;
+      letter-spacing: 8px;
+      fill:#1d1d1f;
+      text-anchor: middle;
+      text-transform: uppercase;
+    }
+    /* Hover efekt na celé tabulce */
+    .hit:hover .panel{ filter:url(#glow); }
+    .hit{ cursor:pointer; }
+  </style>
+
+  <!-- Rámeček -->
+  <g class="hit">
+    <rect x="6" y="6" width="308" height="198" rx="10" class="frame"/>
+    <rect x="12" y="12" width="296" height="186" rx="8" class="panel"/>
+    <!-- Vnitřní stín -->
+    <rect x="12" y="12" width="296" height="186" rx="8" class="shadow"/>
+
+    <!-- Drážky mezi řádky -->
+    <rect x="20" y="74"  width="280" height="6"  class="divider"/>
+    <rect x="20" y="132" width="280" height="6"  class="divider"/>
+
+    <!-- Text (uprav si) -->
+    <text class="letters" x="160" y="58">BEHIND</text>
+    <text class="letters" x="160" y="116">THE</text>
+    <text class="letters" x="160" y="174">GLASS</text>
+  </g>
+</svg>

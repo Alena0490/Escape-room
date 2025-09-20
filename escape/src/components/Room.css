@@ -257,9 +257,10 @@
 }
 
 .front-view .wall-back,
-.back-view .wall-front,
+.back-view .wall-front
 /* .left-view .wall-right, */
-.right-view .wall-left {
+/* .right-view .wall-left  */
+{
   pointer-events: none;
  }
 
@@ -658,22 +659,6 @@
   /* border: 4px solid red !important; */
 }
 
-.poster {
-    width: 20vmin;
-    height: 15vmin;
-    background-image: url("../img/poster.webp");
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-    position: absolute;
-    top: 20%;
-    border-radius: var(--border-radius-sm);
-    left: 10vmin;
-    box-shadow: 0 0 1px #000a, inset 0 0 1px rgba(0, 0, 0, 0.425);
-    border: 0.5vmin solid var(--color-bg-light);
-    cursor: pointer;
-}
-
 .mirror {
     width: 65vmin;
     height: 68vmin;
@@ -723,30 +708,6 @@
 .mirror.lit:hover::after,
 .mirror.lit:active::after {
   animation: ghostFlash 5s ease forwards;
-}
-
-.painting {
-    width: 30vmin;
-    height: 40vmin;
-    background-image: url("../img/self-portrait.webp");
-    background-size: contain;
-    background-position: center;
-    background-repeat: no-repeat;
-    position: absolute;
-    top: 15%;
-    border-radius: var(--border-radius-sm);
-    left: 50vmin;
-    filter: drop-shadow(5px 3px 2px #000a);
-    cursor: pointer;
-}
-
-.left-view .painting {
-  filter: drop-shadow(-5px -3px 2px #000a);
-  cursor: pointer;
-}
-
-.front-view .wall-back .poster {
-  cursor: pointer;
 }
 
 .rug {
@@ -1108,6 +1069,72 @@
   background-size: contain;
   z-index: 200;
   cursor: pointer;
+}
+
+
+.painting {
+    width: 30vmin;
+    height: 40vmin;
+    background-image: url("../img/self-portrait.webp");
+    background-size: contain;
+    background-position: center;
+    background-repeat: no-repeat;
+    position: absolute;
+    top: 15%;
+    border-radius: var(--border-radius-sm);
+    left: 50vmin;
+    filter: drop-shadow(5px 3px 2px #000a);
+    cursor: pointer;
+}
+
+.left-view .painting {
+  filter: drop-shadow(-5px -3px 2px #000a);
+  cursor: pointer;
+}
+
+.poster {
+    width: 20vmin;
+    height: 15vmin;
+    background-image: url("../img/poster.webp");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    position: absolute;
+    top: 20%;
+    border-radius: var(--border-radius-sm);
+    left: 10vmin;
+    box-shadow: 0 0 1px #000a, inset 0 0 1px rgba(0, 0, 0, 0.425);
+    border: 0.5vmin solid var(--color-bg-light);
+    cursor: pointer;
+}
+
+.front-view .wall-back .poster {
+  cursor: pointer;
+}
+
+.wall-left #lightboard {
+  background-image: url("../img/board.svg");
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center center;
+  position: absolute;
+  bottom: -.5%;
+  left: .5%;
+  width: 100px;
+  height: 65px;
+  transform: skew(-4deg);
+  filter: brightness(0.4) 
+          drop-shadow(3px 2px 3px black) 
+          drop-shadow(0 0 0px transparent);
+  z-index: 800;
+  transition: filter 0.6s ease-out; /* zkráceno na 0.6s */
+  cursor: pointer;
+}
+
+.wall-left #lightboard:hover {
+  filter: brightness(1.3) 
+          drop-shadow(3px 3px 3px var(--color-warning))
+          drop-shadow(0 0 9px rgba(255, 255, 200, 0.7));
 }
 
 /* OTHER */

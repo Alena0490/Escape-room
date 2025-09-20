@@ -259,8 +259,6 @@ useEffect(() => {
     const randomIndex = Math.floor(Math.random() * spookySounds.length);
     const soundToPlay = spookySounds[randomIndex];
     
-    console.log("🎵 Playing random sound:", soundToPlay.split('/').pop());
-    
     // Set louder volume only for Steps sound
     let volume = 0.3;
     if (soundToPlay === Steps) {
@@ -274,14 +272,11 @@ useEffect(() => {
     }
   };
 
-  console.log("🔄 Random sounds initialized - lightsOn:", lightsOn);
 
   const interval = setInterval(() => {
     if (window.gameEnded) return; // check if the game has not been ended
     const randomCheck = Math.random();
     const shouldPlay = lightsOn ? randomCheck < 0.75 : randomCheck < 0.2;
-    
-    console.log(`🔄 Check - lights: ${lightsOn ? 'ON' : 'OFF'}, random: ${randomCheck.toFixed(3)}, play: ${shouldPlay}`);
 
     if (shouldPlay) {
       playRandomSpooky();
@@ -289,7 +284,6 @@ useEffect(() => {
   }, 30000);
 
   return () => {
-    console.log("🧹 Clearing interval");
     clearInterval(interval);
   };
 }, [lightsOn, playSound]); // Only necessary dependencies
@@ -690,21 +684,36 @@ useEffect(() => {
         <div className="room" ref={roomRef}>
           <div className="wall wall-front">
             <div
-              className="item painting"
+              className="item painting egg"
               data-title="What a nice painting!"
-              data-comment="Who is this guy? I have a funny feeling that there's something missing about him."
+              data-comment="Strange… That voice—was it you? Did you just say something about the producers? Go on then. Tell me. I’m all ears."
               onClick={(e) => {
+                unlockEasterEgg("painting"); // save to LocalStorage
                 incrementItemClicks();
                 const msg = e.currentTarget.getAttribute("data-comment");
-                if (msg) showComment(msg);
+                if (msg) showComment(msg, "easter-egg");
               }}
               onMouseEnter={() => playSound(JumpScare, { duration: 2.5, volume: 0.7 })} 
             >
-                <span className="visually-hidden">A Van Goth self portrait</span>
+                <span className="visually-hidden">A Van Gogh self portrait</span>
             </div>
           </div>
           
           <div className="wall wall-left">
+            <div
+            className="item lightboard egg"
+            id="lightboard"
+            data-title="Lightbox sign"
+            data-comment="`Behind the Glass`? …Seriously? That crazy reality show? What the hell would a sign like that be doing here?"
+             onClick={(e) => {
+                  unlockEasterEgg("light-sign"); // save to LocalStorage
+                  const msg = e.currentTarget.getAttribute("data-comment");
+                  if (msg) showComment(msg, "easter-egg");
+                  incrementItemClicks();
+                  triggerVibration(30);
+                }}>
+              <span className="visually-hidden">A Lightbox sign laying in the corner</span>
+            </div>
             <div className="cube shelf">
               <div className="cube shelf-level level-1">
                 <div 
@@ -720,7 +729,7 @@ useEffect(() => {
                   }}
                 >
                   <div className="item-inner">
-                    <span className="visually-hidden">A metalis skull</span>
+                    <span className="visually-hidden">A metalic skull</span>
                   </div>
                 </div>
 
@@ -761,14 +770,15 @@ useEffect(() => {
               
               <div className="cube shelf-level level-2">
                 <div 
-                  className="item globe" 
+                  className="item globe egg" 
                   data-title="An old globe" 
-                  data-comment="Where is Czechia? Europe, right? Damn, I hate geography."
+                  data-comment="Where is Czechia? Europe, right? Damn, I hate geography. Wait, what… is there a mic in the stand?"
                   onClick={(e) => {
                     playSound(Pickup);
                     incrementItemClicks();
+                    unlockEasterEgg("globe"); // save to LocalStorage
                     const msg = e.currentTarget.getAttribute("data-comment");
-                    if (msg) showComment(msg);
+                    if (msg) showComment(msg, "easter-egg");
                     triggerVibration(30);
                   }}
                 >
@@ -835,6 +845,7 @@ useEffect(() => {
                   className="item item-cube right-cube"
                   id="hover-not"
                   data-title="An army metal box"
+                  data-comment="No way I could open this! The lock looks rusted solid and the whole thing feels like a ton of bricks."
                   onClick={(e) => {
                     playSound(MetalBox);
                     incrementItemClicks();
@@ -877,6 +888,7 @@ useEffect(() => {
               data-comment="It's locked."
               onClick={(e) => {
                 incrementItemClicks();
+                triggerVibration(30);
                 if (e.currentTarget.classList.contains("open")) {
                   const msg = "It was a long day... Let's get out of here. Finally, fresh air!";
                   e.currentTarget.setAttribute("data-comment", msg);
@@ -908,6 +920,7 @@ useEffect(() => {
                 data-comment="Wait, what: `Smile, you're not the first one here`? Is someone watching me?"
                 onClick={(e) => {
                   incrementItemClicks();
+                  triggerVibration(30);
                   unlockEasterEgg("chalk1"); // save to LocalStorage
                   const msg = e.currentTarget.getAttribute("data-comment");
                   if (msg) showComment(msg, "easter-egg");
@@ -918,14 +931,15 @@ useEffect(() => {
           </div>
           
           <div className="wall wall-right">
-            <div className="poster item" 
-              data-title="Some old poster egg"
+            <div className="poster item egg"
+              data-title="Some old poster" 
               data-comment="What the hell is the chainsaw commercial doing there? Are they sponsoring this freak show or what?"
               onClick={(e) => {
                 unlockEasterEgg("poster"); // save to LocalStorage
                 const msg = e.currentTarget.getAttribute("data-comment");
                     if (msg) showComment(msg, "easter-egg");
                 incrementItemClicks();
+                triggerVibration(30);
               }}
             >
               <span className="visually-hidden">Old faded poster</span>
@@ -942,7 +956,7 @@ useEffect(() => {
                 triggerVibration(30);
               }}
             >
-              <span className="visually-hidden">Old mirror flasting letters Friday 13th</span>
+              <span className="visually-hidden">Old mirror flashing letters Friday 13th</span>
             </div>
 
              <div
@@ -954,6 +968,7 @@ useEffect(() => {
                   const msg = e.currentTarget.getAttribute("data-comment");
                   if (msg) showComment(msg, "easter-egg");
                   incrementItemClicks();
+                  triggerVibration(30);
                 }}
               >
                 <span className="visually-hidden">Crack in the mirror</span>
@@ -993,10 +1008,12 @@ useEffect(() => {
                 data-title="Some crumpled contract"
                 data-comment="A contract with television… Ten thousand euros. Guess I really signed my life away."
                 onClick={(e) => {
+                  playSound(Paper, { volume: 0.5, start: 0.2} )
                   unlockEasterEgg("contract"); // save to LocalStorage
                   const msg = e.currentTarget.getAttribute("data-comment");
                   if (msg) showComment(msg, "easter-egg");
                   incrementItemClicks();
+                  triggerVibration(30);
                 }}
               >
               <span className="visually-hidden">Crumpled contract lying on the floor</span>
