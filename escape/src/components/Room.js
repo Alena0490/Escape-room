@@ -59,11 +59,14 @@ const Room = () => {
   const offIndex = useRef(0);
 
   const handleSwitchClick = (e) => {
-    e.stopPropagation(); // prevent room rotation
+      e.preventDefault();
+      e.stopPropagation(); // 🛑 stop bubbling to roomWrap
+      e.nativeEvent.stopImmediatePropagation?.(); 
     const roomCanvas = document.getElementById("room");
     const switchEl = e.currentTarget;
     const mirrorEl = document.querySelector(".mirror");
 
+    // Always play switch sound first
     playSound(switchSound);
 
     if (roomCanvas.classList.contains("dark")) {
@@ -79,16 +82,22 @@ const Room = () => {
         if (mirrorEl) mirrorEl.classList.add("lit");
         setGameState(prev => ({ ...prev, lightsOn: true }));
 
-        // stop ambient voices
+        // Fade out ambient voices if active
         if (window.roomAmbientAudio) fadeOutAudio(window.roomAmbientAudio, 800);
 
-        // rotating ON message
-        const msg = onMessages[onIndex.current];
-        showComment(msg);
-        switchEl.setAttribute("data-comment", msg);
-        onIndex.current = (onIndex.current + 1) % onMessages.length;
-      }, 300);
-    } else {
+           // Rotating ON message
+          const onMessages = [
+            "Much better.",
+            "Finally some light!",
+            "Ah, I can see everything clearly now.",
+            "Feels safer with the lights on…"
+          ];
+          const msg = onMessages[onIndex.current];
+          switchEl.setAttribute("data-comment", msg);
+          showComment(msg);
+          onIndex.current = (onIndex.current + 1) % onMessages.length;
+        }, 300);
+      } else {
       // LIGHTS OFF
       setTimeout(() => {
         roomCanvas.classList.add("dark");
@@ -96,26 +105,34 @@ const Room = () => {
         if (mirrorEl) mirrorEl.classList.remove("lit");
 
         setGameState(prev => ({ ...prev, lightsOn: false }));
-
-        // start ambient voices
-        if (!window.roomAmbientAudio) {
-          window.roomAmbientAudio = new Audio(Voices);
-          window.roomAmbientAudio.loop = true;
-          window.roomAmbientAudio.volume = 0.3;
-          window.roomAmbientAudio.play().catch(() => {});
-        }
+          // Delay ambient start to avoid conflict with switch sound
+          if (!window.roomAmbientAudio) {
+            setTimeout(() => {
+              window.roomAmbientAudio = new Audio(Voices);
+              window.roomAmbientAudio.loop = true;
+              window.roomAmbientAudio.volume = 0.3;
+              window.roomAmbientAudio.play().catch(() => {});
+            }, 400);
+          }
 
         // rotating OFF message
+        const offMessages = [
+          "Ugh... it's too dark, I can't see a thing.",
+          "Creepy... I should turn the lights back on.",
+          "Wait, what was that?! Better keep it bright.",
+          "Nope, not staying in the dark!"
+        ];
         const msg = offMessages[offIndex.current];
-        showComment(msg);
         switchEl.setAttribute("data-comment", msg);
+        showComment(msg);
         offIndex.current = (offIndex.current + 1) % offMessages.length;
       }, 300);
     }
 
-  incrementItemClicks("light-switch");
-  triggerVibration(30);
-};
+    // ✅ Global feedback
+    incrementItemClicks("light-switch");
+    triggerVibration(30);
+  };
 
   // Destructure state for convenience
   const { rugUp, lightsOn} = gameState;
