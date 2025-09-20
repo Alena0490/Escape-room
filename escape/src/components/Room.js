@@ -26,6 +26,7 @@ import EmptyRoom from "../sounds/empty-room-horror-sound-sfx-333924.mp3"
 import VoicesShort from "../sounds/schizophrenic-voices-62486.mp3"
 import Steps from "../sounds/steps-approaching-in-the-darkness-234016.mp3"
 
+const audioCache = new Map();
 
 const Room = () => {
   const wrapRef = useRef(null);
@@ -38,6 +39,78 @@ const Room = () => {
     isFlickering: false,
   });
   const [showLock, setShowLock] = useState(false);
+  // Messages for the light switch
+const onMessages = [
+  "Much better.",
+  "Finally some light!",
+  "Ah, I can see everything clearly now.",
+  "Feels safer with the lights on…"
+];
+
+const offMessages = [
+  "Ugh... it's too dark, I can't see a thing.",
+  "Creepy... I should turn the lights back on.",
+  "Wait, what was that?! Better keep it bright.",
+  "Nope, not staying in the dark!"
+];
+
+const onIndex = useRef(0);
+const offIndex = useRef(0);
+
+const handleSwitchClick = (e) => {
+  e.stopPropagation(); // prevent rotating the room
+  const roomCanvas = document.getElementById("room");
+  const switchEl = e.currentTarget;
+  const mirrorEl = document.querySelector(".mirror");
+
+  playSound(switchSound);
+
+  if (roomCanvas.classList.contains("dark")) {
+    // LIGHTS ON
+    setTimeout(() => {
+      roomCanvas.classList.remove("dark");
+      switchEl.classList.add("on");
+
+      // Flicker effect
+      setIsFlickering(true);
+      setTimeout(() => setIsFlickering(false), 1200);
+
+      if (mirrorEl) mirrorEl.classList.add("lit");
+      setGameState(prev => ({ ...prev, lightsOn: true }));
+
+      if (window.roomAmbientAudio) fadeOutAudio(window.roomAmbientAudio, 800);
+
+      const msg = onMessages[onIndex.current];
+      switchEl.setAttribute("data-comment", msg);
+      showComment(msg);
+      onIndex.current = (onIndex.current + 1) % onMessages.length;
+    }, 300);
+  } else {
+    // LIGHTS OFF
+    setTimeout(() => {
+      roomCanvas.classList.add("dark");
+      switchEl.classList.remove("on");
+      if (mirrorEl) mirrorEl.classList.remove("lit");
+
+      setGameState(prev => ({ ...prev, lightsOn: false }));
+
+      if (!window.roomAmbientAudio) {
+        window.roomAmbientAudio = new Audio(Voices);
+        window.roomAmbientAudio.loop = true;
+        window.roomAmbientAudio.volume = 0.3;
+        window.roomAmbientAudio.play().catch(() => {});
+      }
+
+      const msg = offMessages[offIndex.current];
+      switchEl.setAttribute("data-comment", msg);
+      showComment(msg);
+      offIndex.current = (offIndex.current + 1) % offMessages.length;
+    }, 300);
+  }
+
+  incrementItemClicks();
+  triggerVibration(30);
+};
 
   // Destructure state for convenience
   const { rugUp, lightsOn} = gameState;
@@ -87,11 +160,16 @@ const getItemsClicked = () => {
   return localStorage.getItem('itemsClicked') || '0';
 };
 
-/** Clicked items */
- const incrementItemClicks = () => {
-      let count = parseInt(localStorage.getItem("itemsClicked") || "0");
-      localStorage.setItem("itemsClicked", count + 1);
-  };
+/** Count unique clicked items */
+const incrementItemClicks = (id) => {
+  let clicked = JSON.parse(localStorage.getItem("clickedItems") || "[]");
+
+  if (!clicked.includes(id)) {
+    clicked.push(id);
+    localStorage.setItem("clickedItems", JSON.stringify(clicked));
+    localStorage.setItem("itemsClicked", clicked.length); // store number
+  }
+};
 
   /** Easter eggs */
 const unlockEasterEgg = (id) => {
@@ -158,7 +236,16 @@ const getEasterEggsCount = () => {
       fadeOut = 0,
     } = settings;
 
-    const audio = new Audio(src);
+    let audio;
+      const cacheKey = src.toString();
+
+      if (audioCache.has(cacheKey)) {
+        audio = audioCache.get(cacheKey).cloneNode();
+      } else {
+        audio = new Audio(src);
+        audioCache.set(cacheKey, audio);
+      }
+
     audio.currentTime = start;
     audio.volume = fadeIn > 0 ? 0 : volume;
     
@@ -217,8 +304,9 @@ const getEasterEggsCount = () => {
       audio.pause();
       audio.currentTime = 0;
     };
-
+    audioCache.clear();
     return audio;
+    
   }, []);
 
   /** Play sequence of sounds with Promise support */
@@ -480,82 +568,7 @@ useEffect(() => {
         });
       });
     };
-
-    const initUtilities = () => {
-      const switchEl = document.querySelector(".switch");
-      const mirrorEl = document.querySelector(".mirror");
-      const roomCanvas = document.getElementById("room");
-
-      const onMessages = [
-        "Much better.",
-        "Finally some light!",
-        "Ah, I can see everything clearly now.",
-        "Feels safer with the lights on…"
-      ];
-
-      const offMessages = [
-        "Ugh... it's too dark, I can't see a thing.",
-        "Creepy... I should turn the lights back on.",
-        "Wait, what was that?! Better keep it bright.",
-        "Nope, not staying in the dark!"
-      ];
-
-      let onIndex = 0;
-      let offIndex = 0;
-
-      if (switchEl) {
-        switchEl.addEventListener("click", () => {
-          const isDark = roomCanvas.classList.contains("dark");
-          
-          playSound(switchSound);
-          
-          if (isDark) {
-          setTimeout(() => {
-            roomCanvas.classList.remove("dark");
-            switchEl.classList.add("on");
-
-            // ✨ Přidáme flicker efekt
-                setIsFlickering(true);
-                setTimeout(() => {
-                  setIsFlickering(false);
-                }, 1200)
-
-            if (mirrorEl) mirrorEl.classList.add("lit");
-            setGameState(prev => ({ ...prev, lightsOn: true }));
-
-            if (window.roomAmbientAudio) fadeOutAudio(window.roomAmbientAudio, 800);
-            
-            const msg = onMessages[onIndex];
-            switchEl.setAttribute("data-comment", msg);
-            showComment(msg);
-            onIndex = (onIndex + 1) % onMessages.length;
-          }, 300);
-         
-          } else {
-            setTimeout(() => {
-              roomCanvas.classList.add("dark");
-              switchEl.classList.remove("on");
-              if (mirrorEl) mirrorEl.classList.remove("lit");
-              
-              setGameState(prev => ({ ...prev, lightsOn: false }));
-              
-              if (!window.roomAmbientAudio) {
-                window.roomAmbientAudio = new Audio(Voices);
-                window.roomAmbientAudio.loop = true;
-                window.roomAmbientAudio.volume = 0.3;
-                window.roomAmbientAudio.play().catch(() => {});
-              }
-              
-              const msg = offMessages[offIndex];
-              switchEl.setAttribute("data-comment", msg);
-              showComment(msg);
-              offIndex = (offIndex + 1) % offMessages.length;
-            }, 300);
-          }
-        });
-      }
-    };
-
+    
     const initItems = () => {
       const roomItems = document.querySelectorAll("#room [data-comment]");
 
@@ -564,7 +577,7 @@ useEffect(() => {
           const comment = item.getAttribute("data-comment");
           if (comment) showComment(comment);
 
-          // 📝 počítadlo kliků
+          // 📝 The click count
           // const clicks = parseInt(localStorage.getItem("itemsClicked") || "0", 10);
           // localStorage.setItem("itemsClicked", clicks + 1);
         };
@@ -604,7 +617,6 @@ useEffect(() => {
       initCubes();
       initTooltip();
       initItems();
-      initUtilities();
     };
 
     // --- listeners with stable refs ---
@@ -626,7 +638,7 @@ useEffect(() => {
         const yPercent = (e.clientY / window.innerHeight - 0.5) * 2;
         const rotateXOffset = parseFloat((xPercent * 15).toFixed(2));
         const rotateYOffset = parseFloat((-yPercent * 15).toFixed(2));
-        // použije tvoji updateRoomTransform
+        // use updateRoomTransform
         updateRoomTransform(rotateXOffset, rotateYOffset);
       };
       let touchStartX = null;
@@ -638,10 +650,6 @@ useEffect(() => {
         touchStartX = null;
       };
 
-    document.addEventListener("keydown", onKey);
-    roomWrap.addEventListener("mousemove", onMouseMove);
-    roomWrap.addEventListener("touchstart", onTouchStart, { passive: true });
-    roomWrap.addEventListener("touchend", onTouchEnd);
     document.addEventListener("keydown", onKey);
     roomWrap.addEventListener("mousemove", onMouseMove);
     roomWrap.addEventListener("touchstart", onTouchStart, { passive: true });
@@ -658,9 +666,7 @@ useEffect(() => {
     };
 
     init();
-      };
-
-      
+      };    
       
       // Start the check
       checkElementsReady();
@@ -689,7 +695,7 @@ useEffect(() => {
               data-comment="Strange… That voice—was it you? Did you just say something about the producers? Go on then. Tell me. I’m all ears."
               onClick={(e) => {
                 unlockEasterEgg("painting"); // save to LocalStorage
-                incrementItemClicks();
+                incrementItemClicks("painting");
                 const msg = e.currentTarget.getAttribute("data-comment");
                 if (msg) showComment(msg, "easter-egg");
               }}
@@ -709,7 +715,7 @@ useEffect(() => {
                   unlockEasterEgg("light-sign"); // save to LocalStorage
                   const msg = e.currentTarget.getAttribute("data-comment");
                   if (msg) showComment(msg, "easter-egg");
-                  incrementItemClicks();
+                  incrementItemClicks("lightbox-sign");
                   triggerVibration(30);
                 }}>
               <span className="visually-hidden">A Lightbox sign laying in the corner</span>
@@ -721,7 +727,7 @@ useEffect(() => {
                   data-title="A Shiny Skull" 
                   data-comment="Wow, it has full set of teeth!"
                   onClick={(e) => {
-                    incrementItemClicks();
+                    incrementItemClicks("skull");
                     playSound(Pickup);
                     triggerVibration(30);
                     const msg = e.currentTarget.getAttribute("data-comment");
@@ -739,7 +745,7 @@ useEffect(() => {
                   data-comment="What do we have there? Bryan Adams - Summer of ... Oh no. Stuck forever in my head."
                   onClick={(e) => {
                     playSound(Cassette, {duration: 2});
-                    incrementItemClicks();
+                    incrementItemClicks("cassette");
                     const msg = e.currentTarget.getAttribute("data-comment");
                     if (msg) showComment(msg);
                     triggerVibration(30);
@@ -756,7 +762,7 @@ useEffect(() => {
                   data-comment="What number is this? Does it matter? It's just a ball."
                   onClick={(e) => {
                     playSound(Ball);
-                    incrementItemClicks();
+                    incrementItemClicks("ball");
                     const msg = e.currentTarget.getAttribute("data-comment");
                     if (msg) showComment(msg);
                     triggerVibration(30);
@@ -775,7 +781,7 @@ useEffect(() => {
                   data-comment="Where is Czechia? Europe, right? Damn, I hate geography. Wait, what… is there a mic in the stand?"
                   onClick={(e) => {
                     playSound(Pickup);
-                    incrementItemClicks();
+                    incrementItemClicks("globe");
                     unlockEasterEgg("globe"); // save to LocalStorage
                     const msg = e.currentTarget.getAttribute("data-comment");
                     if (msg) showComment(msg, "easter-egg");
@@ -793,7 +799,7 @@ useEffect(() => {
                   data-comment="Maybe it still works? I'll call my mom. 6-0-2 Oh no! My finger got stuck!"
                   onClick={(e) => {
                     playSound(Phone, {duration: 4.2});
-                    incrementItemClicks();
+                    incrementItemClicks("phone");
                     const msg = e.currentTarget.getAttribute("data-comment");
                     if (msg) showComment(msg);
                     triggerVibration(30);
@@ -810,7 +816,7 @@ useEffect(() => {
                   data-comment="He gazed up at the enormous face. Forty years it had taken him to learn what kind of smile was hidden beneath the dark moustache. O cruel, needless misunderstanding! O stubborn, self-willed exile from the loving breast! Two gin-scented tears trickled down the sides of his nose. But it was all right, everything was all right, the struggle was finished. He had won the victory over himself. He loved Big Brother. I know this book!"
                   onClick={(e) => {
                     playSound(Book);
-                    incrementItemClicks();
+                    incrementItemClicks("book");
                     const msg = e.currentTarget.getAttribute("data-comment");
                     if (msg) showComment(msg);
                     triggerVibration(30);
@@ -830,7 +836,7 @@ useEffect(() => {
                   data-comment="I hope there is something useful inside. Ouch, my finger! Thank goodness I have this first aid kit."
                   onClick={(e) => {
                     playSound(FirstAid, {duration: 6});
-                    incrementItemClicks();
+                    incrementItemClicks("first-aid");
                     const msg = e.currentTarget.getAttribute("data-comment");
                     if (msg) showComment(msg);
                     triggerVibration(30);
@@ -848,7 +854,7 @@ useEffect(() => {
                   data-comment="No way I could open this! The lock looks rusted solid and the whole thing feels like a ton of bricks."
                   onClick={(e) => {
                     playSound(MetalBox);
-                    incrementItemClicks();
+                    incrementItemClicks("metal-box");
                     const msg = e.currentTarget.getAttribute("data-comment");
                     if (msg) showComment(msg);
                     triggerVibration(30);
@@ -867,10 +873,11 @@ useEffect(() => {
               data-title="Door lock" 
               data-comment="It says: 'Please, enter the code'"
               onClick={(e) => {
+                e.stopPropagation(); 
                 playSound(Click, {fadeIn: 0.2});
                 const msg = e.currentTarget.getAttribute("data-comment");
                     if (msg) showComment(msg);
-                incrementItemClicks();
+                incrementItemClicks("code-lock");
                 setTimeout(() => {
                   setShowLock(true);
                 }, 200);  
@@ -887,7 +894,8 @@ useEffect(() => {
               data-title="Locked Door" 
               data-comment="It's locked."
               onClick={(e) => {
-                incrementItemClicks();
+                e.stopPropagation(); 
+                incrementItemClicks("door");
                 triggerVibration(30);
                 if (e.currentTarget.classList.contains("open")) {
                   const msg = "It was a long day... Let's get out of here. Finally, fresh air!";
@@ -904,22 +912,22 @@ useEffect(() => {
               <span className="visually-hidden">Heavy metal door</span>
             </div>
 
-            <div className="flat switch item" data-title="Light Switch" data-comment="Much better."
-            onClick={(e) => {
-                playSound(switchSound);
-                const msg = e.currentTarget.getAttribute("data-comment");
-                    if (msg) showComment(msg);
-                incrementItemClicks();
-                triggerVibration(30);
-              }}>
+            <div 
+              className="flat switch item" 
+              data-title="Light Switch" 
+              data-comment="Much better."
+              onClick={handleSwitchClick}
+            >
               <span className="visually-hidden">Light switch</span>
             </div>
+
               <div
                 className="item chalk-message"
                 data-title="Strange graffiti writing"
                 data-comment="Wait, what: `Smile, you're not the first one here`? Is someone watching me?"
                 onClick={(e) => {
-                  incrementItemClicks();
+                  e.stopPropagation(); 
+                  incrementItemClicks("graffiti");
                   triggerVibration(30);
                   unlockEasterEgg("chalk1"); // save to LocalStorage
                   const msg = e.currentTarget.getAttribute("data-comment");
@@ -935,10 +943,11 @@ useEffect(() => {
               data-title="Some old poster" 
               data-comment="What the hell is the chainsaw commercial doing there? Are they sponsoring this freak show or what?"
               onClick={(e) => {
+                e.stopPropagation(); 
                 unlockEasterEgg("poster"); // save to LocalStorage
                 const msg = e.currentTarget.getAttribute("data-comment");
                     if (msg) showComment(msg, "easter-egg");
-                incrementItemClicks();
+                incrementItemClicks("poster");
                 triggerVibration(30);
               }}
             >
@@ -949,8 +958,9 @@ useEffect(() => {
               data-title="An old mirror"
               data-comment="How do I look? Eh, hello, Mr. Ghost, please don't kill me."
               onClick={(e) => {
+                e.stopPropagation(); 
                 playSound(Mirror);
-                incrementItemClicks();
+                incrementItemClicks("mirror");
                 const msg = e.currentTarget.getAttribute("data-comment");
                 if (msg) showComment(msg);
                 triggerVibration(30);
@@ -964,10 +974,11 @@ useEffect(() => {
                 data-title="Crack in the mirror"
                 data-comment="What is it? Is there a fu**ing camera inside…?"
                 onClick={(e) => {
+                  e.stopPropagation(); 
                   unlockEasterEgg("mirror-crack"); // save to LocalStorage
                   const msg = e.currentTarget.getAttribute("data-comment");
                   if (msg) showComment(msg, "easter-egg");
-                  incrementItemClicks();
+                  incrementItemClicks("mirror-crack");
                   triggerVibration(30);
                 }}
               >
@@ -982,8 +993,9 @@ useEffect(() => {
               className={`rug flat item ${rugUp ? "rug-up" : ""}`}
               data-title="Some old rug"              
               data-comment="Yuck, it's so dirty. Wait, there is a radio under. There are some scratched letters: 'BIG EAR'. Maybe I could try this frequency. WOW! I've got the signal, it's so weird."
-              onClick={(e) => { 
-                incrementItemClicks();
+              onClick={(e) => {
+                e.stopPropagation();  
+                incrementItemClicks("rug");
                 setGameState(prev => ({ ...prev, rugUp: !prev.rugUp }));
                 const comment = e.currentTarget.getAttribute("data-comment"); 
                 if (comment) showComment(comment);
@@ -1008,11 +1020,12 @@ useEffect(() => {
                 data-title="Some crumpled contract"
                 data-comment="A contract with television… Ten thousand euros. Guess I really signed my life away."
                 onClick={(e) => {
+                  e.stopPropagation(); 
                   playSound(Paper, { volume: 0.5, start: 0.2} )
                   unlockEasterEgg("contract"); // save to LocalStorage
                   const msg = e.currentTarget.getAttribute("data-comment");
                   if (msg) showComment(msg, "easter-egg");
-                  incrementItemClicks();
+                  incrementItemClicks("contract");
                   triggerVibration(30);
                 }}
               >
@@ -1026,13 +1039,14 @@ useEffect(() => {
             data-title="A random box"
             data-comment="There is just a piece of paper. It says: 'KEY: book, ball, mirror, cassette, skull, rug'"
             onClick={(e) => {
+              e.stopPropagation(); 
               playSequence([
                 { CardboardBox, options: {duration: 2.5, fadeIn: 0.2 } },
                 { Paper, options: { volume: 0.5, start: 0.2} }
               ]);
               const msg = e.currentTarget.getAttribute("data-comment");
               if (msg) showComment(msg);
-              incrementItemClicks();
+              incrementItemClicks("cardbox");
               triggerVibration(30);
             }}
           >
@@ -1044,8 +1058,9 @@ useEffect(() => {
             data-title="OUIJA"
             data-comment="Oh, what, the pointer is moving! Creepy... 'T - O - G - E - T out of the room, you need to solve the riddles. You need to use just one last or the only number from each one. But first you need to find the key.' Because why make it easy, right?"
             onClick={(e) => {
+              e.stopPropagation(); 
               playSound(Ghost);
-              incrementItemClicks();
+              incrementItemClicks("ouija");
               const msg = e.currentTarget.getAttribute("data-comment");
               if (msg) showComment(msg);
               triggerVibration(30);

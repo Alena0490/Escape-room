@@ -98,6 +98,8 @@
   pointer-events: none;
   font-size: var(--font-middle);
   user-select: none;
+  will-change: transform;
+  transform-style: preserve-3d;
 }
 
 #room:not(.dark)::after {
