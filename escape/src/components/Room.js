@@ -39,76 +39,81 @@ const Room = () => {
     isFlickering: false,
   });
   const [showLock, setShowLock] = useState(false);
+
   // Messages for the light switch
-const onMessages = [
-  "Much better.",
-  "Finally some light!",
-  "Ah, I can see everything clearly now.",
-  "Feels safer with the lights on…"
-];
+  const onMessages = [
+    "Much better.",
+    "Finally some light!",
+    "Ah, I can see everything clearly now.",
+    "Feels safer with the lights on…"
+  ];
 
-const offMessages = [
-  "Ugh... it's too dark, I can't see a thing.",
-  "Creepy... I should turn the lights back on.",
-  "Wait, what was that?! Better keep it bright.",
-  "Nope, not staying in the dark!"
-];
+  const offMessages = [
+    "Ugh... it's too dark, I can't see a thing.",
+    "Creepy... I should turn the lights back on.",
+    "Wait, what was that?! Better keep it bright.",
+    "Nope, not staying in the dark!"
+  ];
 
-const onIndex = useRef(0);
-const offIndex = useRef(0);
+  const onIndex = useRef(0);
+  const offIndex = useRef(0);
 
-const handleSwitchClick = (e) => {
-  e.stopPropagation(); // prevent rotating the room
-  const roomCanvas = document.getElementById("room");
-  const switchEl = e.currentTarget;
-  const mirrorEl = document.querySelector(".mirror");
+  const handleSwitchClick = (e) => {
+    e.stopPropagation(); // prevent room rotation
+    const roomCanvas = document.getElementById("room");
+    const switchEl = e.currentTarget;
+    const mirrorEl = document.querySelector(".mirror");
 
-  playSound(switchSound);
+    playSound(switchSound);
 
-  if (roomCanvas.classList.contains("dark")) {
-    // LIGHTS ON
-    setTimeout(() => {
-      roomCanvas.classList.remove("dark");
-      switchEl.classList.add("on");
+    if (roomCanvas.classList.contains("dark")) {
+      // LIGHTS ON
+      setTimeout(() => {
+        roomCanvas.classList.remove("dark");
+        switchEl.classList.add("on");
 
-      // Flicker effect
-      setIsFlickering(true);
-      setTimeout(() => setIsFlickering(false), 1200);
+        // ✨ Flicker effect
+        setIsFlickering(true);
+        setTimeout(() => setIsFlickering(false), 1200);
 
-      if (mirrorEl) mirrorEl.classList.add("lit");
-      setGameState(prev => ({ ...prev, lightsOn: true }));
+        if (mirrorEl) mirrorEl.classList.add("lit");
+        setGameState(prev => ({ ...prev, lightsOn: true }));
 
-      if (window.roomAmbientAudio) fadeOutAudio(window.roomAmbientAudio, 800);
+        // stop ambient voices
+        if (window.roomAmbientAudio) fadeOutAudio(window.roomAmbientAudio, 800);
 
-      const msg = onMessages[onIndex.current];
-      switchEl.setAttribute("data-comment", msg);
-      showComment(msg);
-      onIndex.current = (onIndex.current + 1) % onMessages.length;
-    }, 300);
-  } else {
-    // LIGHTS OFF
-    setTimeout(() => {
-      roomCanvas.classList.add("dark");
-      switchEl.classList.remove("on");
-      if (mirrorEl) mirrorEl.classList.remove("lit");
+        // rotating ON message
+        const msg = onMessages[onIndex.current];
+        showComment(msg);
+        switchEl.setAttribute("data-comment", msg);
+        onIndex.current = (onIndex.current + 1) % onMessages.length;
+      }, 300);
+    } else {
+      // LIGHTS OFF
+      setTimeout(() => {
+        roomCanvas.classList.add("dark");
+        switchEl.classList.remove("on");
+        if (mirrorEl) mirrorEl.classList.remove("lit");
 
-      setGameState(prev => ({ ...prev, lightsOn: false }));
+        setGameState(prev => ({ ...prev, lightsOn: false }));
 
-      if (!window.roomAmbientAudio) {
-        window.roomAmbientAudio = new Audio(Voices);
-        window.roomAmbientAudio.loop = true;
-        window.roomAmbientAudio.volume = 0.3;
-        window.roomAmbientAudio.play().catch(() => {});
-      }
+        // start ambient voices
+        if (!window.roomAmbientAudio) {
+          window.roomAmbientAudio = new Audio(Voices);
+          window.roomAmbientAudio.loop = true;
+          window.roomAmbientAudio.volume = 0.3;
+          window.roomAmbientAudio.play().catch(() => {});
+        }
 
-      const msg = offMessages[offIndex.current];
-      switchEl.setAttribute("data-comment", msg);
-      showComment(msg);
-      offIndex.current = (offIndex.current + 1) % offMessages.length;
-    }, 300);
-  }
+        // rotating OFF message
+        const msg = offMessages[offIndex.current];
+        showComment(msg);
+        switchEl.setAttribute("data-comment", msg);
+        offIndex.current = (offIndex.current + 1) % offMessages.length;
+      }, 300);
+    }
 
-  incrementItemClicks();
+  incrementItemClicks("light-switch");
   triggerVibration(30);
 };
 
@@ -157,7 +162,8 @@ const getHintsUsed = () => {
 };
 
 const getItemsClicked = () => {
-  return localStorage.getItem('itemsClicked') || '0';
+  let clicked = JSON.parse(localStorage.getItem("clickedItems") || "[]");
+  return clicked.length;
 };
 
 /** Count unique clicked items */
@@ -908,18 +914,18 @@ useEffect(() => {
                   playSound(Door, {start: 0.2});
                 }
               }}
-            >
-              <span className="visually-hidden">Heavy metal door</span>
-            </div>
+              >
+                <span className="visually-hidden">Heavy metal door</span>
+              </div>
 
-            <div 
-              className="flat switch item" 
-              data-title="Light Switch" 
-              data-comment="Much better."
-              onClick={handleSwitchClick}
-            >
-              <span className="visually-hidden">Light switch</span>
-            </div>
+              <div 
+                className="flat switch item" 
+                data-title="Light Switch" 
+                data-comment="Much better."
+                onClick={handleSwitchClick}
+              >
+                <span className="visually-hidden">Light switch</span>
+              </div>
 
               <div
                 className="item chalk-message"
