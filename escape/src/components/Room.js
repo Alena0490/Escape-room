@@ -385,7 +385,7 @@ useEffect(() => {
   };
 }, [lightsOn, playSound]); // Only necessary dependencies
 
-  /** Display comment dialog */
+ /** Display comment dialog */
   const showComment = (text, className = "") => {
     const dialog = document.querySelector("#dialog");
     dialog.innerHTML = "";
@@ -396,11 +396,31 @@ useEffect(() => {
 
     dialog.appendChild(div);
 
-    setTimeout(() => {
+    // 🔹 Funkce pro zavření
+    const closeMessage = () => {
       div.style.opacity = "0";
-      setTimeout(() => div.remove(), 500);
-    }, 15000);
-   };
+      setTimeout(() => div.remove(), 300);
+      document.removeEventListener("click", handleOutsideClick);
+    };
+
+    // 🔹 Handler kliknutí mimo
+    const handleOutsideClick = (e) => {
+      if (!dialog.contains(e.target)) {
+        closeMessage();
+      }
+    };
+
+    // Přidat listener na kliknutí mimo (malé zpoždění, aby se nespustil hned při kliku na item)
+    setTimeout(() => {
+      document.addEventListener("click", handleOutsideClick);
+    }, 50);
+
+    // ⏳ Automatické zavření po 8s
+    setTimeout(() => {
+      closeMessage();
+    }, 8000);
+  };
+
 
   /** Audio fadeout */
       const fadeOutAudio = (audio, duration = 1000) => {
