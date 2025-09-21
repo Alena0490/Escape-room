@@ -396,29 +396,42 @@ useEffect(() => {
 
     dialog.appendChild(div);
 
-    // 🔹 Funkce pro zavření
+      // 🔹 Display length based on number of characters
+      const len = text.length;
+      let displayTime = 8000; // default 8s
+
+      if (len > 300) {
+        displayTime = 20000;   // extra long
+      } else if (len > 120) {
+        displayTime = 12000;   // long
+      } else if (len < 50) {
+        displayTime = 5000;    // short
+      }
+
+    // 🔹 Closing message
     const closeMessage = () => {
       div.style.opacity = "0";
       setTimeout(() => div.remove(), 300);
       document.removeEventListener("click", handleOutsideClick);
     };
 
-    // 🔹 Handler kliknutí mimo
+    // 🔹 Handler after clicing outside
+    
     const handleOutsideClick = (e) => {
       if (!dialog.contains(e.target)) {
         closeMessage();
       }
     };
 
-    // Přidat listener na kliknutí mimo (malé zpoždění, aby se nespustil hned při kliku na item)
+    // Add listener on click outside (small delay so that it does not start immediately when clicking on the item)
     setTimeout(() => {
       document.addEventListener("click", handleOutsideClick);
     }, 50);
 
-    // ⏳ Automatické zavření po 8s
-    setTimeout(() => {
+    // ⏳ Close after the message
+   setTimeout(() => {
       closeMessage();
-    }, 8000);
+    }, displayTime);
   };
 
 
