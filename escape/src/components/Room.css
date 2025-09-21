@@ -782,7 +782,7 @@
   background-repeat: no-repeat;
   background-position: center center;
   filter: brightness(1.2);
-  mix-blend-mode: oberlay;
+  mix-blend-mode: hard-light;
   z-index: 800;
 }
 
