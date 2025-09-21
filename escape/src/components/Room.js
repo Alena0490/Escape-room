@@ -40,25 +40,11 @@ const Room = () => {
   });
   const [showLock, setShowLock] = useState(false);
 
-  // Messages for the light switch
-  const onMessages = [
-    "Much better.",
-    "Finally some light!",
-    "Ah, I can see everything clearly now.",
-    "Feels safer with the lights on…"
-  ];
-
-  const offMessages = [
-    "Ugh... it's too dark, I can't see a thing.",
-    "Creepy... I should turn the lights back on.",
-    "Wait, what was that?! Better keep it bright.",
-    "Nope, not staying in the dark!"
-  ];
-
   const onIndex = useRef(0);
   const offIndex = useRef(0);
 
   const handleSwitchClick = (e) => {
+    console.log("🔍 handleSwitchClick called", e.type, e.target);
       e.preventDefault();
       e.stopPropagation(); // 🛑 stop bubbling to roomWrap
       e.nativeEvent.stopImmediatePropagation?.(); 
@@ -462,11 +448,24 @@ useEffect(() => {
       r.style.transform = `rotateX(${offsetY}deg) rotateY(${currentRotationY + offsetX}deg)`;
     };
 
-    const updateView = (direction) => {
-    // Re-read current nodes every call to avoid null/stale references
-      const roomWrap = wrapRef.current;
-      const room = roomRef.current;
-      if (!roomWrap || !room) return;
+const updateView = (direction) => {
+  console.log("🔄 updateView called with direction:", direction);
+  console.trace(); // ukáže stack trace
+  
+   // If direction is not specified, just initialize the view without changing it.
+  if (!direction) {
+    const roomWrap = wrapRef.current;
+    if (roomWrap) {
+      roomWrap.classList.remove(...views);
+      roomWrap.classList.add(views[currentViewIndex]);
+    }
+    return; // ENDS FUNCTION
+  }
+  
+  // Re-read current nodes every call to avoid null/stale references
+  const roomWrap = wrapRef.current;
+  const room = roomRef.current;
+  if (!roomWrap || !room) return;
       
       if (direction === "left") {
         currentViewIndex = (currentViewIndex + 1) % views.length;
@@ -593,10 +592,11 @@ useEffect(() => {
     };
     
     const initItems = () => {
-      const roomItems = document.querySelectorAll("#room [data-comment]");
+      const roomItems = document.querySelectorAll("#room [data-comment]:not(.switch):not(.lock):not(.door)");
 
       roomItems.forEach((item) => {
-        item.onclick = () => {
+        item.onclick = (e) => {
+          e.stopPropagation();
           const comment = item.getAttribute("data-comment");
           if (comment) showComment(comment);
 
@@ -694,7 +694,7 @@ useEffect(() => {
       // Start the check
       checkElementsReady();
       return () => cleanupAll();   
-  }, [lightsOn, playSound]);
+  }, [playSound]);
 
   return (
     <div id="room" 
