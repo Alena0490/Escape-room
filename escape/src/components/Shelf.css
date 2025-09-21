@@ -1,0 +1,260 @@
+/*-- SHELF --*/
+
+.cube.shelf {
+  --cubescale: 35vmin;
+  left: calc(0.5 * var(--cubescale));
+  bottom: 0;
+  width: var(--cubescale);
+  height: calc(1.75 * var(--cubescale));
+  transform-style: preserve-3d;
+  filter: unset;
+  transform: translateZ(10vmin);
+  transition: all 0.3s ease;
+}
+
+.left-view .wall-left .shelf {
+  bottom: -100%;
+}
+
+.cube.shelf .cube > div,
+.cube.shelf > div {
+  transform-style: preserve-3d;
+  filter: unset;
+  background-size: var(--cubescale) auto;
+  border: 2px solid var(--color-bg-deep);
+}
+
+.shelf-level > div:not(.item),
+.cube.shelf > div {
+  background-image: url("../img/wood.webp");
+}
+
+.cube.shelf .shelf-level,
+.cube.shelf > .cube-top,
+.cube.shelf > .cube-bottom {
+  height: calc(0.5 * var(--cubescale));
+}
+
+.cube.shelf > .cube-left,
+.cube.shelf > .cube-right {
+  width: calc(0.5 * var(--cubescale));
+}
+
+.shelf-level > .cube-left,
+.cube.shelf > .cube-left {
+  transform: rotateY(-90deg) translateZ(calc(0.25 * var(--cubescale)));
+}
+
+.shelf-level > .cube-right,
+.cube.shelf > .cube-right {
+  transform: rotateY(90deg) translateZ(calc(0.75 * var(--cubescale)));
+}
+
+.shelf-level > .cube-top,
+.cube.shelf > .cube-top {
+  transform: rotateX(90deg) translateZ(calc(0.25 * var(--cubescale)));
+}
+
+.shelf-level > .cube-bottom,
+.cube.shelf > .cube-bottom {
+  transform: rotateX(-90deg) translateZ(calc(1.5 * var(--cubescale)));
+  background-color: rgba(0, 255, 0, 0.7);
+}
+
+.shelf-level > .cube-back,
+.cube.shelf > .cube-back {
+  transform: translateZ(calc(-0.25 * var(--cubescale)));
+  width: var(--cubescale);
+}
+
+.shelf-level > .cube-front,
+.cube.shelf > .cube-front {
+  transform: translateZ(calc(0.25 * var(--cubescale)));
+}
+
+.cube.shelf > .cube-front {
+  background: transparent;
+  box-shadow: unset;
+  border: calc(0.05 * var(--cubescale)) solid var(--color-bg-light);
+  pointer-events: none;
+}
+
+.cube.shelf > .shelf-level {
+  height: calc(0.05 * var(--cubescale));
+  background: unset !important;
+  box-shadow: unset;
+  border: none;
+}
+
+.cube.shelf > .shelf-level > .cube-right,
+.cube.shelf > .shelf-level > .cube-left {
+  width: calc(0.5 * var(--cubescale));
+}
+
+.cube.shelf > .shelf-level > .cube-top,
+.cube.shelf > .shelf-level > .cube-bottom {
+  height: calc(0.5 * var(--cubescale));
+}
+
+.cube.shelf > .shelf-level > .cube-bottom {
+  transform: rotateX(90deg) translateZ(calc(0.2 * var(--cubescale)));
+}
+
+.cube.shelf > .shelf-level .cube-back {
+  display: none;
+}
+
+.cube.shelf .level-1 {
+  transform: translateY(calc(0.575 * var(--cubescale)));
+}
+.cube.shelf .level-2 {
+  transform: translateY(calc(1.15 * var(--cubescale)));
+}
+.cube.shelf .level-3 {
+  transform: translateY(calc(1.7 * var(--cubescale)));
+}
+
+.cube .shelf-level > .item {
+  width: 10vmin;
+  height: 10vmin;
+  transform: rotateZ(90deg)
+    translateX(calc(-1 * (calc(50% + calc(0.05 * var(--cubescale))))))
+    translateY(100%);
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform-origin: bottom center;
+  border: none !important;
+  box-shadow: unset;
+  background-size: contain;
+  background-position: bottom center;
+  background-repeat: no-repeat;
+  background-image: unset;
+}
+
+.cube .shelf-level > .item-cube {
+  --itemscale: 10vmin;
+  width: var(--itemscale);
+  height: var(--itemscale);
+  transform-origin: bottom center;
+}
+
+.cube .shelf-level > .left-cube {
+  left: 35%;
+  width: 5vmin;
+  height: 10vmin;
+}
+.cube .shelf-level > .right-cube {
+  left: unset;
+  right: 0;
+}
+
+.shelf-level .item > .cube {
+  --cubescale: var(--itemscale);
+  background: transparent;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  transform: rotateX(-90deg) rotateZ(-90deg);
+}
+.item > .cube > .cube-back {
+  display: block !important;
+}
+
+.cube.metal-box > div {
+  background-image: url("../img/metallic-box.webp");
+  border: none !important;
+  cursor: pointer;
+}
+
+.cube.cube.metal-box > .cube-right {
+  background-image: url("../img/metallic-box-top.webp");
+  background-size: cover;
+  background-position: center;
+  cursor: pointer;
+}
+
+.cube.medical-chest > div {
+  background-image: url("../img/medical-chest-side1.webp");
+  border: none !important;
+}
+.cube.medical-chest > .cube-top {
+  background-image: url("../img/medical-chest-top.webp");
+  background-size: cover;
+  background-position: -17px center;
+}
+.cube.medical chest > .cube-bottom {
+  background-image: url("../img/medical-chest-top.webp");
+}
+
+.item .item-inner {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-size: contain;
+  background-position: bottom center;
+  background-repeat: no-repeat;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.shelf .item .item-inner {
+  transform: rotate(-90deg);
+}
+
+.shelf-level .item.globe {
+  width: 22vmin;
+  height: 23vmin;
+  left: 25%;
+}
+
+.globe > .item-inner {
+  background-image: url("../img/globe-12145_256.gif");
+  transform: scale(1.9);
+}
+
+.shelf-level .item.skull {
+  width: 10vmin;
+  height: 10vmin;
+  left: 25%;
+}
+
+.skull > .item-inner {
+  background-image: url("../img/skull.webp");
+  transform: rotate(-90deg) translateY(12%) !important;
+}
+
+.phone > .item-inner {
+  background-image: url("../img/phone.webp");
+  transform: rotate(-90deg) translateY(13%) scale(1.5) !important;
+}
+
+.shelf-level .item.book {
+  width: 12vmin;
+  height: 12min;
+  left: 75%;
+}
+
+.book > .item-inner {
+  background-image: url("../img/book.webp");
+  transform: rotate(-90deg) translateY(10%) !important;
+}
+
+.shelf-level .item.ball {
+  width: 8vmin;
+  height: 8vmin;
+  left: 75%;
+}
+
+.ball > .item-inner {
+  background-image: url("../img/billiards-127_256.gif");
+}
+
+.cassette > .item-inner {
+  background-image: url("../img/cassette-10323_256.gif");
+}
+
+
+
