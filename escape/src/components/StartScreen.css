@@ -138,6 +138,20 @@
   .start-btn { width: 100%; max-width: 18rem; }
 }
 
+@media (max-width: 480px) {
+  .start-screen {
+    padding: 1rem 2rem;
+  }
+
+  .start-title {
+    margin-bottom: 0.5rem;
+  }
+
+  .start-intro {
+    margin-bottom: 1rem;
+  }
+}
+
 /* Animation reduced */
 @media (prefers-reduced-motion: reduce) {
   .start-intro p { animation: none; opacity: 1; transform: none; }

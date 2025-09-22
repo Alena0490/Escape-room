@@ -141,6 +141,12 @@
   }
 }
 
+@media (max-width: 480px) {
+    .win p.win-content {
+        margin-block: 1rem;
+    }
+}
+
 /** Keyframes */
   @keyframes popIn {
   0%   { transform: scale(0.6); opacity: 0; }
