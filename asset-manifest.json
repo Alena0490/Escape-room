@@ -1,15 +1,15 @@
 {
   "files": {
-    "main.css": "/Escape-room/static/css/main.5085886e.css",
+    "main.css": "/Escape-room/static/css/main.59965ce4.css",
     "main.js": "/Escape-room/static/js/main.e33951fa.js",
     "static/media/cassette-10323_256.gif": "/Escape-room/static/media/cassette-10323_256.0f0fa2d79791ad0f49bf.gif",
-    "static/media/room.png": "/Escape-room/static/media/room.4bcbe6414d6ba73935d5.png",
     "static/media/globe-12145_256.gif": "/Escape-room/static/media/globe-12145_256.28c5884a7f423324a8ae.gif",
     "static/media/billiards-127_256.gif": "/Escape-room/static/media/billiards-127_256.7ca8dc31aa9ed5629d0d.gif",
     "static/media/015922-whispers-39schizophrenic3.mp3": "/Escape-room/static/media/015922-whispers-39schizophrenic3.18c97e08cfd68e902f32.mp3",
     "static/media/noise.webp": "/Escape-room/static/media/noise.b1d55378ec98f35eb073.webp",
     "static/media/noise-mobile.webp": "/Escape-room/static/media/noise-mobile.57896d8ca921feccbe89.webp",
     "static/media/wall1.webp": "/Escape-room/static/media/wall1.172019e7660bddce929f.webp",
+    "static/media/room.webp": "/Escape-room/static/media/room.bc610f5d7b57b47722c8.webp",
     "static/media/schizophrenic-voices-62486.mp3": "/Escape-room/static/media/schizophrenic-voices-62486.02a1dc569295b55d7734.mp3",
     "static/media/wood.webp": "/Escape-room/static/media/wood.e92a0c5eb1026c8d465a.webp",
     "static/media/alien-underworld-sound-287342.mp3": "/Escape-room/static/media/alien-underworld-sound-287342.3151aecf4852bca2e7a3.mp3",
@@ -66,11 +66,11 @@
     "static/media/medical-chest-side1.webp": "/Escape-room/static/media/medical-chest-side1.0efcc95592849c2d9a6e.webp",
     "index.html": "/Escape-room/index.html",
     "static/media/cardboard-top.webp": "/Escape-room/static/media/cardboard-top.2f2f7a94e75f5fc24f7d.webp",
-    "main.5085886e.css.map": "/Escape-room/static/css/main.5085886e.css.map",
+    "main.59965ce4.css.map": "/Escape-room/static/css/main.59965ce4.css.map",
     "main.e33951fa.js.map": "/Escape-room/static/js/main.e33951fa.js.map"
   },
   "entrypoints": [
-    "static/css/main.5085886e.css",
+    "static/css/main.59965ce4.css",
     "static/js/main.e33951fa.js"
   ]
 }
