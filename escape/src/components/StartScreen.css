@@ -6,7 +6,7 @@
     place-items: center;
     padding: 2rem;
    background-color: var(--color-accent-darker);
-   background-image: url(../img/room.png);
+   background-image: url(../img/room.webp);
    background-size: cover;
    background-position: center center;
     color: var(--color-text-main);
