@@ -4,7 +4,7 @@ import { useState } from "react";
 import { IoClose } from "react-icons/io5";
 import Error from "../sounds/error-126627.mp3";
 import DoorOpen from "../sounds/opening-metal-door-98518.mp3";
-import Whoosh from "../sounds/whoosh-blow-flutter-shortwav-14678.mp3";
+import Whoosh from "../sounds/whoosh-blow-flutter-shortwav-146.mp3";
 import Win from "../sounds/success-fanfare-trumpets-6185.mp3";
 
 const CodeLock = ({

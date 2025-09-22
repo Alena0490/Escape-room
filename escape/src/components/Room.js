@@ -4,7 +4,7 @@ import CodeLock from "./CodeLock";
 import Shelf from "./Shelf";
 /** Sounds */
 import switchSound from "../sounds/light-switch-382712.mp3";
-import Voices from "../sounds/015922_whispers-39schizophrenic39-or-ghost-like-voices-56253.mp3"
+import Voices from "../sounds/015922-whispers-39schizophrenic3.mp3"
 import Ghost from "../sounds/ghost-6979.mp3";
 import Alien from "../sounds/alien-underworld-sound-287342.mp3";
 import Mirror from "../sounds/creepy-moan-87456.mp3";
@@ -13,12 +13,12 @@ import Door from "../sounds/door-handle-1-401153.mp3"
 import Rug from "../sounds/object-dragged-on-carpet-140497.mp3"
 import Paper from "../sounds/paper-rustle-81855.mp3"
 import Click from "../sounds/mouse-click-290204.mp3"
-import JumpScare from "../sounds/075283_quotbehind-youquot-whisper-86744.mp3"
+import JumpScare from "../sounds/075283-quotbehind-youquot-whispe.mp3"
 import RadioTune from "../sounds/am-tuning-104200.mp3"
 /** Random sounds**/
-import EmptyRoom from "../sounds/empty-room-horror-sound-sfx-333924.mp3"
+import EmptyRoom from "../sounds/empty-room-horror-sound-sfx-3339.mp3"
 import VoicesShort from "../sounds/schizophrenic-voices-62486.mp3"
-import Steps from "../sounds/steps-approaching-in-the-darkness-234016.mp3"
+import Steps from "../sounds/steps-approaching-in-the-darknes.mp3"
 
 const audioCache = new Map();
 

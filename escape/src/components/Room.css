@@ -1088,6 +1088,17 @@
 }
 
 @media (max-width: 750px) {
+  #room.dark .overlay.darkness::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  background-image: url("../img/noise-mobile.webp");
+  background-size: cover;
+  background-position: center center;
+  animation: fuzz 1s steps(4) infinite;
+}
+
   .room-nav button {
     font-size: 2.2rem;
     width: 1.7em;
