@@ -211,7 +211,7 @@
 }
 
 .globe > .item-inner {
-  background-image: url("../img/globe-12145_256.gif");
+  background-image: url("../img/globe.webp");
   transform: scale(1.9);
 }
 
@@ -249,11 +249,11 @@
 }
 
 .ball > .item-inner {
-  background-image: url("../img/billiards-127_256.gif");
+  background-image: url("../img/billiard.webp");
 }
 
 .cassette > .item-inner {
-  background-image: url("../img/cassette-10323_256.gif");
+  background-image: url("../img/cassette.webp");
 }
 
 
