@@ -1109,6 +1109,10 @@
     background-image: url("../img/wall2.webp");
   }
 
+  .room .wall.wall-bottom {
+    background-image: url("../img/floor1.webp");
+  }
+
   .shadow-ghost {
     animation: ghost-fade 2s ease-in-out forwards;
   }
