@@ -14,11 +14,6 @@
   transition: opacity 1s ease;
 }
 
-#win.win {
-  opacity: 1;
-  pointer-events: all;
-}
-
 .win {
   position: fixed;
   top: 0%;
@@ -33,6 +28,7 @@
   pointer-events: none;
   z-index: 99999;
   opacity: 1;
+  pointer-events: all;
 }
 
 .win p.win-content {
@@ -132,14 +128,14 @@
 }
 
 @media (max-width: 750px) {
- .win {
-  justify-content: flex-start;
- }
+    .win {
+        justify-content: flex-start;
+    }
 
   .win p.win-content {
-    width: unset;
-        padding: 0.5rem 0.1rem;
-  }
+        width: unset;
+            padding: 0.5rem 0.1rem;
+        }
 
   .win-button {
     margin-top: 2rem;
@@ -153,9 +149,9 @@
 }
 
 /** Keyframes */
-  @keyframes popIn {
-  0%   { transform: scale(0.6); opacity: 0; }
-  60%  { transform: scale(1.1); opacity: 1; }
-  100% { transform: scale(1); }
+@keyframes popIn {
+    0%   { transform: scale(0.6); opacity: 0; }
+    60%  { transform: scale(1.1); opacity: 1; }
+    100% { transform: scale(1); }
 }
 
