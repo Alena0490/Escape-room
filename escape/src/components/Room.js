@@ -33,9 +33,39 @@ const Room = () => {
     isFlickering: false,
   });
   const [showLock, setShowLock] = useState(false);
+  const [ghost, setGhost] = useState({ visible: false, top: 0, left: 0 });
 
   const onIndex = useRef(0);
   const offIndex = useRef(0);
+
+  /** Ghost */
+  
+useEffect(() => {
+  let timeoutId;
+
+  const spawnGhost = () => {
+    if (window.gameEnded) return;
+
+    // chance to appear
+    const chance = gameState.lightsOn ? 0.2 : 0.6;
+    if (Math.random() < chance) {
+      const top = Math.floor(Math.random() * 70) + 10;   // 10–80 %
+      const left = Math.floor(Math.random() * 70) + 10;  // 10–80 %
+      setGhost({ visible: true, top, left });
+
+      // disappears after  ~2 s
+      setTimeout(() => setGhost(g => ({ ...g, visible: false })), 2000);
+    }
+
+    // new try in 10–30 s
+    timeoutId = setTimeout(spawnGhost, Math.random() * 20000 + 10000);
+  };
+
+  // first spawn in 5–10 s
+  timeoutId = setTimeout(spawnGhost, Math.random() * 5000 + 5000);
+
+  return () => clearTimeout(timeoutId);
+}, [gameState.lightsOn]);
 
   const handleSwitchClick = (e) => {
     console.log("🔍 handleSwitchClick called", e.type, e.target);
@@ -885,7 +915,14 @@ const updateView = (direction) => {
               </div>
           </div>
                  
-          <div className="wall wall-top"></div>
+          <div className="wall wall-top">
+            {ghost.visible && (
+            <div
+              className="shadow-ghost"
+              style={{ top: `${ghost.top}%`, left: `${ghost.left}%` }}
+            />
+          )}
+          </div>
           
           <div className="wall wall-bottom">
             <div              

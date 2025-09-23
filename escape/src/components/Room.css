@@ -209,6 +209,23 @@
   background-position: top right;
 }
 
+.shadow-ghost {
+  position: absolute;
+  width: 65%;
+  height: 60%;
+  bottom: 0;
+  left: 0%;
+  background-image: url("../img/ghost.webp");
+  background-size: contain;
+  background-position: bottom left;
+  background-repeat: no-repeat;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 50;
+  animation: ghost-fade 2s ease-in-out forwards;
+}
+
+
 .room .wall-bottom {
   bottom: 0;
   height: calc(2 * var(--depth));
@@ -1227,6 +1244,13 @@
     transform: translateY(-30px) scale(0.9); /* mizí směrem nahoru */
     filter: brightness(0.5);
   }
+}
+
+@keyframes ghost-fade {
+  0%   { opacity: 0; transform: scale(0.9); }
+  20%  { opacity: 0.4; transform: scale(1); }
+  80%  { opacity: 0.3; transform: scale(1); }
+  100% { opacity: 0; transform: scale(1.05); }
 }
 
 
