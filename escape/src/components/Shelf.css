@@ -136,7 +136,7 @@
 }
 
 .cube .shelf-level > .item-cube {
-  --itemscale: var(--itemscale);
+  --itemscale: 10vmin;
   width: var(--itemscale);
   height: var(--itemscale);
   transform-origin: bottom center;
@@ -153,7 +153,7 @@
 }
 
 .shelf-level .item > .cube {
-  --cubescale: var(--itemscale);
+  --cubescale: 10vmin;
   background: transparent;
   position: absolute;
   bottom: 0;
@@ -186,7 +186,8 @@
   background-size: cover;
   background-position: -17px center;
 }
-.cube.medical chest > .cube-bottom {
+
+.cube.medical-chest > .cube-bottom {
   background-image: url("../img/medical-chest-top.webp");
 }
 
