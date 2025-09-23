@@ -1,6 +1,6 @@
 {
   "files": {
-    "main.css": "/Escape-room/static/css/main.ef008c52.css",
+    "main.css": "/Escape-room/static/css/main.9b828223.css",
     "main.js": "/Escape-room/static/js/main.a73fae95.js",
     "static/media/cassette.webp": "/Escape-room/static/media/cassette.e0df93bb9e2459862b7f.webp",
     "static/media/015922-whispers-39schizophrenic3.mp3": "/Escape-room/static/media/015922-whispers-39schizophrenic3.18c97e08cfd68e902f32.mp3",
@@ -72,11 +72,11 @@
     "static/media/switch-dark.webp": "/Escape-room/static/media/switch-dark.117ba8e3857ca96467ee.webp",
     "static/media/medical-chest-side1.webp": "/Escape-room/static/media/medical-chest-side1.b9c9a1a93c8b7f974108.webp",
     "static/media/cardboard-top.webp": "/Escape-room/static/media/cardboard-top.bc8a5ddd289255043f51.webp",
-    "main.ef008c52.css.map": "/Escape-room/static/css/main.ef008c52.css.map",
+    "main.9b828223.css.map": "/Escape-room/static/css/main.9b828223.css.map",
     "main.a73fae95.js.map": "/Escape-room/static/js/main.a73fae95.js.map"
   },
   "entrypoints": [
-    "static/css/main.ef008c52.css",
+    "static/css/main.9b828223.css",
     "static/js/main.a73fae95.js"
   ]
 }
