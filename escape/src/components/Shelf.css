@@ -1,4 +1,7 @@
 /*-- SHELF --*/
+:root {
+  --itemscale: 10vmin;
+}
 
 .cube.shelf {
   --cubescale: 35vmin;
@@ -115,8 +118,8 @@
 }
 
 .cube .shelf-level > .item {
-  width: 10vmin;
-  height: 10vmin;
+  width: var(--itemscale);
+  height: var(--itemscale);
   transform: rotateZ(90deg)
     translateX(calc(-1 * (calc(50% + calc(0.05 * var(--cubescale))))))
     translateY(100%);
@@ -133,7 +136,7 @@
 }
 
 .cube .shelf-level > .item-cube {
-  --itemscale: 10vmin;
+  --itemscale: var(--itemscale);
   width: var(--itemscale);
   height: var(--itemscale);
   transform-origin: bottom center;
@@ -142,7 +145,7 @@
 .cube .shelf-level > .left-cube {
   left: 35%;
   width: 5vmin;
-  height: 10vmin;
+  height: var(--itemscale);
 }
 .cube .shelf-level > .right-cube {
   left: unset;
@@ -216,8 +219,8 @@
 }
 
 .shelf-level .item.skull {
-  width: 10vmin;
-  height: 10vmin;
+  width: var(--itemscale);
+  height: var(--itemscale);
   left: 25%;
 }
 
@@ -233,7 +236,7 @@
 
 .shelf-level .item.book {
   width: 12vmin;
-  height: 12min;
+  height: 12vmin;
   left: 75%;
 }
 

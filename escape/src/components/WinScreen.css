@@ -43,7 +43,7 @@
   pointer-events: auto;
   color: var(--color-accent-bright);
   border: none;
-  background: ńone;
+  background: none;
   border-radius: var(--border-radius-sm);
   padding: 0.5em 0.75em;
   margin-bottom: 0.5em;
@@ -115,6 +115,11 @@
     0 -0.125em 0.125em #454954 inset;
     text-shadow: none;
     filter: brightness(1.2) contrast(1.2);
+}
+
+.win-button:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 3px;
 }
 
 .win-message {

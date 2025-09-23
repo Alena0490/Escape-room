@@ -3,41 +3,40 @@
 
 :root {
   /* Backgrounds */
-  --color-bg-deep: #00060D;       /* absolutní tma */
-  --color-bg-light: #0A1418;       /* tmavší šedozelená */
-  --color-bg-panel: rgba(12, 20, 24, 0.65); /* průhledné panely/formuláře */
-  --color-bg-stone: #2C2F33;      /* tmavě šedá jako betonové zdi */
-  --color-bg-floor: #3D3F42;      /* světlejší šedá pro kontrast */
+  --color-bg-deep: #00060D;
+  --color-bg-light: #0A1418;
+  --color-bg-panel: rgba(12, 20, 24, 0.65);
+  --color-bg-stone: #2C2F33;
+  --color-bg-floor: #3D3F42;
 
   /* Text */
-  --color-text-main: #F6FCFC;     /* světle šedobílá */
-  --color-text-dim: #D0D8D8;      /* tlumená šedá */
-  --color-text-faint: #8B9393;    /* skoro neviditelná */
+  --color-text-main: #F6FCFC;
+  --color-text-dim: #D0D8D8;
+  --color-text-faint: #8B9393;
 
   /* Accents */
   --color-accent: #72A69C;
   --color-accent-darker: #265951;  
-  --color-accent-dark: #00211a;      /* tyrkysový highlight */
+  --color-accent-dark: #00211a;
   --color-accent-bright: #8FD1C4; 
   --color-accent-invert: #735134;
-  /* světlejší tyrkys pro hover */
-  --color-hint: #FFD166;          /* zlatavě žlutá pro HINT text (dobrý kontrast) */
+  --color-hint: #FFD166;
   
   /* States */
-  --color-success: #06eba6;       /* sytá zeleno-tyrkysová */
-  --color-error: #e83939;         /* jasně červená – lépe viditelná */
+  --color-success: #06eba6;
+  --color-error: #e83939;
   --color-warning: #ffc02c; 
-  --color-info: #82e0ff;      /* oranžová – upozornění */
+  --color-info: #82e0ff;
 
-  /* Whites – pro "kost/bledě" efekty */
-  --color-bone: #F5F5F0;          /* kostní bílá */
-  --color-ash: #D9D9D9;           /* popelavá */
-  --color-frost: #EDF5F5;         /* studená bílá pro highlight */
+  /* Whites */
+  --color-bone: #F5F5F0;
+  --color-ash: #D9D9D9;
+  --color-frost: #EDF5F5;
 
   /* Borders / effects */
-  --color-border: #4A5555;        /* decentní šedozelený rámeček */
-  --color-glow: rgba(114, 165, 156, 0.35); /* jemná tyrkysová záře */
-  --color-overlay: rgba(0, 0, 0, 0.55);   /* sjednocovací tmavý filtr */
+  --color-border: #4A5555;
+  --color-glow: rgba(114, 165, 156, 0.35);
+  --color-overlay: rgba(0, 0, 0, 0.55);
 
   /* Text sizes */
   --font-small: clamp(1rem, 2vw, 1.125rem);      /* 16px - 18px */
@@ -276,20 +275,15 @@
 }
 
 .front-view .wall-back,
-.back-view .wall-front
-/* .left-view .wall-right, */
-/* .right-view .wall-left  */
-{
+.back-view .wall-front {
   pointer-events: none;
  }
-
 
 .room {
   transform: rotateX(var(--rotateX)) rotateY(var(--rotateY));
 }
 
 /*-- NAV UI --*/
-
 .room-nav {
   position: fixed;
   z-index: 999;
@@ -380,7 +374,6 @@
 }
 
 /*-- CUBE REUSABLE --*/
-
 .cube {
   width: var(--cubescale);
   height: var(--cubescale);
@@ -487,7 +480,6 @@
 }
 
 .item.ouija {
-  /* position: absolute; */
   bottom: calc(1.2 * var(--cubescale));
   right: calc(0.4 * var(--cubescale));
   transform: translateZ(calc(var(--depth) - var(--cubescale))) rotateY(-15deg);
@@ -561,7 +553,6 @@
 }
 
 /*-- OBJECTS --*/
-
 [data-comment] {
   cursor: pointer;
 }
@@ -594,10 +585,10 @@
 .door::after {
   content: "";
   position: absolute;
-  top: 0;        /* místo bottom: 0 */
-  left: 0;       /* místo left: 23% */
-  width: 100%;   /* místo 31% */
-  height: 100%;  /* místo 60% */
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
   background-image: url("../img/door-open.webp");
   background-position: bottom center;
   background-size: contain;
@@ -637,10 +628,10 @@
   z-index: 800;
 }
 
-/* otočený = vypnuto */
+/* switch off */
 #room.dark .switch {
     background-image: url("../img/switch.webp");
-    background-color: rgba(0,0,0,0); /* průhledné, ale vyplní plochu */
+    background-color: rgba(0,0,0,0);
     pointer-events: auto;
     margin: 2rem;
     cursor: pointer;
@@ -652,7 +643,6 @@
   height: 15%;
   background-image: url("../img/code-lock.webp");
   background-size: contain;
-  /* bottom: 32%; */
   bottom: 36vmin;
   left: 8%;
   margin: 1rem;
@@ -675,7 +665,6 @@
 .right-view .wall-back .switch,
 .right-view .wall-back .lock  {
   filter: drop-shadow(-2px -1px 2px black);
-  /* border: 4px solid red !important; */
 }
 
 .mirror {
@@ -767,7 +756,6 @@
 }
 
 /***Item hover ***/
-
 .item:not(.item-cube) {
   transition: filter .6s ease-out, transform 0.3s ease-out; 
 }
@@ -807,7 +795,6 @@
    width: 20vmin;
     height: 20vmin;
     background-color: transparent;
-    /* border: 4px solid red !important; */
     position: absolute;
     bottom: 30%;
     right: 7%;
@@ -833,20 +820,19 @@
   cursor: pointer;
 }
 
-
 .painting {
-    width: 30vmin;
-    height: 40vmin;
-    background-image: url("../img/self-portrait.webp");
-    background-size: contain;
-    background-position: center;
-    background-repeat: no-repeat;
-    position: absolute;
-    top: 15%;
-    border-radius: var(--border-radius-sm);
-    left: 50vmin;
-    filter: drop-shadow(5px 3px 2px #000a);
-    cursor: pointer;
+  width: 30vmin;
+  height: 40vmin;
+  background-image: url("../img/self-portrait.webp");
+  background-size: contain;
+  background-position: center;
+  background-repeat: no-repeat;
+  position: absolute;
+  top: 15%;
+  border-radius: var(--border-radius-sm);
+  left: 50vmin;
+  filter: drop-shadow(5px 3px 2px #000a);
+  cursor: pointer;
 }
 
 .left-view .painting {
@@ -855,19 +841,19 @@
 }
 
 .poster {
-    width: 20vmin;
-    height: 15vmin;
-    background-image: url("../img/poster.webp");
-    background-size: contain;
-    background-position: center;
-    background-repeat: no-repeat;
-    position: absolute;
-    top: 20%;
-    border-radius: var(--border-radius-sm);
-    left: 10vmin;
-    box-shadow: 0 0 1px #000a, inset 0 0 1px rgba(0, 0, 0, 0.425);
-    border: 0.5vmin solid var(--color-bg-light);
-    cursor: pointer;
+  width: 20vmin;
+  height: 15vmin;
+  background-image: url("../img/poster.webp");
+  background-size: contain;
+  background-position: center;
+  background-repeat: no-repeat;
+  position: absolute;
+  top: 20%;
+  border-radius: var(--border-radius-sm);
+  left: 10vmin;
+  box-shadow: 0 0 1px #000a, inset 0 0 1px rgba(0, 0, 0, 0.425);
+  border: 0.5vmin solid var(--color-bg-light);
+  cursor: pointer;
 }
 
 .front-view .wall-back .poster {
@@ -1020,7 +1006,6 @@
 }
 
 /*Dialog/Comments*/
-
 #dialog {
   position: fixed;
   z-index: 999;
@@ -1106,23 +1091,41 @@
 
 @media (max-width: 750px) {
   #room.dark .overlay.darkness::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  background-image: url("../img/noise-mobile.webp");
-  background-size: cover;
-  background-position: center center;
-  animation: fuzz 1s steps(4) infinite;
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    background-image: url("../img/noise-mobile.webp");
+    background-size: cover;
+    background-position: center center;
+    animation: fuzz 1.5s steps(4) infinite;
+  }
+
+  .room .wall.wall-top {
+    background-image: url("../img/ceiling-mobile.webp");
+  }
+
+  .room .wall {
+    background-image: url("../img/wall2.webp");
+  }
+
+  .shadow-ghost {
+    animation: ghost-fade 2s ease-in-out forwards;
+  }
+
+  .item {
+    transform: translateZ(0);
+    backface-visibility: hidden;
+  }
 }
 
 @media (max-width: 650px) {
-
   .cube-shelf {
     transform: translateZ(10vmin);
     scale: 1.2;
     bottom: 5%;
   }
+
   .contract {
     width: 17%;
     height: 21%;
@@ -1163,7 +1166,6 @@
     height: 70vmin;
     right: 3%;
   }
-}
 
   .room-nav button {
     font-size: 2.2rem;
@@ -1173,7 +1175,6 @@
 }
 
 @media (max-width: 548px) {
-
   .room {
     height: 60vh;
   }

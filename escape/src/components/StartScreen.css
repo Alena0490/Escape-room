@@ -27,7 +27,7 @@
     pointer-events: none;
     height: 160vh;
     width: 160vw;
-    z-index: 100;
+    z-index: 1;
     animation: 
     smoothWakeUp 4s cubic-bezier(0.4, 0.0, 0.2, 1) forwards;
 }
@@ -124,32 +124,33 @@
   outline-offset: 3px;
 }
 
-.start-btn:focus:not(:focus-visible) {
-  outline: none;
-}
-
-.start-btn:hover:not(:focus-visible) {
-  outline: none;
-}
-
 /* Media */
 @media (max-width: 560px) {
-  .start-intro { text-align: left; }
-  .start-btn { width: 100%; max-width: 18rem; }
+    .start-screen::after {
+        animation: none;
+    }
+
+    .start-intro { 
+        text-align: left; 
+    }
+
+    .start-btn { 
+        width: 100%; max-width: 18rem; 
+    }
 }
 
 @media (max-width: 480px) {
-  .start-screen {
-    padding: 1rem 2rem;
-  }
+    .start-screen {
+        padding: 1rem 2rem;
+    }
 
-  .start-title {
-    margin-bottom: 0.5rem;
-  }
+    .start-title {
+        margin-bottom: 0.5rem;
+    }
 
-  .start-intro {
-    margin-bottom: 1rem;
-  }
+    .start-intro {
+        margin-bottom: 1rem;
+    }
 }
 
 /* Animation reduced */
