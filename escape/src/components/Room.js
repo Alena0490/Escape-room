@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import "./Room.css";
 import CodeLock from "./CodeLock";
 import Shelf from "./Shelf";
+import RoomNavigation from "./RoomNavigation";
 /** Sounds */
 import switchSound from "../sounds/light-switch-382712.mp3";
 import Voices from "../sounds/015922-whispers-39schizophrenic3.mp3"
@@ -38,45 +39,82 @@ const Room = () => {
   const onIndex = useRef(0);
   const offIndex = useRef(0);
 
-  /** Ghost */
-  
-useEffect(() => {
-  let timeoutId;
+  /** === VIEW NAVIGATION === */
+  const views = ["back-view", "left-view", "front-view", "right-view"];
+  const walls = ["wall-back", "wall-left", "wall-front", "wall-right"];
+  let currentViewIndex = 0;
+  let currentRotationY = 0;
 
-  const spawnGhost = () => {
-    if (window.gameEnded) return;
-
-    // chance to appear
-    const chance = gameState.lightsOn ? 0.2 : 0.6;
-    if (Math.random() < chance) {
-      const top = Math.floor(Math.random() * 70) + 10;   // 10–80 %
-      const left = Math.floor(Math.random() * 70) + 10;  // 10–80 %
-      setGhost({ visible: true, top, left });
-
-      // disappears after  ~2 s
-      setTimeout(() => setGhost(g => ({ ...g, visible: false })), 2000);
-    }
-
-    // new try in 10–30 s
-    timeoutId = setTimeout(spawnGhost, Math.random() * 20000 + 10000);
+  const updateRoomTransform = (offsetX, offsetY) => {
+    const r = roomRef.current;
+    if (!r) return;
+    r.style.transform = `rotateX(${offsetY}deg) rotateY(${currentRotationY + offsetX}deg)`;
   };
 
-  // first spawn in 5–10 s
-  timeoutId = setTimeout(spawnGhost, Math.random() * 5000 + 5000);
+  const updateView = (direction) => {
+    const roomWrap = wrapRef.current;
+    const room = roomRef.current;
+    if (!roomWrap || !room) return;
 
-  return () => clearTimeout(timeoutId);
-}, [gameState.lightsOn]);
+    if (direction === "left") {
+      currentViewIndex = (currentViewIndex + 1) % views.length;
+      currentRotationY -= 90;
+    } else if (direction === "right") {
+      currentViewIndex = (currentViewIndex - 1 + views.length) % views.length;
+      currentRotationY += 90;
+    }
 
+    roomWrap.classList.remove(...views);
+    roomWrap.classList.add(views[currentViewIndex]);
+
+    roomWrap.classList.add("rotating");
+    setTimeout(() => {
+      const w = wrapRef.current;
+      if (w) w.classList.remove("rotating");
+    }, 500);
+
+    document.querySelectorAll(".room .wall").forEach((el) =>
+      el.classList.remove("active")
+    );
+    const activeWall = document.querySelector(`.wall.${walls[currentViewIndex]}`);
+    if (activeWall) activeWall.classList.add("active");
+
+    updateRoomTransform(0, 0);
+  };
+
+  /** === GHOST === */
+  useEffect(() => {
+    let timeoutId;
+
+    const spawnGhost = () => {
+      if (window.gameEnded) return;
+
+      const chance = gameState.lightsOn ? 0.2 : 0.6;
+      if (Math.random() < chance) {
+        const top = Math.floor(Math.random() * 70) + 10;
+        const left = Math.floor(Math.random() * 70) + 10;
+        setGhost({ visible: true, top, left });
+
+        setTimeout(() => setGhost(g => ({ ...g, visible: false })), 2000);
+      }
+
+      timeoutId = setTimeout(spawnGhost, Math.random() * 20000 + 10000);
+    };
+
+    timeoutId = setTimeout(spawnGhost, Math.random() * 5000 + 5000);
+
+    return () => clearTimeout(timeoutId);
+  }, [gameState.lightsOn]);
+
+  /** === SWITCH === */
   const handleSwitchClick = (e) => {
-    console.log("🔍 handleSwitchClick called", e.type, e.target);
-      e.preventDefault();
-      e.stopPropagation(); // 🛑 stop bubbling to roomWrap
-      e.nativeEvent.stopImmediatePropagation?.(); 
+    e.preventDefault();
+    e.stopPropagation();
+    e.nativeEvent.stopImmediatePropagation?.();
     const roomCanvas = document.getElementById("room");
     const switchEl = e.currentTarget;
     const mirrorEl = document.querySelector(".mirror");
 
-    // Always play switch sound first
     playSound(switchSound);
 
     if (roomCanvas.classList.contains("dark")) {
@@ -85,29 +123,26 @@ useEffect(() => {
         roomCanvas.classList.remove("dark");
         switchEl.classList.add("on");
 
-        // ✨ Flicker effect
         setIsFlickering(true);
         setTimeout(() => setIsFlickering(false), 1200);
 
         if (mirrorEl) mirrorEl.classList.add("lit");
         setGameState(prev => ({ ...prev, lightsOn: true }));
 
-        // Fade out ambient voices if active
         if (window.roomAmbientAudio) fadeOutAudio(window.roomAmbientAudio, 800);
 
-           // Rotating ON message
-          const onMessages = [
-            "Much better.",
-            "Finally some light!",
-            "Ah, I can see everything clearly now.",
-            "Feels safer with the lights on…"
-          ];
-          const msg = onMessages[onIndex.current];
-          switchEl.setAttribute("data-comment", msg);
-          showComment(msg);
-          onIndex.current = (onIndex.current + 1) % onMessages.length;
-        }, 300);
-      } else {
+        const onMessages = [
+          "Much better.",
+          "Finally some light!",
+          "Ah, I can see everything clearly now.",
+          "Feels safer with the lights on…"
+        ];
+        const msg = onMessages[onIndex.current];
+        switchEl.setAttribute("data-comment", msg);
+        showComment(msg);
+        onIndex.current = (onIndex.current + 1) % onMessages.length;
+      }, 300);
+    } else {
       // LIGHTS OFF
       setTimeout(() => {
         roomCanvas.classList.add("dark");
@@ -458,7 +493,6 @@ useEffect(() => {
     }, displayTime);
   };
 
-
   /** Audio fadeout */
       const fadeOutAudio = (audio, duration = 1000) => {
       const startVolume = audio.volume;
@@ -492,64 +526,6 @@ useEffect(() => {
       setTimeout(checkElementsReady, 50);
       return;
     }
-    // start initization
-    const views = ["back-view", "left-view", "front-view", "right-view"];
-    const walls = ["wall-back", "wall-left", "wall-front", "wall-right"];
-    let currentViewIndex = 0;   // 0 = back-view
-    let currentRotationY = 0;
-
-    const updateRoomTransform = (offsetX, offsetY) => {
-      // Always read the latest element from the ref (StrictMode can remount)
-      const r = roomRef.current;
-      if (!r) return;
-      r.style.transform = `rotateX(${offsetY}deg) rotateY(${currentRotationY + offsetX}deg)`;
-    };
-
-const updateView = (direction) => {
-  console.log("🔄 updateView called with direction:", direction);
-  console.trace(); // ukáže stack trace
-  
-   // If direction is not specified, just initialize the view without changing it.
-  if (!direction) {
-    const roomWrap = wrapRef.current;
-    if (roomWrap) {
-      roomWrap.classList.remove(...views);
-      roomWrap.classList.add(views[currentViewIndex]);
-    }
-    return; // ENDS FUNCTION
-  }
-  
-  // Re-read current nodes every call to avoid null/stale references
-  const roomWrap = wrapRef.current;
-  const room = roomRef.current;
-  if (!roomWrap || !room) return;
-      
-      if (direction === "left") {
-        currentViewIndex = (currentViewIndex + 1) % views.length;
-        currentRotationY -= 90;
-      } else if (direction === "right") {
-        currentViewIndex = (currentViewIndex - 1 + views.length) % views.length;
-        currentRotationY += 90;
-      }
-
-      roomWrap.classList.remove(...views);
-      roomWrap.classList.add(views[currentViewIndex]);
-
-      roomWrap.classList.add("rotating");
-      setTimeout(() => {
-        // Get a fresh node in case of remount
-        const w = wrapRef.current;
-        if (w) w.classList.remove("rotating");
-      }, 500);
-
-      document.querySelectorAll(".room .wall").forEach((el) =>
-        el.classList.remove("active")
-      );
-      const activeWall = document.querySelector(`.wall.${walls[currentViewIndex]}`);
-      if (activeWall) activeWall.classList.add("active"); // check if the wall is existing
-
-      updateRoomTransform(0, 0);
-    };
 
     const initButtons = () => {
       const leftBtn = document.getElementById("turnLeft");
@@ -602,7 +578,6 @@ const updateView = (direction) => {
     };
 
     const initCubes = () => {
-      console.log("🔧 initCubes běží");
       document.querySelectorAll(".cube").forEach((cube) => {
         const faces = ["top", "left", "front", "right", "back", "bottom"];
         faces.forEach((face) => {
@@ -1035,24 +1010,33 @@ const updateView = (direction) => {
         calculateGameTime={calculateGameTime}
       />
 
-      <nav className="room-nav">
-        <button id="turnLeft" data-title="Turn Left" aria-label="Turn left">
-          <i>👈</i>
-          <span className="hidden">Turn Left</span>
-        </button>
-        <button id="turnRight" data-title="Turn Right" aria-label="Turn right">
-          <i>👉</i>
-          <span className="hidden">Turn Right</span>
-        </button>
-        <button id="zoom" data-title="Look" aria-label="Zoom">
-          <i>🔎</i>
-          <span className="hidden">Look</span>
-        </button>
-        <button id="hint" data-title="Hint!" aria-label="Show hint">
-          <i>💡</i>
-          <span className="hidden">Hint</span>
-        </button>
-      </nav>
+      <RoomNavigation
+        onLeft={() => updateView("left")}
+        onRight={() => updateView("right")}
+        onZoom={() => {
+          const rc = document.getElementById("room");
+          if (rc) rc.classList.toggle("zoomed");
+        }}
+        onHint={() => {
+          const hints = [
+            "Talk to the old spirits.",
+            "Admire the art.",
+            "Get the code first.",
+            "Don't forget to look into boxes.",
+            "You need to search all the stuff.",
+            "Play sports.",
+            "Read the book.",
+            "It's always better with lights on.",
+            "Don't be afraid of ghosts.",
+            "Don't forget to check under the rug.",
+          ];
+          const random = hints[Math.floor(Math.random() * hints.length)];
+          showComment(random, "hint");
+
+          const used = parseInt(localStorage.getItem("hintsUsed") || "0", 10);
+          localStorage.setItem("hintsUsed", used + 1);
+        }}
+      />
 
       <div id="tooltip"></div>
       <div id="itemCur"></div>

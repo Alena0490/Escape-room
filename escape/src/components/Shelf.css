@@ -83,10 +83,11 @@
 }
 
 .cube.shelf > .shelf-level {
-  height: calc(0.05 * var(--cubescale));
-  background: unset !important;
-  box-shadow: unset;
-  border: none;
+    background: initial !important;
+    border: none;
+    box-shadow: none;
+    height: calc(var(--cubescale) * .05);
+    border: none;
 }
 
 .cube.shelf > .shelf-level > .cube-right,
@@ -150,6 +151,7 @@
 .cube .shelf-level > .right-cube {
   left: unset;
   right: 0;
+  z-index: 900;
 }
 
 .shelf-level .item > .cube {
