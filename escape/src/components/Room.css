@@ -410,7 +410,7 @@
   filter: none;
   box-shadow: none;
   pointer-events: all;
-  /* border: 3px solid red; */
+  border: 3px solid red;
 }
 
 .ouija-overlay {
@@ -1026,7 +1026,7 @@
     animation: ghost-fade 2s ease-in-out forwards;
   }
 
-  .item {
+  .item:not(.ouija) {
     transform: translateZ(0);
     backface-visibility: hidden;
   }
@@ -1092,16 +1092,9 @@
   }
 
   .item.ouija {
-    width: 20%;
-    height: 20%;
-    bottom: calc(1.2 * var(--cubescale));
-    right: calc(0.4 * var(--cubescale));
-    transform: translateZ(calc(var(--depth) - var(--cubescale))) rotateY(-15deg);
-    cursor: pointer;
-    background: none;
-    box-shadow: none;
-    z-index: 900;
-    pointer-events: all;
+    width: 25vmin;
+    height: var(--item-size);
+    transform: scale3d(1.9, 1.5, 1.5);
   }
 }
 
