@@ -44,10 +44,17 @@
   --font-large: clamp(1.25rem, 3vw, 1.5rem);      /* 20px - 24px */
   --font-xlarge: clamp(1.5rem, 3.8vw, 2rem); /* 24px - 32px */
 
+  /*Sizes*/
+  --item-size: 20vmin;
+
   /*Border radius*/
   --border-radius-sm: 0.1rem;
   --border-radius: 0.25rem;
   --border-radius-lg: 0.5rem;
+
+  /*Shadow*/
+  --shadow: drop-shadow(3px 3px 3px black);
+
 }
 
 #room {
@@ -474,22 +481,33 @@
   z-index: 10;
 }
 
+.item {
+  width: var(--item-size);
+  height: var(--item-size);
+  filter: var(--shadow);
+}
+
 .item:active {
   transform: scale(0.95);
   transition: transform 0.1s;
 }
 
 .item.ouija {
-  bottom: calc(1.2 * var(--cubescale));
-  right: calc(0.4 * var(--cubescale));
-  transform: translateZ(calc(var(--depth) - var(--cubescale))) rotateY(-15deg);
-  --cubescale: 20vmin;
+  position: relative;
+  bottom: 25vmin;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 22vmin;
+  height: var(--item-size);
+  background: transparent;
   cursor: pointer;
-  background: none;
+  z-index: 810;
+  border: none;
+  filter: none;
   box-shadow: none;
-  z-index: 800;
   pointer-events: all;
 }
+
 
 .ouija-overlay {
   position: absolute;
@@ -624,7 +642,7 @@
   transition: none;
   backface-visibility: hidden;
   transform-style: flat;
-  filter: drop-shadow(3px 3px 3px black);
+  filter: var(--shadow);
   z-index: 800;
 }
 
@@ -650,7 +668,8 @@
   transition: none;
   backface-visibility: hidden;
   transform-style: flat;
-  filter: drop-shadow(3px 3px 3px black) sepia(0.3);
+  filter: 
+  var(--shadow) sepia(0.3);
   z-index: 800;
 }
 
@@ -667,20 +686,23 @@
   filter: drop-shadow(-2px -1px 2px black);
 }
 
+.mirror, .poster, .painting, .contract, .chalk-message {
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  cursor: pointer;
+}
+
 .mirror {
     width: 65vmin;
     height: 68vmin;
     background-image: url("../img/mirror.webp");
-    background-size: contain;
-    background-position: center;
     filter: sepia(0.2);
-    background-repeat: no-repeat;
     position: absolute;
     bottom: 0;
     right: 4%;
     box-shadow: none;
     border: none;
-    cursor: pointer;
 }
 
 .mirror::after {
@@ -749,10 +771,8 @@
   background-size: contain;
   background-repeat: no-repeat;
   filter: drop-shadow(-3px -3px 3px black);
-  width: 20vmin;
-  height: 20vmin;
-
-  
+  width: var(--item-size);
+  height: var(--item-size);
 }
 
 /***Item hover ***/
@@ -783,17 +803,14 @@
   background-image: url("../img/graffiti.webp");
   width: 27%;
   height: 27%;
-  background-size: contain;
-  background-repeat: no-repeat;
-  background-position: center center;
   filter: brightness(1.2);
   mix-blend-mode: hard-light;
   z-index: 800;
 }
 
 .mirror-crack {
-   width: 20vmin;
-    height: 20vmin;
+   width: var(--item-size);
+    height: var(--item-size);
     background-color: transparent;
     position: absolute;
     bottom: 30%;
@@ -813,26 +830,18 @@
   filter: brightness(0.9) sepia(0.3) contrast(1.2)drop-shadow(1px 2px 2px black);
   transform: rotate(20deg);
   background-image: url("../img/contract.webp");
-  background-repeat: no-repeat;
-  background-position: center center;
-  background-size: contain;
   z-index: 200;
-  cursor: pointer;
 }
 
 .painting {
   width: 30vmin;
   height: 40vmin;
   background-image: url("../img/self-portrait.webp");
-  background-size: contain;
-  background-position: center;
-  background-repeat: no-repeat;
   position: absolute;
   top: 15%;
   border-radius: var(--border-radius-sm);
   left: 50vmin;
   filter: drop-shadow(5px 3px 2px #000a);
-  cursor: pointer;
 }
 
 .left-view .painting {
@@ -841,19 +850,15 @@
 }
 
 .poster {
-  width: 20vmin;
+  width: var(--item-size);
   height: 15vmin;
   background-image: url("../img/poster.webp");
-  background-size: contain;
-  background-position: center;
-  background-repeat: no-repeat;
   position: absolute;
   top: 20%;
   border-radius: var(--border-radius-sm);
   left: 10vmin;
   box-shadow: 0 0 1px #000a, inset 0 0 1px rgba(0, 0, 0, 0.425);
   border: 0.5vmin solid var(--color-bg-light);
-  cursor: pointer;
 }
 
 .front-view .wall-back .poster {
@@ -872,7 +877,7 @@
   height: 65px;
   transform: skew(-4deg);
   filter: brightness(0.4) 
-          drop-shadow(3px 2px 3px black) 
+          var(--shadow) 
           drop-shadow(0 0 0px transparent);
   z-index: 800;
   transition: filter 0.6s ease-out; /* zkráceno na 0.6s */
@@ -1123,7 +1128,17 @@
   }
 }
 
-@media (max-width: 650px) {
+@media (max-width: 650px) {  
+.room-wrap.rotating .room {
+  will-change: transform; /* použít jen v animaci */
+}
+
+  .zoomed .room-wrap {
+    transform: scale(1.3);
+    perspective: 100vmin;
+    transform-origin: center;
+  }
+
   .cube-shelf {
     transform: translateZ(10vmin);
     scale: 1.2;
@@ -1176,6 +1191,19 @@
     font-size: 2.2rem;
     width: 1.7em;
     height: 1.7em;
+  }
+
+  .item.ouija {
+    width: 20%;
+    height: 20%;
+    bottom: calc(1.2 * var(--cubescale));
+    right: calc(0.4 * var(--cubescale));
+    transform: translateZ(calc(var(--depth) - var(--cubescale))) rotateY(-15deg);
+    cursor: pointer;
+    background: none;
+    box-shadow: none;
+    z-index: 900;
+    pointer-events: all;
   }
 }
 

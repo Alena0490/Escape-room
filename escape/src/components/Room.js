@@ -495,8 +495,8 @@ useEffect(() => {
     // start initization
     const views = ["back-view", "left-view", "front-view", "right-view"];
     const walls = ["wall-back", "wall-left", "wall-front", "wall-right"];
-    let currentViewIndex = 1;
-    let currentRotationY = -90;
+    let currentViewIndex = 0;   // 0 = back-view
+    let currentRotationY = 0;
 
     const updateRoomTransform = (offsetX, offsetY) => {
       // Always read the latest element from the ref (StrictMode can remount)
@@ -602,6 +602,7 @@ const updateView = (direction) => {
     };
 
     const initCubes = () => {
+      console.log("🔧 initCubes běží");
       document.querySelectorAll(".cube").forEach((cube) => {
         const faces = ["top", "left", "front", "right", "back", "bottom"];
         faces.forEach((face) => {
@@ -989,34 +990,34 @@ const updateView = (direction) => {
             <span className="visually-hidden">Cardboard box</span>
           </div>
           
-          <div
-            className="item cube ouija"
-            data-title="OUIJA"
-            data-comment="Oh, what, the pointer is moving! Creepy... 'T - O - G - E - T out of the room, you need to solve the riddles. You need to use just one last or the only number from each one. But first you need to find the key.' Because why make it easy, right?"
-            onClick={(e) => {
-              e.stopPropagation(); 
-              playSound(Ghost);
-              incrementItemClicks("ouija");
-              const msg = e.currentTarget.getAttribute("data-comment");
-              if (msg) showComment(msg);
-              triggerVibration(30);
-              // show detail
-             const overlay = document.querySelector(".ouija-overlay");
-              overlay.classList.add("active");
-              setTimeout(() => {
-                overlay.classList.remove("active");
-              }, 5500); // ⏳ remove detail
-            }}
-          >
-            <span className="visually-hidden">OUIJA board</span>
-          </div>
-          
           <div 
-          className="cube table" 
-          data-title="A weird table" 
-          data-comment="Nice, I really need this for my living room. Wait, what is there?"
+            className="cube table" 
+            data-title="A weird table" 
+            data-comment="Nice, I really need this for my living room. Wait, what is there?"
           >
             <span className="visually-hidden">A wooden table with skull decoration</span>
+
+            <div
+              className="item ouija"
+              data-title="OUIJA"
+              data-comment="Oh, what, the pointer is moving! Creepy... 'T - O - G - E - T out of the room, you need to solve the riddles. You need to use just one last or the only number from each one. But first you need to find the key.' Because why make it easy, right?"
+              onClick={(e) => {
+                e.stopPropagation(); 
+                playSound(Ghost);
+                incrementItemClicks("ouija");
+                const msg = e.currentTarget.getAttribute("data-comment");
+                if (msg) showComment(msg);
+                triggerVibration(30);
+                // show detail
+              const overlay = document.querySelector(".ouija-overlay");
+                overlay.classList.add("active");
+                setTimeout(() => {
+                  overlay.classList.remove("active");
+                }, 5500); // ⏳ remove detail
+              }}
+            >
+              <span className="visually-hidden">OUIJA board</span>
+            </div>          
           </div>
         </div>
       </div>
