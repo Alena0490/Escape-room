@@ -3,6 +3,7 @@ import "./Room.css";
 import CodeLock from "./CodeLock";
 import Shelf from "./Shelf";
 import RoomNavigation from "./RoomNavigation";
+import AudioController from "./AudioControler";
 /** Sounds */
 import switchSound from "../sounds/light-switch-382712.mp3";
 import Voices from "../sounds/015922-whispers-39schizophrenic3.mp3"
@@ -97,7 +98,6 @@ const Room = () => {
 
         setTimeout(() => setGhost(g => ({ ...g, visible: false })), 2000);
       }
-
       timeoutId = setTimeout(spawnGhost, Math.random() * 20000 + 10000);
     };
 
@@ -174,27 +174,27 @@ const Room = () => {
       }, 300);
     }
 
-    // ✅ Global feedback
-    incrementItemClicks("light-switch");
-    triggerVibration(30);
-  };
+  // ✅ Global feedback
+  incrementItemClicks("light-switch");
+  triggerVibration(30);
+};
 
-  // Destructure state for convenience
-  const { rugUp, lightsOn} = gameState;
-  
-  /** Vibration feedback for mobile devices */
-  const triggerVibration = (duration = 50) => {
-    if ('vibrate' in navigator) {
-      navigator.vibrate(duration);
+// Destructure state for convenience
+const { rugUp, lightsOn} = gameState;
+
+/** Vibration feedback for mobile devices */
+const triggerVibration = (duration = 50) => {
+  if ('vibrate' in navigator) {
+    navigator.vibrate(duration);
+  }
+};
+
+/** Start time -Save to LocalStorage */
+useEffect(() => {
+    if (!localStorage.getItem("gameStartTime")) {
+      localStorage.setItem("gameStartTime", Date.now());
     }
-  };
-
-  /** Start time -Save to LocalStorage */
-  useEffect(() => {
-      if (!localStorage.getItem("gameStartTime")) {
-        localStorage.setItem("gameStartTime", Date.now());
-      }
-    }, []);
+}, []);
 
   /*** ENDING SCREEN  */
   /** Stop audio */
@@ -208,7 +208,7 @@ const Room = () => {
   };
 }, []);
 
-  // Statistics functions
+// Statistics functions
 const calculateGameTime = () => {
   const startTime = localStorage.getItem('gameStartTime');
   if (!startTime) return '00:00';
@@ -239,7 +239,7 @@ const incrementItemClicks = (id) => {
   }
 };
 
-  /** Easter eggs */
+/** Easter eggs */
 const unlockEasterEgg = (id) => {
   let eggs = JSON.parse(localStorage.getItem("easterEggs") || "{}");
   if (!eggs[id]) {
@@ -253,160 +253,160 @@ const getEasterEggsCount = () => {
   return Object.keys(eggs).length;
 };
 
-  /** Load game state from localStorage on component mount */
-  useEffect(() => {
-    const savedState = localStorage.getItem('escapeRoomState');
-    if (savedState) {
-      const parsedState = JSON.parse(savedState);
-      setGameState(parsedState);
-      
-      // Apply visual states based on saved data
-      const roomCanvas = document.getElementById("room");
-      const switchEl = document.querySelector(".switch");
-      const mirrorEl = document.querySelector(".mirror");
-      const doorEl = document.querySelector(".door.item");
-      
-      if (roomCanvas && switchEl && mirrorEl) {
-        if (parsedState.lightsOn) {
-          roomCanvas.classList.remove("dark");
-          switchEl.classList.add("on");
-          mirrorEl.classList.add("lit");
-        } else {
-          roomCanvas.classList.add("dark");
-          switchEl.classList.remove("on");
-          mirrorEl.classList.remove("lit");
-        }
-      }
-      
-      if (doorEl && parsedState.doorOpen) {
-        doorEl.classList.add("open");
-      }
-    }
-  }, []);
-
-  /** Save game state to localStorage whenever it changes */
-  useEffect(() => {
-    localStorage.setItem('escapeRoomState', JSON.stringify(gameState));
-  }, [gameState]);
-
-  /** Sound effects with fade in/out support */
-  const playSound = useCallback((src, options = {}) => {
-    // Parse options
-    const settings = typeof options === "number" 
-      ? { duration: options } 
-      : options;
-
-    const {
-      start = 0,
-      duration = null,
-      volume = 1,
-      fadeIn = 0,
-      fadeOut = 0,
-    } = settings;
-
-    let audio;
-      const cacheKey = src.toString();
-
-      if (audioCache.has(cacheKey)) {
-        audio = audioCache.get(cacheKey).cloneNode();
+/** Load game state from localStorage on component mount */
+useEffect(() => {
+  const savedState = localStorage.getItem('escapeRoomState');
+  if (savedState) {
+    const parsedState = JSON.parse(savedState);
+    setGameState(parsedState);
+    
+    // Apply visual states based on saved data
+    const roomCanvas = document.getElementById("room");
+    const switchEl = document.querySelector(".switch");
+    const mirrorEl = document.querySelector(".mirror");
+    const doorEl = document.querySelector(".door.item");
+    
+    if (roomCanvas && switchEl && mirrorEl) {
+      if (parsedState.lightsOn) {
+        roomCanvas.classList.remove("dark");
+        switchEl.classList.add("on");
+        mirrorEl.classList.add("lit");
       } else {
-        audio = new Audio(src);
-        audioCache.set(cacheKey, audio);
+        roomCanvas.classList.add("dark");
+        switchEl.classList.remove("on");
+        mirrorEl.classList.remove("lit");
       }
-
-    audio.currentTime = start;
-    audio.volume = fadeIn > 0 ? 0 : volume;
+    }
     
-    // Play audio with error handling
-    // eslint-disable-next-line no-unused-vars
-    const playPromise = audio.play().catch(console.warn);
+    if (doorEl && parsedState.doorOpen) {
+      doorEl.classList.add("open");
+    }
+  }
+}, []);
 
-    let fadeInInterval, fadeOutTimeout;
+/** Save game state to localStorage whenever it changes */
+useEffect(() => {
+  localStorage.setItem('escapeRoomState', JSON.stringify(gameState));
+}, [gameState]);
 
-    // Fade in effect
-    if (fadeIn > 0) {
-      const steps = Math.ceil(fadeIn * 20);
-      const increment = volume / steps;
-      const stepTime = fadeIn * 1000 / steps;
-      let currentStep = 0;
-      
-      fadeInInterval = setInterval(() => {
-        currentStep++;
-        audio.volume = Math.min(volume, increment * currentStep);
-        if (currentStep >= steps) {
-          clearInterval(fadeInInterval);
-          audio.volume = volume;
-        }
-      }, stepTime);
+/** Sound effects with fade in/out support */
+const playSound = useCallback((src, options = {}) => {
+  // Parse options
+  const settings = typeof options === "number" 
+    ? { duration: options } 
+    : options;
+
+  const {
+    start = 0,
+    duration = null,
+    volume = 1,
+    fadeIn = 0,
+    fadeOut = 0,
+  } = settings;
+
+  let audio;
+    const cacheKey = src.toString();
+
+    if (audioCache.has(cacheKey)) {
+      audio = audioCache.get(cacheKey).cloneNode();
+    } else {
+      audio = new Audio(src);
+      audioCache.set(cacheKey, audio);
     }
 
-    // Auto stop with fade out
-    if (duration) {
-      fadeOutTimeout = setTimeout(() => {
-        if (fadeOut > 0) {
-          const steps = Math.ceil(fadeOut * 20);
-          const decrement = audio.volume / steps;
-          const stepTime = fadeOut * 1000 / steps;
-          let currentVol = audio.volume;
-          
-          const fadeOutInterval = setInterval(() => {
-            currentVol -= decrement;
-            audio.volume = Math.max(0, currentVol);
-            if (currentVol <= 0) {
-              clearInterval(fadeOutInterval);
-              audio.pause();
-              audio.currentTime = 0;
-            }
-          }, stepTime);
-        } else {
-          audio.pause();
-          audio.currentTime = 0;
-        }
-      }, duration * 1000);
-    }
+  audio.currentTime = start;
+  audio.volume = fadeIn > 0 ? 0 : volume;
+  
+  // Play audio with error handling
+  // eslint-disable-next-line no-unused-vars
+  const playPromise = audio.play().catch(console.warn);
 
-    // Cleanup function
-    audio.stop = () => {
-      clearInterval(fadeInInterval);
-      clearTimeout(fadeOutTimeout);
-      audio.pause();
-      audio.currentTime = 0;
-    };
-    audioCache.clear();
-    return audio;
+  let fadeInInterval, fadeOutTimeout;
+
+  // Fade in effect
+  if (fadeIn > 0) {
+    const steps = Math.ceil(fadeIn * 20);
+    const increment = volume / steps;
+    const stepTime = fadeIn * 1000 / steps;
+    let currentStep = 0;
     
-  }, []);
+    fadeInInterval = setInterval(() => {
+      currentStep++;
+      audio.volume = Math.min(volume, increment * currentStep);
+      if (currentStep >= steps) {
+        clearInterval(fadeInInterval);
+        audio.volume = volume;
+      }
+    }, stepTime);
+  }
 
-  /** Play sequence of sounds with Promise support */
-  const playSequence = async (sounds) => {
-    for (const sound of sounds) {
-      let src, options;
-      
-      if (sound.src) {
-        src = sound.src;
-        options = sound.options;
+  // Auto stop with fade out
+  if (duration) {
+    fadeOutTimeout = setTimeout(() => {
+      if (fadeOut > 0) {
+        const steps = Math.ceil(fadeOut * 20);
+        const decrement = audio.volume / steps;
+        const stepTime = fadeOut * 1000 / steps;
+        let currentVol = audio.volume;
+        
+        const fadeOutInterval = setInterval(() => {
+          currentVol -= decrement;
+          audio.volume = Math.max(0, currentVol);
+          if (currentVol <= 0) {
+            clearInterval(fadeOutInterval);
+            audio.pause();
+            audio.currentTime = 0;
+          }
+        }, stepTime);
       } else {
-        const soundKey = Object.keys(sound).find(key => key !== 'options');
-        src = sound[soundKey];
-        options = sound.options;
+        audio.pause();
+        audio.currentTime = 0;
       }
-      
-      const audio = playSound(src, options);
-    
-      // Wait for sound to finish
-      await new Promise(resolve => {
-        const duration = options?.duration;
-        if (duration) {
-          setTimeout(resolve, duration * 1000);
-        } else {
-          audio.onended = resolve;
-          setTimeout(resolve, 30000);
-        }
-      });
-    }
+    }, duration * 1000);
+  }
+
+  // Cleanup function
+  audio.stop = () => {
+    clearInterval(fadeInInterval);
+    clearTimeout(fadeOutTimeout);
+    audio.pause();
+    audio.currentTime = 0;
   };
+  audioCache.clear();
+  return audio;
+  
+}, []);
 
-  // Random sounds
+/** Play sequence of sounds with Promise support */
+const playSequence = async (sounds) => {
+  for (const sound of sounds) {
+    let src, options;
+    
+    if (sound.src) {
+      src = sound.src;
+      options = sound.options;
+    } else {
+      const soundKey = Object.keys(sound).find(key => key !== 'options');
+      src = sound[soundKey];
+      options = sound.options;
+    }
+    
+    const audio = playSound(src, options);
+  
+    // Wait for sound to finish
+    await new Promise(resolve => {
+      const duration = options?.duration;
+      if (duration) {
+        setTimeout(resolve, duration * 1000);
+      } else {
+        audio.onended = resolve;
+        setTimeout(resolve, 30000);
+      }
+    });
+  }
+};
+
+// Random sounds
 useEffect(() => {
   const spookySounds = [EmptyRoom, VoicesShort, Steps];
 
@@ -427,7 +427,6 @@ useEffect(() => {
       console.error("❌ Error playing sound:", error);
     }
   };
-
 
   const interval = setInterval(() => {
     if (window.gameEnded) return; // check if the game has not been ended
@@ -474,8 +473,7 @@ useEffect(() => {
       document.removeEventListener("click", handleOutsideClick);
     };
 
-    // 🔹 Handler after clicing outside
-    
+    // 🔹 Handler after clicing outside  
     const handleOutsideClick = (e) => {
       if (!dialog.contains(e.target)) {
         closeMessage();
@@ -494,228 +492,173 @@ useEffect(() => {
   };
 
   /** Audio fadeout */
-      const fadeOutAudio = (audio, duration = 1000) => {
-      const startVolume = audio.volume;
-      const fadeStep = startVolume / (duration / 50);
-      
-      const fadeInterval = setInterval(() => {
-        if (audio.volume > fadeStep) {
-          audio.volume -= fadeStep;
-        } else {
-          audio.volume = 0;
-          audio.pause();
-          audio.currentTime = 0;
-          clearInterval(fadeInterval);
-          window.roomAmbientAudio = null;
-        }
-      }, 50);
-    };
-
-  useEffect(() => {
-    let cleanupAll = () => {};
-    let cleanupButtons = null;
-
-    // wait then elements are ready
-  const checkElementsReady = () => {
-    const roomWrap = wrapRef.current;
-    const room = roomRef.current;
-    const roomCanvas = document.getElementById("room");
+    const fadeOutAudio = (audio, duration = 1000) => {
+    const startVolume = audio.volume;
+    const fadeStep = startVolume / (duration / 50);
     
-    if (!roomWrap || !room || !roomCanvas) {
-      // try again after 50s
-      setTimeout(checkElementsReady, 50);
-      return;
-    }
-
-    const initButtons = () => {
-      const leftBtn = document.getElementById("turnLeft");
-      const rightBtn = document.getElementById("turnRight");
-      const zoomBtn = document.getElementById("zoom");
-
-      leftBtn && leftBtn.addEventListener("click", onLeft);
-      rightBtn && rightBtn.addEventListener("click", onRight);
-      zoomBtn && zoomBtn.addEventListener("click", onZoom);
-
-      // return cleanup after disconnection
-      return () => {
-        leftBtn && leftBtn.removeEventListener("click", onLeft);
-        rightBtn && rightBtn.removeEventListener("click", onRight);
-        zoomBtn && zoomBtn.removeEventListener("click", onZoom);
-      };
-    };
-
-    const initKeyboardSupport = () => {
-      document.addEventListener("keydown", (e) => {
-        if (e.key === "ArrowLeft") updateView("left");
-        else if (e.key === "ArrowRight") updateView("right");
-      });
-    };
-
-    const initSwipeSupport = () => {
-      let touchStartX = null;
-      roomWrap.addEventListener("touchstart", (e) => {
-        touchStartX = e.changedTouches[0].screenX;
-      });
-      roomWrap.addEventListener("touchend", (e) => {
-        if (touchStartX === null) return;
-        const touchEndX = e.changedTouches[0].screenX;
-        const diffX = touchStartX - touchEndX;
-        if (Math.abs(diffX) > 30) {
-          diffX > 0 ? updateView("left") : updateView("right");
-        }
-        touchStartX = null;
-      });
-    };
-
-    const initMouseMovement = () => {
-      roomWrap.addEventListener("mousemove", (e) => {
-        const xPercent = (e.clientX / window.innerWidth - 0.5) * 2;
-        const yPercent = (e.clientY / window.innerHeight - 0.5) * 2;
-        const rotateXOffset = parseFloat((xPercent * 15).toFixed(2));
-        const rotateYOffset = parseFloat((-yPercent * 15).toFixed(2));
-        updateRoomTransform(rotateXOffset, rotateYOffset);
-      });
-    };
-
-    const initCubes = () => {
-      document.querySelectorAll(".cube").forEach((cube) => {
-        const faces = ["top", "left", "front", "right", "back", "bottom"];
-        faces.forEach((face) => {
-          const faceElement = document.createElement("div");
-          faceElement.classList.add(`cube-${face}`);
-          cube.appendChild(faceElement);
-        });
-      });
-    };
-
-    const initTooltip = () => {
-      // Mirror crack hover
-      const tooltip = document.querySelector("#tooltip");
-      document.addEventListener("mousemove", (event) => {
-        const tooltipPadding = 10;
-        const pageWidth = window.innerWidth;
-        const pageHeight = window.innerHeight;
-        let top = event.clientY + tooltipPadding;
-        let left = event.clientX + tooltipPadding;
-
-        if (left + tooltip.offsetWidth > pageWidth) {
-          left = event.clientX - tooltip.offsetWidth - tooltipPadding;
-        }
-        if (top + tooltip.offsetHeight > pageHeight) {
-          top = event.clientY - tooltip.offsetHeight - tooltipPadding;
-        }
-        tooltip.style.top = `${top}px`;
-        tooltip.style.left = `${left}px`;
-      });
-
-      document.querySelectorAll("[data-comment]").forEach((el) => {
-        el.addEventListener("mouseenter", () => {
-          const span = document.createElement("span");
-          tooltip.innerHTML = "";
-          span.textContent = el.getAttribute("data-title");
-          span.classList.add("tooltip-content");
-          tooltip.appendChild(span);
-          tooltip.style.display = "block";
-        });
-        el.addEventListener("mouseleave", () => {
-          tooltip.innerHTML = "";
-          tooltip.style.display = "none";
-        });
-      });
-    };
-    
-    const initItems = () => {
-  // ✅ necháme jen hint button
-  const hints = [
-    "Talk to the old spirits.",
-    "Admire the art.",
-    "Get the code first.",
-    "Don't forget to look into boxes.",
-    "You need to search all the stuff.",
-    "Play sports.",
-    "Read the book.",
-    "It's always better with lights on.",
-    "Don't be afraid of ghosts.", 
-    "Don't forget to check under the rug.",
-  ];
-
-  const hintBtn = document.getElementById("hint");
-  if (hintBtn) {
-    hintBtn.onclick = () => {
-      const random = hints[Math.floor(Math.random() * hints.length)];
-      showComment(random, "hint");
-
-      // 📝 Save hints used
-      const used = parseInt(localStorage.getItem("hintsUsed") || "0", 10);
-      localStorage.setItem("hintsUsed", used + 1);
-    };
-  }
-};
-
-    const init = () => {
-      requestAnimationFrame(() => updateView());
-      cleanupButtons = initButtons();
-      initKeyboardSupport();
-      initSwipeSupport();
-      initMouseMovement();
-      initCubes();
-      initTooltip();
-      initItems();
-    };
-
-    // --- listeners with stable refs ---
-      const onLeft = () => updateView("left");
-      const onRight = () => updateView("right");
-      const onZoom = () => {
-        const rc = document.getElementById("room");
-        if (rc) rc.classList.toggle("zoomed");
-      };
-      const onKey = (e) => {
-        if (e.key === "ArrowLeft") updateView("left");
-        else if (e.key === "ArrowRight") updateView("right");
-      };
-      const onMouseMove = (e) => {
-        const w = wrapRef.current;
-        const r = roomRef.current;
-        if (!w || !r) return;
-        const xPercent = (e.clientX / window.innerWidth - 0.5) * 2;
-        const yPercent = (e.clientY / window.innerHeight - 0.5) * 2;
-        const rotateXOffset = parseFloat((xPercent * 15).toFixed(2));
-        const rotateYOffset = parseFloat((-yPercent * 15).toFixed(2));
-        // use updateRoomTransform
-        updateRoomTransform(rotateXOffset, rotateYOffset);
-      };
-      let touchStartX = null;
-      const onTouchStart = (e) => { touchStartX = e.changedTouches[0].screenX; };
-      const onTouchEnd = (e) => {
-        if (touchStartX === null) return;
-        const diffX = touchStartX - e.changedTouches[0].screenX;
-        if (Math.abs(diffX) > 30) (diffX > 0 ? updateView("left") : updateView("right"));
-        touchStartX = null;
-      };
-
-    document.addEventListener("keydown", onKey);
-    roomWrap.addEventListener("mousemove", onMouseMove);
-    roomWrap.addEventListener("touchstart", onTouchStart, { passive: true });
-    roomWrap.addEventListener("touchend", onTouchEnd);
-
-    cleanupAll = () => {
-      document.removeEventListener("keydown", onKey);
-      if (roomWrap) {
-        roomWrap.removeEventListener("mousemove", onMouseMove);
-        roomWrap.removeEventListener("touchstart", onTouchStart);
-        roomWrap.removeEventListener("touchend", onTouchEnd);
+    const fadeInterval = setInterval(() => {
+      if (audio.volume > fadeStep) {
+        audio.volume -= fadeStep;
+      } else {
+        audio.volume = 0;
+        audio.pause();
+        audio.currentTime = 0;
+        clearInterval(fadeInterval);
+        window.roomAmbientAudio = null;
       }
-      cleanupButtons && cleanupButtons();
+    }, 50);
+  };
+
+useEffect(() => {
+  let cleanupAll = () => {};
+
+  // wait then elements are ready
+  const checkElementsReady = () => {
+  const roomWrap = wrapRef.current;
+  const room = roomRef.current;
+  const roomCanvas = document.getElementById("room");
+  
+  if (!roomWrap || !room || !roomCanvas) {
+    // try again after 50s
+    setTimeout(checkElementsReady, 50);
+    return;
+  }
+
+  const initKeyboardSupport = () => {
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "ArrowLeft") updateView("left");
+      else if (e.key === "ArrowRight") updateView("right");
+    });
+  };
+
+  const initSwipeSupport = () => {
+    let touchStartX = null;
+    roomWrap.addEventListener("touchstart", (e) => {
+      touchStartX = e.changedTouches[0].screenX;
+    });
+    roomWrap.addEventListener("touchend", (e) => {
+      if (touchStartX === null) return;
+      const touchEndX = e.changedTouches[0].screenX;
+      const diffX = touchStartX - touchEndX;
+      if (Math.abs(diffX) > 30) {
+        diffX > 0 ? updateView("left") : updateView("right");
+      }
+      touchStartX = null;
+    });
+  };
+
+  const initMouseMovement = () => {
+    roomWrap.addEventListener("mousemove", (e) => {
+      const xPercent = (e.clientX / window.innerWidth - 0.5) * 2;
+      const yPercent = (e.clientY / window.innerHeight - 0.5) * 2;
+      const rotateXOffset = parseFloat((xPercent * 15).toFixed(2));
+      const rotateYOffset = parseFloat((-yPercent * 15).toFixed(2));
+      updateRoomTransform(rotateXOffset, rotateYOffset);
+    });
+  };
+
+  const initCubes = () => {
+    document.querySelectorAll(".cube").forEach((cube) => {
+      const faces = ["top", "left", "front", "right", "back", "bottom"];
+      faces.forEach((face) => {
+        const faceElement = document.createElement("div");
+        faceElement.classList.add(`cube-${face}`);
+        cube.appendChild(faceElement);
+      });
+    });
+  };
+
+  const initTooltip = () => {
+    // Mirror crack hover
+    const tooltip = document.querySelector("#tooltip");
+    document.addEventListener("mousemove", (event) => {
+      const tooltipPadding = 10;
+      const pageWidth = window.innerWidth;
+      const pageHeight = window.innerHeight;
+      let top = event.clientY + tooltipPadding;
+      let left = event.clientX + tooltipPadding;
+
+      if (left + tooltip.offsetWidth > pageWidth) {
+        left = event.clientX - tooltip.offsetWidth - tooltipPadding;
+      }
+      if (top + tooltip.offsetHeight > pageHeight) {
+        top = event.clientY - tooltip.offsetHeight - tooltipPadding;
+      }
+      tooltip.style.top = `${top}px`;
+      tooltip.style.left = `${left}px`;
+    });
+
+    document.querySelectorAll("[data-comment]").forEach((el) => {
+      el.addEventListener("mouseenter", () => {
+        const span = document.createElement("span");
+        tooltip.innerHTML = "";
+        span.textContent = el.getAttribute("data-title");
+        span.classList.add("tooltip-content");
+        tooltip.appendChild(span);
+        tooltip.style.display = "block";
+      });
+      el.addEventListener("mouseleave", () => {
+        tooltip.innerHTML = "";
+        tooltip.style.display = "none";
+      });
+    });
+  };
+  
+  const init = () => {
+    requestAnimationFrame(() => updateView());
+    initKeyboardSupport();
+    initSwipeSupport();
+    initMouseMovement();
+    initCubes();
+    initTooltip();
+  };
+
+  // --- listeners with stable refs ---
+    const onKey = (e) => {
+      if (e.key === "ArrowLeft") updateView("left");
+      else if (e.key === "ArrowRight") updateView("right");
+    };
+    const onMouseMove = (e) => {
+      const w = wrapRef.current;
+      const r = roomRef.current;
+      if (!w || !r) return;
+      const xPercent = (e.clientX / window.innerWidth - 0.5) * 2;
+      const yPercent = (e.clientY / window.innerHeight - 0.5) * 2;
+      const rotateXOffset = parseFloat((xPercent * 15).toFixed(2));
+      const rotateYOffset = parseFloat((-yPercent * 15).toFixed(2));
+      // use updateRoomTransform
+      updateRoomTransform(rotateXOffset, rotateYOffset);
+    };
+    let touchStartX = null;
+    const onTouchStart = (e) => { touchStartX = e.changedTouches[0].screenX; };
+    const onTouchEnd = (e) => {
+      if (touchStartX === null) return;
+      const diffX = touchStartX - e.changedTouches[0].screenX;
+      if (Math.abs(diffX) > 30) (diffX > 0 ? updateView("left") : updateView("right"));
+      touchStartX = null;
     };
 
-    init();
-      };    
+  document.addEventListener("keydown", onKey);
+  roomWrap.addEventListener("mousemove", onMouseMove);
+  roomWrap.addEventListener("touchstart", onTouchStart, { passive: true });
+  roomWrap.addEventListener("touchend", onTouchEnd);
+
+  cleanupAll = () => {
+    document.removeEventListener("keydown", onKey);
+    if (roomWrap) {
+      roomWrap.removeEventListener("mousemove", onMouseMove);
+      roomWrap.removeEventListener("touchstart", onTouchStart);
+      roomWrap.removeEventListener("touchend", onTouchEnd);
+    }
+  };
+
+  init();
+};    
       
-      // Start the check
-      checkElementsReady();
-      return () => cleanupAll();   
-  }, [playSound]);
+  // Start the check
+  checkElementsReady();
+  return () => cleanupAll();   
+}, [playSound]);
 
   return (
     <div id="room" 
@@ -723,7 +666,7 @@ useEffect(() => {
     ${lightsOn ? "" : "dark"}
     ${isFlickering ? "lights-glitch" : ""}
   `.trim()}
->
+  >
       <div className="overlay darkness"></div>
       <div className="overlay zoom"></div>
       <div id="win"></div>
@@ -943,8 +886,6 @@ useEffect(() => {
               >
               <span className="visually-hidden">Crumpled contract lying on the floor</span>
             </div>
-
-
           </div>
           
           <div className="cube cardbox" 
@@ -990,13 +931,12 @@ useEffect(() => {
                   overlay.classList.remove("active");
                 }, 5500); // ⏳ remove detail
               }}
-            >
+              >
               <span className="visually-hidden">OUIJA board</span>
             </div>          
           </div>
         </div>
       </div>
-
       <CodeLock
         showLock={showLock}
         setShowLock={setShowLock}
@@ -1009,35 +949,10 @@ useEffect(() => {
         getEasterEggsCount={getEasterEggsCount}
         calculateGameTime={calculateGameTime}
       />
-
       <RoomNavigation
-        onLeft={() => updateView("left")}
-        onRight={() => updateView("right")}
-        onZoom={() => {
-          const rc = document.getElementById("room");
-          if (rc) rc.classList.toggle("zoomed");
-        }}
-        onHint={() => {
-          const hints = [
-            "Talk to the old spirits.",
-            "Admire the art.",
-            "Get the code first.",
-            "Don't forget to look into boxes.",
-            "You need to search all the stuff.",
-            "Play sports.",
-            "Read the book.",
-            "It's always better with lights on.",
-            "Don't be afraid of ghosts.",
-            "Don't forget to check under the rug.",
-          ];
-          const random = hints[Math.floor(Math.random() * hints.length)];
-          showComment(random, "hint");
-
-          const used = parseInt(localStorage.getItem("hintsUsed") || "0", 10);
-          localStorage.setItem("hintsUsed", used + 1);
-        }}
+        updateView={updateView}
+        showComment={showComment}
       />
-
       <div id="tooltip"></div>
       <div id="itemCur"></div>
       <div id="dialog" role="status" aria-live="polite"></div>
