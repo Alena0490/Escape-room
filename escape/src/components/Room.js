@@ -44,39 +44,42 @@ const Room = () => {
   const updateRoomTransform = (offsetX, offsetY) => {
     const r = roomRef.current;
     if (!r) return;
-    r.style.transform = `rotateX(${offsetY}deg) rotateY(${currentRotationY + offsetX}deg)`;
-  };
+    // Pouze mouse offset, neměňte základní rotaci
+    r.style.transform = `rotateX(${offsetY}deg) rotateY(${currentRotationY}deg)`;
+  }
 
   const updateView = (direction) => {
-    const roomWrap = wrapRef.current;
-    const room = roomRef.current;
-    if (!roomWrap || !room) return;
+  const roomWrap = wrapRef.current;
+  const room = roomRef.current;
+  if (!roomWrap || !room) return;
 
-    if (direction === "left") {
-      currentViewIndex = (currentViewIndex + 1) % views.length;
-      currentRotationY -= 90;
-    } else if (direction === "right") {
-      currentViewIndex = (currentViewIndex - 1 + views.length) % views.length;
-      currentRotationY += 90;
-    }
+  if (direction === "left") {
+    currentViewIndex = (currentViewIndex + 1) % views.length;
+    currentRotationY -= 90;
+  } else if (direction === "right") {
+    currentViewIndex = (currentViewIndex - 1 + views.length) % views.length;
+    currentRotationY += 90;
+  }
 
-    roomWrap.classList.remove(...views);
-    roomWrap.classList.add(views[currentViewIndex]);
+  // Aplikujte rotaci přímo na room element
+  room.style.transform = `rotateY(${currentRotationY}deg)`;
 
-    roomWrap.classList.add("rotating");
-    setTimeout(() => {
-      const w = wrapRef.current;
-      if (w) w.classList.remove("rotating");
-    }, 500);
+  // CSS třídy jen pro logiku zobrazování obsahu
+  roomWrap.classList.remove(...views);
+  roomWrap.classList.add(views[currentViewIndex]);
 
-    document.querySelectorAll(".room .wall").forEach((el) =>
-      el.classList.remove("active")
-    );
-    const activeWall = document.querySelector(`.wall.${walls[currentViewIndex]}`);
-    if (activeWall) activeWall.classList.add("active");
+  roomWrap.classList.add("rotating");
+  setTimeout(() => {
+    const w = wrapRef.current;
+    if (w) w.classList.remove("rotating");
+  }, 500);
 
-    updateRoomTransform(0, 0);
-  };
+  document.querySelectorAll(".room .wall").forEach((el) =>
+    el.classList.remove("active")
+  );
+  const activeWall = document.querySelector(`.wall.${walls[currentViewIndex]}`);
+  if (activeWall) activeWall.classList.add("active");
+};
 
   /** === GHOST === */
   useEffect(() => {
@@ -460,19 +463,26 @@ useEffect(() => {
     return;
   }
 
-  const initKeyboardSupport = () => {
-    document.addEventListener("keydown", (e) => {
-      if (e.key === "ArrowLeft") updateView("left");
-      else if (e.key === "ArrowRight") updateView("right");
-    });
+    const initKeyboardSupport = () => {
+    const onKeyDown = (e) => {
+      if (e.key === "ArrowLeft") {
+        e.preventDefault();
+        updateView("left");
+      } else if (e.key === "ArrowRight") {
+        e.preventDefault();
+        updateView("right");
+      }
+    };
+    document.addEventListener("keydown", onKeyDown);
+    return () => document.removeEventListener("keydown", onKeyDown);
   };
 
   const initSwipeSupport = () => {
     let touchStartX = null;
-    roomWrap.addEventListener("touchstart", (e) => {
+    const onTouchStart = (e) => {
       touchStartX = e.changedTouches[0].screenX;
-    });
-    roomWrap.addEventListener("touchend", (e) => {
+    };
+    const onTouchEnd = (e) => {
       if (touchStartX === null) return;
       const touchEndX = e.changedTouches[0].screenX;
       const diffX = touchStartX - touchEndX;
@@ -480,18 +490,19 @@ useEffect(() => {
         diffX > 0 ? updateView("left") : updateView("right");
       }
       touchStartX = null;
-    });
+    };
+    
+    roomWrap.addEventListener("touchstart", onTouchStart, { passive: true });
+    roomWrap.addEventListener("touchend", onTouchEnd);
+    
+    return () => {
+      roomWrap.removeEventListener("touchstart", onTouchStart);
+      roomWrap.removeEventListener("touchend", onTouchEnd);
+    };
   };
 
-  const initMouseMovement = () => {
-    roomWrap.addEventListener("mousemove", (e) => {
-      const xPercent = (e.clientX / window.innerWidth - 0.5) * 2;
-      const yPercent = (e.clientY / window.innerHeight - 0.5) * 2;
-      const rotateXOffset = parseFloat((xPercent * 15).toFixed(2));
-      const rotateYOffset = parseFloat((-yPercent * 15).toFixed(2));
-      updateRoomTransform(rotateXOffset, rotateYOffset);
-    });
-  };
+  // ZMĚNA: Mouse tracking ODSTRANĚN - způsoboval konflikt s navigation tlačítky
+  // initMouseMovement() funkce byla odstraněna úplně
 
   const initCubes = () => {
     document.querySelectorAll(".cube").forEach((cube) => {
@@ -540,55 +551,22 @@ useEffect(() => {
     });
   };
   
-  const init = () => {
+    const init = () => {
     requestAnimationFrame(() => updateView());
-    initKeyboardSupport();
-    initSwipeSupport();
-    initMouseMovement();
+    const keyboardCleanup = initKeyboardSupport();
+    const swipeCleanup = initSwipeSupport();
+    const tooltipCleanup = initTooltip();
     initCubes();
-    initTooltip();
+    
+    // ZMĚNA: Vrací cleanup funkce pro správné odpojení event listenerů
+    return () => {
+      keyboardCleanup && keyboardCleanup();
+      swipeCleanup && swipeCleanup();
+      tooltipCleanup && tooltipCleanup();
+    };
   };
 
-  // --- listeners with stable refs ---
-    const onKey = (e) => {
-      if (e.key === "ArrowLeft") updateView("left");
-      else if (e.key === "ArrowRight") updateView("right");
-    };
-    const onMouseMove = (e) => {
-      const w = wrapRef.current;
-      const r = roomRef.current;
-      if (!w || !r) return;
-      const xPercent = (e.clientX / window.innerWidth - 0.5) * 2;
-      const yPercent = (e.clientY / window.innerHeight - 0.5) * 2;
-      const rotateXOffset = parseFloat((xPercent * 15).toFixed(2));
-      const rotateYOffset = parseFloat((-yPercent * 15).toFixed(2));
-      // use updateRoomTransform
-      updateRoomTransform(rotateXOffset, rotateYOffset);
-    };
-    let touchStartX = null;
-    const onTouchStart = (e) => { touchStartX = e.changedTouches[0].screenX; };
-    const onTouchEnd = (e) => {
-      if (touchStartX === null) return;
-      const diffX = touchStartX - e.changedTouches[0].screenX;
-      if (Math.abs(diffX) > 30) (diffX > 0 ? updateView("left") : updateView("right"));
-      touchStartX = null;
-    };
-
-  document.addEventListener("keydown", onKey);
-  roomWrap.addEventListener("mousemove", onMouseMove);
-  roomWrap.addEventListener("touchstart", onTouchStart, { passive: true });
-  roomWrap.addEventListener("touchend", onTouchEnd);
-
-  cleanupAll = () => {
-    document.removeEventListener("keydown", onKey);
-    if (roomWrap) {
-      roomWrap.removeEventListener("mousemove", onMouseMove);
-      roomWrap.removeEventListener("touchstart", onTouchStart);
-      roomWrap.removeEventListener("touchend", onTouchEnd);
-    }
-  };
-
-  init();
+  cleanupAll = init();
 };    
       
   // Start the check
