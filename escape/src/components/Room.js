@@ -3,10 +3,9 @@ import "./Room.css";
 import CodeLock from "./CodeLock";
 import Shelf from "./Shelf";
 import RoomNavigation from "./RoomNavigation";
-import AudioController from "./AudioControler";
+import AudioController from "./AudioController";
 /** Sounds */
 import switchSound from "../sounds/light-switch-382712.mp3";
-import Voices from "../sounds/015922-whispers-39schizophrenic3.mp3"
 import Ghost from "../sounds/ghost-6979.mp3";
 import Alien from "../sounds/alien-underworld-sound-287342.mp3";
 import Mirror from "../sounds/creepy-moan-87456.mp3";
@@ -17,10 +16,6 @@ import Paper from "../sounds/paper-rustle-81855.mp3"
 import Click from "../sounds/mouse-click-290204.mp3"
 import JumpScare from "../sounds/075283-quotbehind-youquot-whispe.mp3"
 import RadioTune from "../sounds/am-tuning-104200.mp3"
-/** Random sounds**/
-import EmptyRoom from "../sounds/empty-room-horror-sound-sfx-3339.mp3"
-import VoicesShort from "../sounds/schizophrenic-voices-62486.mp3"
-import Steps from "../sounds/steps-approaching-in-the-darknes.mp3"
 
 const audioCache = new Map();
 
@@ -129,8 +124,6 @@ const Room = () => {
         if (mirrorEl) mirrorEl.classList.add("lit");
         setGameState(prev => ({ ...prev, lightsOn: true }));
 
-        if (window.roomAmbientAudio) fadeOutAudio(window.roomAmbientAudio, 800);
-
         const onMessages = [
           "Much better.",
           "Finally some light!",
@@ -150,15 +143,6 @@ const Room = () => {
         if (mirrorEl) mirrorEl.classList.remove("lit");
 
         setGameState(prev => ({ ...prev, lightsOn: false }));
-          // Delay ambient start to avoid conflict with switch sound
-          if (!window.roomAmbientAudio) {
-            setTimeout(() => {
-              window.roomAmbientAudio = new Audio(Voices);
-              window.roomAmbientAudio.loop = true;
-              window.roomAmbientAudio.volume = 0.3;
-              window.roomAmbientAudio.play().catch(() => {});
-            }, 400);
-          }
 
         // rotating OFF message
         const offMessages = [
@@ -197,17 +181,6 @@ useEffect(() => {
 }, []);
 
   /*** ENDING SCREEN  */
-  /** Stop audio */
-  useEffect(() => {
-  return () => {
-    if (window.roomAmbientAudio) {
-      window.roomAmbientAudio.pause();
-      window.roomAmbientAudio.currentTime = 0;
-      window.roomAmbientAudio = null;
-    }
-  };
-}, []);
-
 // Statistics functions
 const calculateGameTime = () => {
   const startTime = localStorage.getItem('gameStartTime');
@@ -405,43 +378,6 @@ const playSequence = async (sounds) => {
     });
   }
 };
-
-// Random sounds
-useEffect(() => {
-  const spookySounds = [EmptyRoom, VoicesShort, Steps];
-
-  const playRandomSpooky = () => {
-    // Always pick completely random sound, no queue needed
-    const randomIndex = Math.floor(Math.random() * spookySounds.length);
-    const soundToPlay = spookySounds[randomIndex];
-    
-    // Set louder volume only for Steps sound
-    let volume = 0.3;
-    if (soundToPlay === Steps) {
-      volume = 0.6;
-    }
-    
-    try {
-      playSound(soundToPlay, { volume: volume });
-    } catch (error) {
-      console.error("❌ Error playing sound:", error);
-    }
-  };
-
-  const interval = setInterval(() => {
-    if (window.gameEnded) return; // check if the game has not been ended
-    const randomCheck = Math.random();
-    const shouldPlay = lightsOn ? randomCheck < 0.75 : randomCheck < 0.2;
-
-    if (shouldPlay) {
-      playRandomSpooky();
-    }
-  }, 30000);
-
-  return () => {
-    clearInterval(interval);
-  };
-}, [lightsOn, playSound]); // Only necessary dependencies
 
  /** Display comment dialog */
   const showComment = (text, className = "") => {
@@ -667,6 +603,11 @@ useEffect(() => {
     ${isFlickering ? "lights-glitch" : ""}
   `.trim()}
   >
+     <AudioController 
+        lightsOn={lightsOn}
+        playSound={playSound}
+        fadeOutAudio={fadeOutAudio}
+      />
       <div className="overlay darkness"></div>
       <div className="overlay zoom"></div>
       <div id="win"></div>

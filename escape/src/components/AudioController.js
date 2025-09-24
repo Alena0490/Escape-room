@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 /** Random sounds **/
 import EmptyRoom from "../sounds/empty-room-horror-sound-sfx-3339.mp3";
 import VoicesShort from "../sounds/schizophrenic-voices-62486.mp3";
@@ -6,6 +6,7 @@ import Steps from "../sounds/steps-approaching-in-the-darknes.mp3";
 import Voices from "../sounds/015922-whispers-39schizophrenic3.mp3";
 
 const AudioController = ({ lightsOn, playSound, fadeOutAudio }) => {
+  const [hasBeenLitBefore, setHasBeenLitBefore] = useState(false);
   
   // Random spooky sounds
   useEffect(() => {
@@ -31,6 +32,7 @@ const AudioController = ({ lightsOn, playSound, fadeOutAudio }) => {
       if (window.gameEnded) return;
       const randomCheck = Math.random();
       const shouldPlay = lightsOn ? randomCheck < 0.75 : randomCheck < 0.2;
+      console.log(`Lights: ${lightsOn}, Random: ${randomCheck}, Should play: ${shouldPlay}`);
 
       if (shouldPlay) {
         playRandomSpooky();
@@ -41,8 +43,18 @@ const AudioController = ({ lightsOn, playSound, fadeOutAudio }) => {
   }, [lightsOn, playSound]);
 
   // Ambient audio management
-  useEffect(() => {
-    if (!lightsOn && !window.roomAmbientAudio) {
+// Track when lights have been turned on for the first time
+useEffect(() => {
+  if (lightsOn && !hasBeenLitBefore) {
+    setHasBeenLitBefore(true);
+  }
+}, [lightsOn, hasBeenLitBefore]);
+
+// Ambient audio management
+useEffect(() => {
+  if (!lightsOn && hasBeenLitBefore) {
+    // Start ambient audio only after lights have been turned on at least once
+    if (!window.roomAmbientAudio) {
       setTimeout(() => {
         window.roomAmbientAudio = new Audio(Voices);
         window.roomAmbientAudio.loop = true;
@@ -50,11 +62,11 @@ const AudioController = ({ lightsOn, playSound, fadeOutAudio }) => {
         window.roomAmbientAudio.play().catch(() => {});
       }, 400);
     }
-    
-    if (lightsOn && window.roomAmbientAudio) {
-      fadeOutAudio(window.roomAmbientAudio, 800);
-    }
-  }, [lightsOn, fadeOutAudio]);
+  } else if (lightsOn && window.roomAmbientAudio) {
+    // Stop ambient audio when lights are ON
+    fadeOutAudio(window.roomAmbientAudio, 800);
+  }
+}, [lightsOn, hasBeenLitBefore, fadeOutAudio]);
 
   // Cleanup on unmount
   useEffect(() => {
