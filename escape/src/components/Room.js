@@ -4,6 +4,8 @@ import CodeLock from "./CodeLock";
 import Shelf from "./Shelf";
 import RoomNavigation from "./RoomNavigation";
 import AudioController from "./AudioController";
+import { lazy, Suspense } from 'react';
+const GhostComponent = lazy(() => import('./GhostComponent'));
 /** Sounds */
 import switchSound from "../sounds/light-switch-382712.mp3";
 import Ghost from "../sounds/ghost-6979.mp3";
@@ -30,7 +32,6 @@ const Room = () => {
     isFlickering: false,
   });
   const [showLock, setShowLock] = useState(false);
-  const [ghost, setGhost] = useState({ visible: false, top: 0, left: 0 });
 
   const onIndex = useRef(0);
   const offIndex = useRef(0);
@@ -80,29 +81,6 @@ const Room = () => {
   const activeWall = document.querySelector(`.wall.${walls[currentViewIndex]}`);
   if (activeWall) activeWall.classList.add("active");
 };
-
-  /** === GHOST === */
-  useEffect(() => {
-    let timeoutId;
-
-    const spawnGhost = () => {
-      if (window.gameEnded) return;
-
-      const chance = gameState.lightsOn ? 0.2 : 0.6;
-      if (Math.random() < chance) {
-        const top = Math.floor(Math.random() * 70) + 10;
-        const left = Math.floor(Math.random() * 70) + 10;
-        setGhost({ visible: true, top, left });
-
-        setTimeout(() => setGhost(g => ({ ...g, visible: false })), 2000);
-      }
-      timeoutId = setTimeout(spawnGhost, Math.random() * 20000 + 10000);
-    };
-
-    timeoutId = setTimeout(spawnGhost, Math.random() * 5000 + 5000);
-
-    return () => clearTimeout(timeoutId);
-  }, [gameState.lightsOn]);
 
   /** === SWITCH === */
   const handleSwitchClick = (e) => {
@@ -501,9 +479,7 @@ useEffect(() => {
     };
   };
 
-  // ZMĚNA: Mouse tracking ODSTRANĚN - způsoboval konflikt s navigation tlačítky
   // initMouseMovement() funkce byla odstraněna úplně
-
   const initCubes = () => {
     document.querySelectorAll(".cube").forEach((cube) => {
       const faces = ["top", "left", "front", "right", "back", "bottom"];
@@ -557,8 +533,7 @@ useEffect(() => {
     const swipeCleanup = initSwipeSupport();
     const tooltipCleanup = initTooltip();
     initCubes();
-    
-    // ZMĚNA: Vrací cleanup funkce pro správné odpojení event listenerů
+
     return () => {
       keyboardCleanup && keyboardCleanup();
       swipeCleanup && swipeCleanup();
@@ -754,12 +729,9 @@ useEffect(() => {
           </div>
                  
           <div className="wall wall-top">
-            {ghost.visible && (
-            <div
-              className="shadow-ghost"
-              style={{ top: `${ghost.top}%`, left: `${ghost.left}%` }}
-            />
-          )}
+              <Suspense fallback={null}>
+                <GhostComponent lightsOn={lightsOn} />
+              </Suspense>
           </div>
           
           <div className="wall wall-bottom">
