@@ -39,47 +39,105 @@ const Room = () => {
   /** === VIEW NAVIGATION === */
   const views = ["back-view", "left-view", "front-view", "right-view"];
   const walls = ["wall-back", "wall-left", "wall-front", "wall-right"];
-  let currentViewIndex = 0;
-  let currentRotationY = 0;
+  const rotationYRef = useRef(0);     // otočení stěn po Y
+  const viewIndexRef  = useRef(0);    // index aktuální stěny
+  const tiltRef       = useRef({ x: 0 }); // náklon pouze po X
+  const rafRef        = useRef(null);
 
-  const updateRoomTransform = (offsetX, offsetY) => {
+  const applyTransform = useCallback(() => {
     const r = roomRef.current;
     if (!r) return;
-    // Pouze mouse offset, neměňte základní rotaci
-    r.style.transform = `rotateX(${offsetY}deg) rotateY(${currentRotationY}deg)`;
+    const { x} = tiltRef.current;
+    r.style.transform = `rotateX(${x}deg) rotateY(${rotationYRef.current}deg)`;
+  }, []);
+
+
+  const updateRoomTransform = (_offsetX, offsetY) => {
+  tiltRef.current.x = offsetY;
+  if (!rafRef.current) {
+    rafRef.current = requestAnimationFrame(() => {
+      rafRef.current = null;
+      applyTransform();
+    });
   }
+};
 
   const updateView = (direction) => {
-  const roomWrap = wrapRef.current;
-  const room = roomRef.current;
-  if (!roomWrap || !room) return;
+    const roomWrap = wrapRef.current;
+    if (!roomWrap || !roomRef.current) return;
 
-  if (direction === "left") {
-    currentViewIndex = (currentViewIndex + 1) % views.length;
-    currentRotationY -= 90;
+    tiltRef.current.x = 0;
+
+    if (direction === "left") {
+    viewIndexRef.current = (viewIndexRef.current + 1) % views.length;
+    rotationYRef.current -= 90;
   } else if (direction === "right") {
-    currentViewIndex = (currentViewIndex - 1 + views.length) % views.length;
-    currentRotationY += 90;
+    viewIndexRef.current = (viewIndexRef.current - 1 + views.length) % views.length;
+    rotationYRef.current += 90;
   }
 
-  // Aplikujte rotaci přímo na room element
-  room.style.transform = `rotateY(${currentRotationY}deg)`;
-
-  // CSS třídy jen pro logiku zobrazování obsahu
+  // CSS classes for active view
   roomWrap.classList.remove(...views);
-  roomWrap.classList.add(views[currentViewIndex]);
+  roomWrap.classList.add(views[viewIndexRef.current]);
 
   roomWrap.classList.add("rotating");
-  setTimeout(() => {
-    const w = wrapRef.current;
-    if (w) w.classList.remove("rotating");
-  }, 500);
+  setTimeout(() => roomWrap.classList.remove("rotating"), 500);
 
-  document.querySelectorAll(".room .wall").forEach((el) =>
-    el.classList.remove("active")
-  );
-  const activeWall = document.querySelector(`.wall.${walls[currentViewIndex]}`);
-  if (activeWall) activeWall.classList.add("active");
+  document.querySelectorAll(".room .wall").forEach((el) => el.classList.remove("active"));
+  document.querySelector(`.wall.${walls[viewIndexRef.current]}`)?.classList.add("active");
+
+  applyTransform(); // compose Y-rotation with tilt
+};
+
+const initMouseTilt = () => {
+  const wrap = wrapRef.current;
+  if (!wrap) return () => {};
+
+   const MAX = 6;
+
+  const onMouseMove = (e) => {
+    // turn of on mobile and when zoomed
+    if ('ontouchstart' in window) return;
+    if (wrap.classList.contains('rotating')) return;
+    const root = document.getElementById('room');
+    if (root && root.classList.contains('zoomed')) return;
+
+    const yPercent = (e.clientY / window.innerHeight - 0.5) * 2; // -1..1
+    tiltRef.current.x = Math.max(-MAX, Math.min(MAX, -yPercent * MAX));
+
+      if (!rafRef.current) {
+        rafRef.current = requestAnimationFrame(() => {
+          rafRef.current = null;
+          applyTransform();
+        });
+      }
+    };
+
+    const onMouseLeave = () => {
+      tiltRef.current.x = 0;
+      applyTransform();
+    };
+
+    wrap.addEventListener('mousemove', onMouseMove);
+    wrap.addEventListener('mouseleave', onMouseLeave);
+
+    return () => {
+      wrap.removeEventListener('mousemove', onMouseMove);
+      wrap.removeEventListener('mouseleave', onMouseLeave);
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+      rafRef.current = null;
+    };
+  };
+
+  const initNavFreezeTilt = () => {
+  const onNavDown = (e) => {
+    if (e.target?.closest?.('.room-nav')) {
+      tiltRef.current.x = 0;
+      applyTransform();
+    }
+  };
+  document.addEventListener('pointerdown', onNavDown, true); // capture + dřív
+  return () => document.removeEventListener('pointerdown', onNavDown, true);
 };
 
   /** === SWITCH === */
@@ -479,7 +537,6 @@ useEffect(() => {
     };
   };
 
-  // initMouseMovement() funkce byla odstraněna úplně
   const initCubes = () => {
     document.querySelectorAll(".cube").forEach((cube) => {
       const faces = ["top", "left", "front", "right", "back", "bottom"];
@@ -528,18 +585,23 @@ useEffect(() => {
   };
   
     const init = () => {
-    requestAnimationFrame(() => updateView());
-    const keyboardCleanup = initKeyboardSupport();
-    const swipeCleanup = initSwipeSupport();
-    const tooltipCleanup = initTooltip();
-    initCubes();
+      requestAnimationFrame(() => updateView());
 
-    return () => {
-      keyboardCleanup && keyboardCleanup();
-      swipeCleanup && swipeCleanup();
-      tooltipCleanup && tooltipCleanup();
+      const keyboardCleanup = initKeyboardSupport();
+      const swipeCleanup    = initSwipeSupport();
+      const tooltipCleanup  = initTooltip();
+      const mouseTiltCleanup = initMouseTilt();
+      const navFreezeCleanup = initNavFreezeTilt();
+      initCubes();
+
+      return () => {
+        keyboardCleanup && keyboardCleanup();
+        swipeCleanup && swipeCleanup();
+        tooltipCleanup && tooltipCleanup();
+        mouseTiltCleanup && mouseTiltCleanup();
+        navFreezeCleanup && navFreezeCleanup();
+      };
     };
-  };
 
   cleanupAll = init();
 };    
