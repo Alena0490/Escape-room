@@ -26,8 +26,8 @@ const CodeLock = ({
     e.preventDefault();
     if (code === "483920") {
       playSequence([
-        { DoorOpen, options: { fadeIn: 0.2, duration: 2.5 } },
-        { Win, options: { volume: 1, start: 0.1 } },
+        { src: DoorOpen, options: { fadeIn: 0.2, duration: 2.5 } },
+        { src: Win, options: { volume: 1,  start: 0.1 } },
       ]);
 
       if (window.roomAmbientAudio) {

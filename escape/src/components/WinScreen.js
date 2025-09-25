@@ -7,6 +7,7 @@ const WinScreen = ({
   eggCount, 
   onRestart 
 }) => {
+     console.log("WinScreen rendered, onRestart is:", typeof onRestart);
     return (
         <section className="win-screen">
                 <div id="win" className="win">

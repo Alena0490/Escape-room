@@ -1,9 +1,11 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef } from "react";
 import "./Room.css";
 import CodeLock from "./CodeLock";
 import Shelf from "./Shelf";
 import RoomNavigation from "./RoomNavigation";
 import AudioController from "./AudioController";
+import useTilt from "../hooks/useTilt.js";
+import useSetAudio from "../hooks/useSetAudio.js"
 import { lazy, Suspense } from 'react';
 const GhostComponent = lazy(() => import('./GhostComponent'));
 /** Sounds */
@@ -19,11 +21,10 @@ import Click from "../sounds/mouse-click-290204.mp3"
 import JumpScare from "../sounds/075283-quotbehind-youquot-whispe.mp3"
 import RadioTune from "../sounds/am-tuning-104200.mp3"
 
-const audioCache = new Map();
-
 const Room = () => {
   const wrapRef = useRef(null);
   const roomRef = useRef(null);
+  const { playSound, playSequence, fadeOutAudio } = useSetAudio();
   const [isFlickering, setIsFlickering] = useState(false);
   const [gameState, setGameState] = useState({
     rugUp: false,
@@ -39,106 +40,46 @@ const Room = () => {
   /** === VIEW NAVIGATION === */
   const views = ["back-view", "left-view", "front-view", "right-view"];
   const walls = ["wall-back", "wall-left", "wall-front", "wall-right"];
-  const rotationYRef = useRef(0);     // otočení stěn po Y
-  const viewIndexRef  = useRef(0);    // index aktuální stěny
-  const tiltRef       = useRef({ x: 0 }); // náklon pouze po X
-  const rafRef        = useRef(null);
-
-  const applyTransform = useCallback(() => {
-    const r = roomRef.current;
-    if (!r) return;
-    const { x} = tiltRef.current;
-    r.style.transform = `rotateX(${x}deg) rotateY(${rotationYRef.current}deg)`;
-  }, []);
-
-
-  const updateRoomTransform = (_offsetX, offsetY) => {
-  tiltRef.current.x = offsetY;
-  if (!rafRef.current) {
-    rafRef.current = requestAnimationFrame(() => {
-      rafRef.current = null;
-      applyTransform();
+  const rotationYRef = useRef(0);
+  const viewIndexRef = useRef(0);
+  const {
+    applyTransform,       // pitch+yaw
+      resetTilt,          // tilt back to 0/0
+      bindMouseTilt,      // mousemove/mouseleave
+      bindNavFreezeTilt,  // reset when clicking on .room-nav
+    } = useTilt({
+      roomRef,
+      wrapRef,
+      rotationYRef,
+      maxPitch: 6,
+      maxYaw: 3,
     });
-  }
-};
 
   const updateView = (direction) => {
     const roomWrap = wrapRef.current;
     if (!roomWrap || !roomRef.current) return;
 
-    tiltRef.current.x = 0;
+    // reset tilt on view change
+    resetTilt();
 
     if (direction === "left") {
-    viewIndexRef.current = (viewIndexRef.current + 1) % views.length;
-    rotationYRef.current -= 90;
-  } else if (direction === "right") {
-    viewIndexRef.current = (viewIndexRef.current - 1 + views.length) % views.length;
-    rotationYRef.current += 90;
-  }
-
-  // CSS classes for active view
-  roomWrap.classList.remove(...views);
-  roomWrap.classList.add(views[viewIndexRef.current]);
-
-  roomWrap.classList.add("rotating");
-  setTimeout(() => roomWrap.classList.remove("rotating"), 500);
-
-  document.querySelectorAll(".room .wall").forEach((el) => el.classList.remove("active"));
-  document.querySelector(`.wall.${walls[viewIndexRef.current]}`)?.classList.add("active");
-
-  applyTransform(); // compose Y-rotation with tilt
-};
-
-const initMouseTilt = () => {
-  const wrap = wrapRef.current;
-  if (!wrap) return () => {};
-
-   const MAX = 6;
-
-  const onMouseMove = (e) => {
-    // turn of on mobile and when zoomed
-    if ('ontouchstart' in window) return;
-    if (wrap.classList.contains('rotating')) return;
-    const root = document.getElementById('room');
-    if (root && root.classList.contains('zoomed')) return;
-
-    const yPercent = (e.clientY / window.innerHeight - 0.5) * 2; // -1..1
-    tiltRef.current.x = Math.max(-MAX, Math.min(MAX, -yPercent * MAX));
-
-      if (!rafRef.current) {
-        rafRef.current = requestAnimationFrame(() => {
-          rafRef.current = null;
-          applyTransform();
-        });
-      }
-    };
-
-    const onMouseLeave = () => {
-      tiltRef.current.x = 0;
-      applyTransform();
-    };
-
-    wrap.addEventListener('mousemove', onMouseMove);
-    wrap.addEventListener('mouseleave', onMouseLeave);
-
-    return () => {
-      wrap.removeEventListener('mousemove', onMouseMove);
-      wrap.removeEventListener('mouseleave', onMouseLeave);
-      if (rafRef.current) cancelAnimationFrame(rafRef.current);
-      rafRef.current = null;
-    };
-  };
-
-  const initNavFreezeTilt = () => {
-  const onNavDown = (e) => {
-    if (e.target?.closest?.('.room-nav')) {
-      tiltRef.current.x = 0;
-      applyTransform();
+      viewIndexRef.current = (viewIndexRef.current + 1) % views.length;
+      rotationYRef.current -= 90;
+    } else if (direction === "right") {
+      viewIndexRef.current = (viewIndexRef.current - 1 + views.length) % views.length;
+      rotationYRef.current += 90;
     }
+
+    roomWrap.classList.remove(...views);
+    roomWrap.classList.add(views[viewIndexRef.current]);
+    roomWrap.classList.add("rotating");
+    setTimeout(() => roomWrap.classList.remove("rotating"), 500);
+
+    document.querySelectorAll(".room .wall").forEach((el) => el.classList.remove("active"));
+    document.querySelector(`.wall.${walls[viewIndexRef.current]}`)?.classList.add("active");
+
+    applyTransform();
   };
-  document.addEventListener('pointerdown', onNavDown, true); // capture + dřív
-  return () => document.removeEventListener('pointerdown', onNavDown, true);
-};
 
   /** === SWITCH === */
   const handleSwitchClick = (e) => {
@@ -197,228 +138,110 @@ const initMouseTilt = () => {
       }, 300);
     }
 
-  // ✅ Global feedback
-  incrementItemClicks("light-switch");
-  triggerVibration(30);
-};
+    // ✅ Global feedback
+    incrementItemClicks("light-switch");
+    triggerVibration(30);
+  };
 
-// Destructure state for convenience
-const { rugUp, lightsOn} = gameState;
+  // Destructure state for convenience
+  const { rugUp, lightsOn} = gameState;
 
-/** Vibration feedback for mobile devices */
-const triggerVibration = (duration = 50) => {
-  if ('vibrate' in navigator) {
-    navigator.vibrate(duration);
-  }
-};
-
-/** Start time -Save to LocalStorage */
-useEffect(() => {
-    if (!localStorage.getItem("gameStartTime")) {
-      localStorage.setItem("gameStartTime", Date.now());
+  /** Vibration feedback for mobile devices */
+  const triggerVibration = (duration = 50) => {
+    if ('vibrate' in navigator) {
+      navigator.vibrate(duration);
     }
-}, []);
+  };
+
+  /** Start time -Save to LocalStorage */
+  useEffect(() => {
+      if (!localStorage.getItem("gameStartTime")) {
+        localStorage.setItem("gameStartTime", Date.now());
+      }
+  }, []);
 
   /*** ENDING SCREEN  */
-// Statistics functions
-const calculateGameTime = () => {
-  const startTime = localStorage.getItem('gameStartTime');
-  if (!startTime) return '00:00';
-  
-  const elapsed = Date.now() - parseInt(startTime);
-  const minutes = Math.floor(elapsed / 60000);
-  const seconds = Math.floor((elapsed % 60000) / 1000);
-  return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-};
-
-const getHintsUsed = () => {
-  return localStorage.getItem('hintsUsed') || '0';
-};
-
-const getItemsClicked = () => {
-  let clicked = JSON.parse(localStorage.getItem("clickedItems") || "[]");
-  return clicked.length;
-};
-
-/** Count unique clicked items */
-const incrementItemClicks = (id) => {
-  let clicked = JSON.parse(localStorage.getItem("clickedItems") || "[]");
-
-  if (!clicked.includes(id)) {
-    clicked.push(id);
-    localStorage.setItem("clickedItems", JSON.stringify(clicked));
-    localStorage.setItem("itemsClicked", clicked.length); // store number
-  }
-};
-
-/** Easter eggs */
-const unlockEasterEgg = (id) => {
-  let eggs = JSON.parse(localStorage.getItem("easterEggs") || "{}");
-  if (!eggs[id]) {
-    eggs[id] = true;
-    localStorage.setItem("easterEggs", JSON.stringify(eggs));
-  }
-};
-
-const getEasterEggsCount = () => {
-  const eggs = JSON.parse(localStorage.getItem("easterEggs") || "{}");
-  return Object.keys(eggs).length;
-};
-
-/** Load game state from localStorage on component mount */
-useEffect(() => {
-  const savedState = localStorage.getItem('escapeRoomState');
-  if (savedState) {
-    const parsedState = JSON.parse(savedState);
-    setGameState(parsedState);
+  // Statistics functions
+  const calculateGameTime = () => {
+    const startTime = localStorage.getItem('gameStartTime');
+    if (!startTime) return '00:00';
     
-    // Apply visual states based on saved data
-    const roomCanvas = document.getElementById("room");
-    const switchEl = document.querySelector(".switch");
-    const mirrorEl = document.querySelector(".mirror");
-    const doorEl = document.querySelector(".door.item");
-    
-    if (roomCanvas && switchEl && mirrorEl) {
-      if (parsedState.lightsOn) {
-        roomCanvas.classList.remove("dark");
-        switchEl.classList.add("on");
-        mirrorEl.classList.add("lit");
-      } else {
-        roomCanvas.classList.add("dark");
-        switchEl.classList.remove("on");
-        mirrorEl.classList.remove("lit");
-      }
-    }
-    
-    if (doorEl && parsedState.doorOpen) {
-      doorEl.classList.add("open");
-    }
-  }
-}, []);
-
-/** Save game state to localStorage whenever it changes */
-useEffect(() => {
-  localStorage.setItem('escapeRoomState', JSON.stringify(gameState));
-}, [gameState]);
-
-/** Sound effects with fade in/out support */
-const playSound = useCallback((src, options = {}) => {
-  // Parse options
-  const settings = typeof options === "number" 
-    ? { duration: options } 
-    : options;
-
-  const {
-    start = 0,
-    duration = null,
-    volume = 1,
-    fadeIn = 0,
-    fadeOut = 0,
-  } = settings;
-
-  let audio;
-    const cacheKey = src.toString();
-
-    if (audioCache.has(cacheKey)) {
-      audio = audioCache.get(cacheKey).cloneNode();
-    } else {
-      audio = new Audio(src);
-      audioCache.set(cacheKey, audio);
-    }
-
-  audio.currentTime = start;
-  audio.volume = fadeIn > 0 ? 0 : volume;
-  
-  // Play audio with error handling
-  // eslint-disable-next-line no-unused-vars
-  const playPromise = audio.play().catch(console.warn);
-
-  let fadeInInterval, fadeOutTimeout;
-
-  // Fade in effect
-  if (fadeIn > 0) {
-    const steps = Math.ceil(fadeIn * 20);
-    const increment = volume / steps;
-    const stepTime = fadeIn * 1000 / steps;
-    let currentStep = 0;
-    
-    fadeInInterval = setInterval(() => {
-      currentStep++;
-      audio.volume = Math.min(volume, increment * currentStep);
-      if (currentStep >= steps) {
-        clearInterval(fadeInInterval);
-        audio.volume = volume;
-      }
-    }, stepTime);
-  }
-
-  // Auto stop with fade out
-  if (duration) {
-    fadeOutTimeout = setTimeout(() => {
-      if (fadeOut > 0) {
-        const steps = Math.ceil(fadeOut * 20);
-        const decrement = audio.volume / steps;
-        const stepTime = fadeOut * 1000 / steps;
-        let currentVol = audio.volume;
-        
-        const fadeOutInterval = setInterval(() => {
-          currentVol -= decrement;
-          audio.volume = Math.max(0, currentVol);
-          if (currentVol <= 0) {
-            clearInterval(fadeOutInterval);
-            audio.pause();
-            audio.currentTime = 0;
-          }
-        }, stepTime);
-      } else {
-        audio.pause();
-        audio.currentTime = 0;
-      }
-    }, duration * 1000);
-  }
-
-  // Cleanup function
-  audio.stop = () => {
-    clearInterval(fadeInInterval);
-    clearTimeout(fadeOutTimeout);
-    audio.pause();
-    audio.currentTime = 0;
+    const elapsed = Date.now() - parseInt(startTime);
+    const minutes = Math.floor(elapsed / 60000);
+    const seconds = Math.floor((elapsed % 60000) / 1000);
+    return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
   };
-  audioCache.clear();
-  return audio;
-  
-}, []);
 
-/** Play sequence of sounds with Promise support */
-const playSequence = async (sounds) => {
-  for (const sound of sounds) {
-    let src, options;
-    
-    if (sound.src) {
-      src = sound.src;
-      options = sound.options;
-    } else {
-      const soundKey = Object.keys(sound).find(key => key !== 'options');
-      src = sound[soundKey];
-      options = sound.options;
+  const getHintsUsed = () => {
+    return localStorage.getItem('hintsUsed') || '0';
+  };
+
+  const getItemsClicked = () => {
+    let clicked = JSON.parse(localStorage.getItem("clickedItems") || "[]");
+    return clicked.length;
+  };
+
+  /** Count unique clicked items */
+  const incrementItemClicks = (id) => {
+    let clicked = JSON.parse(localStorage.getItem("clickedItems") || "[]");
+
+    if (!clicked.includes(id)) {
+      clicked.push(id);
+      localStorage.setItem("clickedItems", JSON.stringify(clicked));
+      localStorage.setItem("itemsClicked", clicked.length); // store number
     }
-    
-    const audio = playSound(src, options);
-  
-    // Wait for sound to finish
-    await new Promise(resolve => {
-      const duration = options?.duration;
-      if (duration) {
-        setTimeout(resolve, duration * 1000);
-      } else {
-        audio.onended = resolve;
-        setTimeout(resolve, 30000);
-      }
-    });
-  }
-};
+  };
 
- /** Display comment dialog */
+  /** Easter eggs */
+  const unlockEasterEgg = (id) => {
+    let eggs = JSON.parse(localStorage.getItem("easterEggs") || "{}");
+    if (!eggs[id]) {
+      eggs[id] = true;
+      localStorage.setItem("easterEggs", JSON.stringify(eggs));
+    }
+  };
+
+  const getEasterEggsCount = () => {
+    const eggs = JSON.parse(localStorage.getItem("easterEggs") || "{}");
+    return Object.keys(eggs).length;
+  };
+
+  /** Load game state from localStorage on component mount */
+  useEffect(() => {
+    const savedState = localStorage.getItem('escapeRoomState');
+    if (savedState) {
+      const parsedState = JSON.parse(savedState);
+      setGameState(parsedState);
+      
+      // Apply visual states based on saved data
+      const roomCanvas = document.getElementById("room");
+      const switchEl = document.querySelector(".switch");
+      const mirrorEl = document.querySelector(".mirror");
+      const doorEl = document.querySelector(".door.item");
+      
+      if (roomCanvas && switchEl && mirrorEl) {
+        if (parsedState.lightsOn) {
+          roomCanvas.classList.remove("dark");
+          switchEl.classList.add("on");
+          mirrorEl.classList.add("lit");
+        } else {
+          roomCanvas.classList.add("dark");
+          switchEl.classList.remove("on");
+          mirrorEl.classList.remove("lit");
+        }
+      }   
+      if (doorEl && parsedState.doorOpen) {
+        doorEl.classList.add("open");
+      }
+    }
+  }, []);
+
+  /** Save game state to localStorage whenever it changes */
+  useEffect(() => {
+    localStorage.setItem('escapeRoomState', JSON.stringify(gameState));
+  }, [gameState]);
+  
+  /** Display comment dialog */
   const showComment = (text, className = "") => {
     const dialog = document.querySelector("#dialog");
     dialog.innerHTML = "";
@@ -429,17 +252,17 @@ const playSequence = async (sounds) => {
 
     dialog.appendChild(div);
 
-      // 🔹 Display length based on number of characters
-      const len = text.length;
-      let displayTime = 8000; // default 8s
+    // 🔹 Display length based on number of characters
+    const len = text.length;
+    let displayTime = 8000; // default 8s
 
-      if (len > 300) {
-        displayTime = 20000;   // extra long
-      } else if (len > 120) {
-        displayTime = 12000;   // long
-      } else if (len < 50) {
-        displayTime = 5000;    // short
-      }
+    if (len > 300) {
+      displayTime = 20000;   // extra long
+    } else if (len > 120) {
+      displayTime = 12000;   // long
+    } else if (len < 50) {
+      displayTime = 5000;    // short
+    }
 
     // 🔹 Closing message
     const closeMessage = () => {
@@ -461,155 +284,137 @@ const playSequence = async (sounds) => {
     }, 50);
 
     // ⏳ Close after the message
-   setTimeout(() => {
+    setTimeout(() => {
       closeMessage();
     }, displayTime);
   };
 
-  /** Audio fadeout */
-    const fadeOutAudio = (audio, duration = 1000) => {
-    const startVolume = audio.volume;
-    const fadeStep = startVolume / (duration / 50);
-    
-    const fadeInterval = setInterval(() => {
-      if (audio.volume > fadeStep) {
-        audio.volume -= fadeStep;
-      } else {
-        audio.volume = 0;
-        audio.pause();
-        audio.currentTime = 0;
-        clearInterval(fadeInterval);
-        window.roomAmbientAudio = null;
-      }
-    }, 50);
-  };
+  useEffect(() => {
+    let cleanupAll = () => {};
 
-useEffect(() => {
-  let cleanupAll = () => {};
-
-  // wait then elements are ready
-  const checkElementsReady = () => {
-  const roomWrap = wrapRef.current;
-  const room = roomRef.current;
-  const roomCanvas = document.getElementById("room");
-  
-  if (!roomWrap || !room || !roomCanvas) {
-    // try again after 50s
-    setTimeout(checkElementsReady, 50);
-    return;
-  }
-
-    const initKeyboardSupport = () => {
-    const onKeyDown = (e) => {
-      if (e.key === "ArrowLeft") {
-        e.preventDefault();
-        updateView("left");
-      } else if (e.key === "ArrowRight") {
-        e.preventDefault();
-        updateView("right");
-      }
-    };
-    document.addEventListener("keydown", onKeyDown);
-    return () => document.removeEventListener("keydown", onKeyDown);
-  };
-
-  const initSwipeSupport = () => {
-    let touchStartX = null;
-    const onTouchStart = (e) => {
-      touchStartX = e.changedTouches[0].screenX;
-    };
-    const onTouchEnd = (e) => {
-      if (touchStartX === null) return;
-      const touchEndX = e.changedTouches[0].screenX;
-      const diffX = touchStartX - touchEndX;
-      if (Math.abs(diffX) > 30) {
-        diffX > 0 ? updateView("left") : updateView("right");
-      }
-      touchStartX = null;
-    };
-    
-    roomWrap.addEventListener("touchstart", onTouchStart, { passive: true });
-    roomWrap.addEventListener("touchend", onTouchEnd);
-    
-    return () => {
-      roomWrap.removeEventListener("touchstart", onTouchStart);
-      roomWrap.removeEventListener("touchend", onTouchEnd);
-    };
-  };
-
-  const initCubes = () => {
-    document.querySelectorAll(".cube").forEach((cube) => {
-      const faces = ["top", "left", "front", "right", "back", "bottom"];
-      faces.forEach((face) => {
-        const faceElement = document.createElement("div");
-        faceElement.classList.add(`cube-${face}`);
-        cube.appendChild(faceElement);
-      });
-    });
-  };
-
-  const initTooltip = () => {
-    // Mirror crack hover
-    const tooltip = document.querySelector("#tooltip");
-    document.addEventListener("mousemove", (event) => {
-      const tooltipPadding = 10;
-      const pageWidth = window.innerWidth;
-      const pageHeight = window.innerHeight;
-      let top = event.clientY + tooltipPadding;
-      let left = event.clientX + tooltipPadding;
-
-      if (left + tooltip.offsetWidth > pageWidth) {
-        left = event.clientX - tooltip.offsetWidth - tooltipPadding;
-      }
-      if (top + tooltip.offsetHeight > pageHeight) {
-        top = event.clientY - tooltip.offsetHeight - tooltipPadding;
-      }
-      tooltip.style.top = `${top}px`;
-      tooltip.style.left = `${left}px`;
-    });
-
-    document.querySelectorAll("[data-comment]").forEach((el) => {
-      el.addEventListener("mouseenter", () => {
-        const span = document.createElement("span");
-        tooltip.innerHTML = "";
-        span.textContent = el.getAttribute("data-title");
-        span.classList.add("tooltip-content");
-        tooltip.appendChild(span);
-        tooltip.style.display = "block";
-      });
-      el.addEventListener("mouseleave", () => {
-        tooltip.innerHTML = "";
-        tooltip.style.display = "none";
-      });
-    });
-  };
-  
-    const init = () => {
-      requestAnimationFrame(() => updateView());
-
-      const keyboardCleanup = initKeyboardSupport();
-      const swipeCleanup    = initSwipeSupport();
-      const tooltipCleanup  = initTooltip();
-      const mouseTiltCleanup = initMouseTilt();
-      const navFreezeCleanup = initNavFreezeTilt();
-      initCubes();
-
-      return () => {
-        keyboardCleanup && keyboardCleanup();
-        swipeCleanup && swipeCleanup();
-        tooltipCleanup && tooltipCleanup();
-        mouseTiltCleanup && mouseTiltCleanup();
-        navFreezeCleanup && navFreezeCleanup();
-      };
-    };
-
-  cleanupAll = init();
-};    
+    // wait then elements are ready
+    const checkElementsReady = () => {
+      const roomWrap = wrapRef.current;
+      const room = roomRef.current;
+      const roomCanvas = document.getElementById("room");
       
-  // Start the check
-  checkElementsReady();
-  return () => cleanupAll();   
-}, [playSound]);
+      if (!roomWrap || !room || !roomCanvas) {
+        // try again after 50s
+        setTimeout(checkElementsReady, 50);
+        return;
+      }
+
+      const initKeyboardSupport = () => {
+        const onKeyDown = (e) => {
+          if (e.key === "ArrowLeft") {
+            e.preventDefault();
+            updateView("left");
+          } else if (e.key === "ArrowRight") {
+            e.preventDefault();
+            updateView("right");
+          }
+        };
+        document.addEventListener("keydown", onKeyDown);
+        return () => document.removeEventListener("keydown", onKeyDown);
+      };
+
+      const initSwipeSupport = () => {
+        let touchStartX = null;
+        const onTouchStart = (e) => {
+          touchStartX = e.changedTouches[0].screenX;
+        };
+        const onTouchEnd = (e) => {
+          if (touchStartX === null) return;
+          const touchEndX = e.changedTouches[0].screenX;
+          const diffX = touchStartX - touchEndX;
+          if (Math.abs(diffX) > 30) {
+            diffX > 0 ? updateView("left") : updateView("right");
+          }
+          touchStartX = null;
+        };
+        
+        roomWrap.addEventListener("touchstart", onTouchStart, { passive: true });
+        roomWrap.addEventListener("touchend", onTouchEnd);
+        
+        return () => {
+          roomWrap.removeEventListener("touchstart", onTouchStart);
+          roomWrap.removeEventListener("touchend", onTouchEnd);
+        };
+      };
+
+      const initCubes = () => {
+        document.querySelectorAll(".cube").forEach((cube) => {
+          const faces = ["top", "left", "front", "right", "back", "bottom"];
+          faces.forEach((face) => {
+            const faceElement = document.createElement("div");
+            faceElement.classList.add(`cube-${face}`);
+            cube.appendChild(faceElement);
+          });
+        });
+      };
+
+      const initTooltip = () => {
+        // Mirror crack hover
+        const tooltip = document.querySelector("#tooltip");
+        document.addEventListener("mousemove", (event) => {
+          const tooltipPadding = 10;
+          const pageWidth = window.innerWidth;
+          const pageHeight = window.innerHeight;
+          let top = event.clientY + tooltipPadding;
+          let left = event.clientX + tooltipPadding;
+
+          if (left + tooltip.offsetWidth > pageWidth) {
+            left = event.clientX - tooltip.offsetWidth - tooltipPadding;
+          }
+          if (top + tooltip.offsetHeight > pageHeight) {
+            top = event.clientY - tooltip.offsetHeight - tooltipPadding;
+          }
+          tooltip.style.top = `${top}px`;
+          tooltip.style.left = `${left}px`;
+        });
+
+        document.querySelectorAll("[data-comment]").forEach((el) => {
+          el.addEventListener("mouseenter", () => {
+            const span = document.createElement("span");
+            tooltip.innerHTML = "";
+            span.textContent = el.getAttribute("data-title");
+            span.classList.add("tooltip-content");
+            tooltip.appendChild(span);
+            tooltip.style.display = "block";
+          });
+          el.addEventListener("mouseleave", () => {
+            tooltip.innerHTML = "";
+            tooltip.style.display = "none";
+          });
+        });
+      };
+      
+      const init = () => {
+        requestAnimationFrame(() => updateView());
+
+        const keyboardCleanup  = initKeyboardSupport();
+        const swipeCleanup     = initSwipeSupport();
+        const tooltipCleanup   = initTooltip();
+        const unbindMouseTilt  = bindMouseTilt();
+        const unbindNavFreeze  = bindNavFreezeTilt();
+        initCubes();
+
+        return () => {
+          keyboardCleanup && keyboardCleanup();
+          swipeCleanup && swipeCleanup();
+          tooltipCleanup && tooltipCleanup();
+          unbindMouseTilt && unbindMouseTilt();
+          unbindNavFreeze && unbindNavFreeze();
+        };
+      };
+
+      cleanupAll = init();
+    };    
+        
+    // Start the check
+    checkElementsReady();
+    return () => cleanupAll();   
+  }, [bindMouseTilt, bindNavFreezeTilt, applyTransform]);
 
   return (
     <div id="room" 
@@ -810,9 +615,9 @@ useEffect(() => {
                 
                 if (!rugUp) {
                   playSequence([
-                    { Rug, options: { duration: 1, fadeIn: 0.2 } },
-                    {RadioTune, options: { duration: 4.2, fadeIn: 0.2 }},
-                    { Alien, options: { volume: 0.3, start: 2} }
+                    { src: Rug, options: { duration: 1, fadeIn: 0.2 } },
+                    { src: RadioTune, options: { duration: 4.2, fadeIn: 0.2 } },
+                    { src: Alien, options: { volume: 0.3, start: 2 } }
                   ]);
                 } else {
                   playSound(Rug, { duration: 0.8, volume: 0.7 });
@@ -847,8 +652,8 @@ useEffect(() => {
             onClick={(e) => {
               e.stopPropagation(); 
               playSequence([
-                { CardboardBox, options: {duration: 2.5, fadeIn: 0.2 } },
-                { Paper, options: { volume: 0.5, start: 0.2} }
+                { src: CardboardBox, options: { duration: 2.5, fadeIn: 0.2 } },
+                { src: Paper, options: { volume: 0.5,  start: 0.2 } }
               ]);
               const msg = e.currentTarget.getAttribute("data-comment");
               if (msg) showComment(msg);

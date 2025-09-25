@@ -52,22 +52,22 @@ useEffect(() => {
 
 // Ambient audio management
 useEffect(() => {
-  if (!lightsOn && hasBeenLitBefore) {
-    // Start ambient audio only after lights have been turned on at least once
-    if (!window.roomAmbientAudio) {
-      setTimeout(() => {
-        window.roomAmbientAudio = new Audio(Voices);
-        window.roomAmbientAudio.loop = true;
-        window.roomAmbientAudio.volume = 0.3;
-        window.roomAmbientAudio.play().catch(() => {});
-      }, 400);
+    if (!lightsOn && hasBeenLitBefore) {
+      if (!window.roomAmbientAudio) {
+        setTimeout(() => {
+          // Použijte playSound místo new Audio()
+          window.roomAmbientAudio = playSound(Voices, { 
+            volume: 0.3,
+            // duration: null pro nekonečné přehrávání
+          });
+          window.roomAmbientAudio.loop = true;
+        }, 400);
+      }
+    } else if (lightsOn && window.roomAmbientAudio) {
+      fadeOutAudio(window.roomAmbientAudio, 800);
+      window.roomAmbientAudio = null; // Přidejte reset
     }
-  } else if (lightsOn && window.roomAmbientAudio) {
-    // Stop ambient audio when lights are ON
-    fadeOutAudio(window.roomAmbientAudio, 800);
-  }
-}, [lightsOn, hasBeenLitBefore, fadeOutAudio]);
-
+  }, [lightsOn, hasBeenLitBefore, fadeOutAudio, playSound]);
   // Cleanup on unmount
   useEffect(() => {
     return () => {
