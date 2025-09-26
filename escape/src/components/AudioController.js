@@ -5,13 +5,17 @@ import VoicesShort from "../sounds/schizophrenic-voices-62486.mp3";
 import Steps from "../sounds/steps-approaching-in-the-darknes.mp3";
 import Voices from "../sounds/015922-whispers-39schizophrenic3.mp3";
 import Laugh from "../sounds/evil-laughing-256454.mp3"
+import EvilLaugh from "../sounds/evil-laughter-353177.mp3"
+import CrazyWoman from "../sounds/female-horror-voice-they-know-no.mp3"
+import WomanInsomnia from "../sounds/halloween-horror-voice-insomnia.mp3"
+import Lullaby from "../sounds/music-box-lullaby-23919.mp3"
 
 const AudioController = ({ lightsOn, playSound, fadeOutAudio }) => {
   const [hasBeenLitBefore, setHasBeenLitBefore] = useState(false);
   
   // Random spooky sounds
   useEffect(() => {
-    const spookySounds = [EmptyRoom, VoicesShort, Steps, Laugh];
+    const spookySounds = [EmptyRoom, VoicesShort, Steps, Laugh, EvilLaugh, CrazyWoman, WomanInsomnia, Lullaby];
 
     const playRandomSpooky = () => {
       const randomIndex = Math.floor(Math.random() * spookySounds.length);
