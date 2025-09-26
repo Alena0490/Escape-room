@@ -87,6 +87,25 @@
   will-change: transform;
 }
 
+.room-wrap.front-view .wall-back,
+.room-wrap.back-view  .wall-front,
+.room-wrap.left-view  .wall-left,
+.room-wrap.right-view .wall-right {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.room-wrap.front-view:not(.rotating) .wall-back,
+.room-wrap.back-view:not(.rotating)  .wall-front,
+.room-wrap.left-view:not(.rotating)  .wall-left,
+.room-wrap.right-view:not(.rotating) .wall-right {
+  visibility: hidden;
+  background: none;
+  filter: none;
+  box-shadow: none;
+  border: none;
+}
+
 .zoomed .room-wrap {
   transform: scale(1.5);
   perspective: 125vmin;
@@ -150,6 +169,7 @@
   background-size: cover;
   background-repeat: repeat-x;
   transform-style: preserve-3d;
+  pointer-events: auto;
 }
 
 .room > div > b {

@@ -146,15 +146,13 @@ const BackWall = ({
 
     return (
         <div   
-            className={`wall wall-back ${isActive ? "active" : ""}`}
-            aria-hidden={!isActive}
-            style={!isActive ? { pointerEvents: "none" } : undefined}
+            className={`wall wall-back ${isActive ? "active" : ""}`} 
         >            
             <div className="flat lock item" 
                 data-title="Door lock" 
                 data-comment="It says: 'Please, enter the code'"
-                onClick={isActive ? handleLockClick : undefined}
-                tabIndex={isActive ? 0 : -1}
+                onClick={handleLockClick} 
+                tabIndex={0}
             ></div>
 
             <div className="flat door inner">
@@ -165,8 +163,8 @@ const BackWall = ({
                 className="flat door item" 
                 data-title="Locked Door" 
                 data-comment="It's locked."
-                onClick={isActive ? handleDoorClick : undefined}
-                tabIndex={isActive ? 0 : -1}
+                onClick={handleDoorClick} 
+                tabIndex={0}
             >
                 <span className="visually-hidden">Heavy metal door</span>
             </div>
@@ -175,8 +173,8 @@ const BackWall = ({
                 className="flat switch item" 
                 data-title="Light Switch" 
                 data-comment="Much better."
-                onClick={isActive ? handleSwitchClick : undefined}
-                tabIndex={isActive ? 0 : -1}
+                onClick={handleSwitchClick} 
+                tabIndex={0}
             >
                 <span className="visually-hidden">Light switch</span>
             </div>
@@ -185,8 +183,8 @@ const BackWall = ({
                 className="item chalk-message"
                 data-title="Strange graffiti writing"
                 data-comment="Wait, what: `Smile, you're not the first one here`? Is someone watching me?"
-                onClick={isActive ? handleChalkClick : undefined}
-                tabIndex={isActive ? 0 : -1}
+                onClick={handleChalkClick} 
+                tabIndex={0}
             >
                 <span className="visually-hidden">Graffiti text on the wall</span>
             </div>
