@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import "./Room.css";
 import CodeLock from "./CodeLock";
 import Shelf from "./Shelf";
+import Floor from "./Floor.js";
 import RoomNavigation from "./RoomNavigation";
 import AudioController from "./AudioController";
 import useTilt from "../hooks/useTilt.js";
@@ -11,15 +12,12 @@ const GhostComponent = lazy(() => import('./GhostComponent'));
 /** Sounds */
 import switchSound from "../sounds/light-switch-382712.mp3";
 import Ghost from "../sounds/ghost-6979.mp3";
-import Alien from "../sounds/alien-underworld-sound-287342.mp3";
 import Mirror from "../sounds/creepy-moan-87456.mp3";
 import CardboardBox from "../sounds/cardboard-box-open-182560.mp3";
 import Door from "../sounds/door-handle-1-401153.mp3"
-import Rug from "../sounds/object-dragged-on-carpet-140497.mp3"
 import Paper from "../sounds/paper-rustle-81855.mp3"
 import Click from "../sounds/mouse-click-290204.mp3"
 import JumpScare from "../sounds/075283-quotbehind-youquot-whispe.mp3"
-import RadioTune from "../sounds/am-tuning-104200.mp3"
 
 const Room = () => {
   const wrapRef = useRef(null);
@@ -27,10 +25,8 @@ const Room = () => {
   const { playSound, playSequence, fadeOutAudio } = useSetAudio();
   const [isFlickering, setIsFlickering] = useState(false);
   const [gameState, setGameState] = useState({
-    rugUp: false,
     lightsOn: false,
     doorOpen: false,
-    isFlickering: false,
   });
   const [showLock, setShowLock] = useState(false);
 
@@ -82,6 +78,13 @@ const Room = () => {
   };
 
   /** === SWITCH === */
+  // Preload switch sound
+  useEffect(() => {
+    const a = new Audio(switchSound);
+    a.preload = "auto";
+    a.load();            //ask borwser for fetch+decode
+  }, []);
+
   const handleSwitchClick = (e) => {
     e.preventDefault();
     e.stopPropagation();
@@ -144,7 +147,7 @@ const Room = () => {
   };
 
   // Destructure state for convenience
-  const { rugUp, lightsOn} = gameState;
+  const {lightsOn} = gameState;
 
   /** Vibration feedback for mobile devices */
   const triggerVibration = (duration = 50) => {
@@ -430,7 +433,6 @@ const Room = () => {
       />
       <div className="overlay darkness"></div>
       <div className="overlay zoom"></div>
-      <div id="win"></div>
       <div className="ouija-overlay">
           <span className="visually-hidden">Old Ouija boardwith pointer</span>
       </div>
@@ -601,50 +603,14 @@ const Room = () => {
               </Suspense>
           </div>
           
-          <div className="wall wall-bottom">
-            <div              
-              className={`rug flat item ${rugUp ? "rug-up" : ""}`}
-              data-title="Some old rug"              
-              data-comment="Yuck, it's so dirty. Wait, there is a radio under. There are some scratched letters: 'BIG EAR'. Maybe I could try this frequency. WOW! I've got the signal, it's so weird."
-              onClick={(e) => {
-                e.stopPropagation();  
-                incrementItemClicks("rug");
-                setGameState(prev => ({ ...prev, rugUp: !prev.rugUp }));
-                const comment = e.currentTarget.getAttribute("data-comment"); 
-                if (comment) showComment(comment);
-                
-                if (!rugUp) {
-                  playSequence([
-                    { src: Rug, options: { duration: 1, fadeIn: 0.2 } },
-                    { src: RadioTune, options: { duration: 4.2, fadeIn: 0.2 } },
-                    { src: Alien, options: { volume: 0.3, start: 2 } }
-                  ]);
-                } else {
-                  playSound(Rug, { duration: 0.8, volume: 0.7 });
-                }
-                triggerVibration(30);
-              }}
-            >
-              <span className="visually-hidden">Dirty fur rug</span>
-            </div>
-
-            <div
-                className="item contract egg"
-                data-title="Some crumpled contract"
-                data-comment="A contract with television… Ten thousand euros. Guess I really signed my life away."
-                onClick={(e) => {
-                  e.stopPropagation(); 
-                  playSound(Paper, { volume: 0.5, start: 0.2} )
-                  unlockEasterEgg("contract"); // save to LocalStorage
-                  const msg = e.currentTarget.getAttribute("data-comment");
-                  if (msg) showComment(msg, "easter-egg");
-                  incrementItemClicks("contract");
-                  triggerVibration(30);
-                }}
-              >
-              <span className="visually-hidden">Crumpled contract lying on the floor</span>
-            </div>
-          </div>
+          <Floor
+            playSound={playSound}
+            playSequence={playSequence}
+            showComment={showComment}
+            incrementItemClicks={incrementItemClicks}
+            unlockEasterEgg={unlockEasterEgg}
+            triggerVibration={triggerVibration}
+          />
           
           <div className="cube cardbox" 
             data-title="A random box"

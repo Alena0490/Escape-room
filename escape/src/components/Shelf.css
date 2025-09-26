@@ -265,16 +265,16 @@
 
 @media (max-width: 750px) {
     .ball > .item-inner {
-  background-image: url("../img/billiard1.webp");
-}
+    background-image: url("../img/billiard1.webp");
+    }
 
-.cassette > .item-inner {
-  background-image: url("../img/cassette1.webp");
-}
+    .cassette > .item-inner {
+    background-image: url("../img/cassette1.webp");
+    }
 
-.globe > .item-inner {
-  background-image: url("../img/globe1.webp");
-  transform: scale(1.9);
-}
+    .globe > .item-inner {
+    background-image: url("../img/globe1.webp");
+    transform: scale(1.9);
+    }
 }
 

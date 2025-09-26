@@ -1,0 +1,87 @@
+.room .wall-bottom {
+  bottom: 0;
+  height: calc(2 * var(--depth));
+  transform: rotateX(-90deg) translateY(calc(1 * var(--depth))) rotateY(180deg);
+  transform-origin: bottom;
+  background-image: 
+   repeating-linear-gradient(
+      to right,
+      rgba(0,0,0,0.85) 0px,
+      rgba(0,0,0,0.85) 3px,
+      transparent 3px,
+      transparent 100%
+    ),
+    repeating-linear-gradient(
+      to bottom,
+      rgba(0,0,0,0.85) 0px,
+      rgba(0,0,0,0.85) 3px,
+      transparent 4px,
+      transparent 15%
+    ),
+  url("../img/floor1.webp");
+  background-size: 15%;
+  background-repeat: repeat;
+  background-position: top right;
+  filter: sepia(0.2) brightness(0.8) contrast(1.1);
+}
+
+.rug {
+  background-image: url("../img/rug.webp");
+  width: 45vmin;
+  height: 45vmin;
+  background-size: contain;
+  background-repeat: no-repeat;
+  position: absolute;
+  top: calc(50% - 8vmin);
+  left: calc(50% - 8vmin);
+  filter: drop-shadow(0.1vmin 0.3vmin 0.6vmin rgba(0, 0, 0)) contrast(1.1) brightness(0.9);
+  z-index: 3;
+  transform: translateZ(2px);
+}
+
+.rug::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: inherit;
+  z-index: 3;
+}
+
+.rug-up {
+  transform: rotate(95deg);
+  background: url(../img/radio.webp);
+  background-size: contain;
+  background-repeat: no-repeat;
+  filter: drop-shadow(-3px -3px 3px black);
+  width: var(--item-size);
+  height: var(--item-size);
+}
+
+.contract {
+    position: absolute;
+    top: calc(20% - 8vmin);
+    left: calc(65% - 4vmin);
+    width: 11%;
+    height: 14%;
+    filter: brightness(0.9) sepia(0.3) contrast(1.2)drop-shadow(1px 2px 2px black);
+    transform: rotate(20deg);
+    background-image: url("../img/contract.webp");
+    z-index: 200;
+}
+
+@media (max-width: 750px) {
+     .room .wall.wall-bottom {
+        background-image: url("../img/floor1.webp");
+    } 
+}
+
+@media (max-width: 650px) {
+     .contract {
+        width: 17%;
+        height: 21%;
+        margin: 2%;
+    }
+}
