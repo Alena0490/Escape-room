@@ -126,7 +126,6 @@
   pointer-events: none;
 }
 
-
 .room > div {
   position: absolute;
   pointer-events: auto;
@@ -202,17 +201,6 @@
   transform: rotateY(-90deg) translateX(calc(1 * var(--depth)));
   transform-origin: right;
   background-color: magenta;
-}
-
-.room .wall-top {
-  top: 0;
-  height: calc(2 * var(--depth));
-  transform: rotateX(90deg) translateY(calc(-1 * var(--depth))) rotateY(180deg);
-  transform-origin: top;
-  background-image: url("../img/ceiling.webp");
-  background-size: cover;
-  background-repeat: repeat;
-  background-position: top right;
 }
 
 .room-wrap.rotating *,
@@ -515,7 +503,6 @@
     cursor: pointer;
 }
 
-
 .lock {
   width: 11%;
   height: 15%;
@@ -618,7 +605,6 @@
 .flat.door:active {
   filter: brightness(1.1) sepia(0.3) drop-shadow(3px 3px 3px var(--color-warning)) !important;
 }
-
 
 /* EASTER EGGS */
 .chalk-message {
@@ -920,10 +906,6 @@
     animation: fuzz 1.5s steps(4) infinite;
   }
 
-  .room .wall.wall-top {
-    background-image: url("../img/ceiling-mobile.webp");
-  }
-
   .room .wall {
     background-image: url("../img/wall2.webp");
   }
@@ -935,9 +917,9 @@
 }
 
 @media (max-width: 650px) {  
-.room-wrap.rotating .room {
-  will-change: transform; /* použít jen v animaci */
-}
+  .room-wrap.rotating .room {
+    will-change: transform; /* použít jen v animaci */
+  }
 
   .zoomed .room-wrap {
     transform: scale(1.3);
@@ -1003,7 +985,6 @@
     font-size: var(--font-small);
   }
 }
-
 
 @keyframes shake {
   0%, 100% { transform: translateX(0); }

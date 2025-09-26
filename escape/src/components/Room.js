@@ -3,12 +3,11 @@ import "./Room.css";
 import CodeLock from "./CodeLock";
 import Shelf from "./Shelf";
 import Floor from "./Floor.js";
+import Ceiling from "./Ceiling.js";
 import RoomNavigation from "./RoomNavigation";
 import AudioController from "./AudioController";
 import useTilt from "../hooks/useTilt.js";
 import useSetAudio from "../hooks/useSetAudio.js"
-import { lazy, Suspense } from 'react';
-const GhostComponent = lazy(() => import('./GhostComponent'));
 /** Sounds */
 import switchSound from "../sounds/light-switch-382712.mp3";
 import Ghost from "../sounds/ghost-6979.mp3";
@@ -597,11 +596,7 @@ const Room = () => {
               </div>
           </div>
                  
-          <div className="wall wall-top">
-              <Suspense fallback={null}>
-                <GhostComponent lightsOn={lightsOn} />
-              </Suspense>
-          </div>
+          <Ceiling lightsOn={lightsOn} />
           
           <Floor
             playSound={playSound}

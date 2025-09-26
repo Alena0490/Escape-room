@@ -1,0 +1,17 @@
+.room .wall-top {
+  top: 0;
+  height: calc(2 * var(--depth));
+  transform: rotateX(90deg) translateY(calc(-1 * var(--depth))) rotateY(180deg);
+  transform-origin: top;
+  background-image: url("../img/ceiling.webp");
+  background-size: cover;
+  background-repeat: repeat;
+  background-position: top right;
+}
+
+@media (max-width: 750px) {
+    .room .wall.wall-top {
+        background-image: url("../img/ceiling-mobile.webp");
+    }
+}
+
