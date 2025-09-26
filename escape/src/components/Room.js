@@ -29,6 +29,22 @@ const Room = () => {
   });
   const [showLock, setShowLock] = useState(false);
 
+  /** DIALOGS */
+  useEffect(() => {
+    const dialog = document.getElementById("dialog");
+    const onDocPointerDown = (e) => {
+      if (!dialog.contains(e.target)) {
+        const last = dialog.lastElementChild;
+        if (last) {
+          last.style.opacity = "0";
+          setTimeout(() => last.remove(), 300);
+        }
+      }
+    };
+    document.addEventListener("pointerdown", onDocPointerDown, true);
+    return () => document.removeEventListener("pointerdown", onDocPointerDown, true);
+  }, []);
+
   const onIndex = useRef(0);
   const offIndex = useRef(0);
 
@@ -248,12 +264,9 @@ const Room = () => {
   /** Display comment dialog */
   const showComment = (text, className = "") => {
     const dialog = document.querySelector("#dialog");
-    dialog.innerHTML = "";
-
     const div = document.createElement("div");
     div.innerHTML = text;
     if (className) div.className = className;
-
     dialog.appendChild(div);
 
     // 🔹 Display length based on number of characters
@@ -268,29 +281,15 @@ const Room = () => {
       displayTime = 5000;    // short
     }
 
-    // 🔹 Closing message
+    // 🔹 Closing message (lokální fade-out + remove)
     const closeMessage = () => {
+      if (!div.isConnected) return;
       div.style.opacity = "0";
       setTimeout(() => div.remove(), 300);
-      document.removeEventListener("click", handleOutsideClick);
     };
-
-    // 🔹 Handler after clicing outside  
-    const handleOutsideClick = (e) => {
-      if (!dialog.contains(e.target)) {
-        closeMessage();
-      }
-    };
-
-    // Add listener on click outside (small delay so that it does not start immediately when clicking on the item)
-    setTimeout(() => {
-      document.addEventListener("click", handleOutsideClick);
-    }, 50);
 
     // ⏳ Close after the message
-    setTimeout(() => {
-      closeMessage();
-    }, displayTime);
+    setTimeout(closeMessage, displayTime);
   };
 
   useEffect(() => {
@@ -358,39 +357,52 @@ const Room = () => {
       };
 
       const initTooltip = () => {
-        // Mirror crack hover
         const tooltip = document.querySelector("#tooltip");
-        document.addEventListener("mousemove", (event) => {
-          const tooltipPadding = 10;
-          const pageWidth = window.innerWidth;
-          const pageHeight = window.innerHeight;
-          let top = event.clientY + tooltipPadding;
-          let left = event.clientX + tooltipPadding;
+        let rafId = null;
 
-          if (left + tooltip.offsetWidth > pageWidth) {
-            left = event.clientX - tooltip.offsetWidth - tooltipPadding;
-          }
-          if (top + tooltip.offsetHeight > pageHeight) {
-            top = event.clientY - tooltip.offsetHeight - tooltipPadding;
-          }
-          tooltip.style.top = `${top}px`;
-          tooltip.style.left = `${left}px`;
-        });
+        const onMove = (e) => {
+          if (rafId) return;
+          rafId = requestAnimationFrame(() => {
+            rafId = null;
+            const pad = 10;
+            let top = e.clientY + pad;
+            let left = e.clientX + pad;
+            const w = tooltip.offsetWidth, h = tooltip.offsetHeight;
+            if (left + w > innerWidth) left = e.clientX - w - pad;
+            if (top + h > innerHeight) top = e.clientY - h - pad;
+            tooltip.style.top = `${top}px`;
+            tooltip.style.left = `${left}px`;
+          });
+        };
 
-        document.querySelectorAll("[data-comment]").forEach((el) => {
-          el.addEventListener("mouseenter", () => {
-            const span = document.createElement("span");
-            tooltip.innerHTML = "";
-            span.textContent = el.getAttribute("data-title");
-            span.classList.add("tooltip-content");
-            tooltip.appendChild(span);
-            tooltip.style.display = "block";
-          });
-          el.addEventListener("mouseleave", () => {
-            tooltip.innerHTML = "";
-            tooltip.style.display = "none";
-          });
-        });
+        const onOver = (e) => {
+          const el = e.target.closest("[data-comment]");
+          if (!el) return;
+          tooltip.innerHTML = "";
+          const span = document.createElement("span");
+          span.textContent = el.getAttribute("data-title") || "";
+          span.classList.add("tooltip-content");
+          tooltip.appendChild(span);
+          tooltip.style.display = "block";
+          document.addEventListener("mousemove", onMove, { passive: true });
+        };
+
+        const onOut = (e) => {
+          if (!e.target.closest("[data-comment]")) return;
+          tooltip.innerHTML = "";
+          tooltip.style.display = "none";
+          document.removeEventListener("mousemove", onMove);
+        };
+
+        document.addEventListener("mouseover", onOver);
+        document.addEventListener("mouseout", onOut);
+
+        // cleanup – přesně jako dřív vracej funkci
+        return () => {
+          document.removeEventListener("mouseover", onOver);
+          document.removeEventListener("mouseout", onOut);
+          document.removeEventListener("mousemove", onMove);
+        };
       };
       
       const init = () => {
