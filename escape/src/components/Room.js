@@ -4,6 +4,7 @@ import CodeLock from "./CodeLock";
 import Shelf from "./Shelf";
 import Floor from "./Floor.js";
 import Ceiling from "./Ceiling.js";
+import BackWall from "./BackWall.js";
 import RoomNavigation from "./RoomNavigation";
 import AudioController from "./AudioController";
 import useTilt from "../hooks/useTilt.js";
@@ -13,9 +14,7 @@ import switchSound from "../sounds/light-switch-382712.mp3";
 import Ghost from "../sounds/ghost-6979.mp3";
 import Mirror from "../sounds/creepy-moan-87456.mp3";
 import CardboardBox from "../sounds/cardboard-box-open-182560.mp3";
-import Door from "../sounds/door-handle-1-401153.mp3"
 import Paper from "../sounds/paper-rustle-81855.mp3"
-import Click from "../sounds/mouse-click-290204.mp3"
 import JumpScare from "../sounds/075283-quotbehind-youquot-whispe.mp3"
 
 const Room = () => {
@@ -23,6 +22,7 @@ const Room = () => {
   const roomRef = useRef(null);
   const { playSound, playSequence, fadeOutAudio } = useSetAudio();
   const [isFlickering, setIsFlickering] = useState(false);
+  const [activeView, setActiveView] = useState(0); // 0 = back-view
   const [gameState, setGameState] = useState({
     lightsOn: false,
     doorOpen: false,
@@ -53,6 +53,8 @@ const Room = () => {
   const updateView = (direction) => {
     const roomWrap = wrapRef.current;
     if (!roomWrap || !roomRef.current) return;
+
+    setActiveView(viewIndexRef.current);
 
     // reset tilt on view change
     resetTilt();
@@ -478,75 +480,17 @@ const Room = () => {
             />
           </div>
           
-          <div className="wall wall-back">            
-            <div className="flat lock item" 
-              data-title="Door lock" 
-              data-comment="It says: 'Please, enter the code'"
-              onClick={(e) => {
-                e.stopPropagation(); 
-                playSound(Click, {fadeIn: 0.2});
-                const msg = e.currentTarget.getAttribute("data-comment");
-                    if (msg) showComment(msg);
-                incrementItemClicks("code-lock");
-                setTimeout(() => {
-                  setShowLock(true);
-                }, 200);  
-                triggerVibration(30);
-              }}
-            ></div>
-
-            <div className="flat door inner">
-              <span className="visually-hidden">Numeric lock</span>
-            </div>
-            
-            <div 
-              className="flat door item" 
-              data-title="Locked Door" 
-              data-comment="It's locked."
-              onClick={(e) => {
-                e.stopPropagation(); 
-                incrementItemClicks("door");
-                triggerVibration(30);
-                if (e.currentTarget.classList.contains("open")) {
-                  const msg = "It was a long day... Let's get out of here. Finally, fresh air!";
-                  e.currentTarget.setAttribute("data-comment", msg);
-                  showComment(msg);
-                } else {
-                  const msg = "It's locked.";
-                  e.currentTarget.setAttribute("data-comment", msg);
-                  showComment(msg);
-                  playSound(Door, {start: 0.2});
-                }
-              }}
-              >
-                <span className="visually-hidden">Heavy metal door</span>
-              </div>
-
-              <div 
-                className="flat switch item" 
-                data-title="Light Switch" 
-                data-comment="Much better."
-                onClick={handleSwitchClick}
-              >
-                <span className="visually-hidden">Light switch</span>
-              </div>
-
-              <div
-                className="item chalk-message"
-                data-title="Strange graffiti writing"
-                data-comment="Wait, what: `Smile, you're not the first one here`? Is someone watching me?"
-                onClick={(e) => {
-                  e.stopPropagation(); 
-                  incrementItemClicks("graffiti");
-                  triggerVibration(30);
-                  unlockEasterEgg("chalk1"); // save to LocalStorage
-                  const msg = e.currentTarget.getAttribute("data-comment");
-                  if (msg) showComment(msg, "easter-egg");
-                }}
-              >
-                <span className="visually-hidden">Graffiti text on the wall</span>
-              </div>
-          </div>
+          <BackWall
+            isActive={activeView === 0}
+            setLightsOn={(v) => setGameState(p => ({ ...p, lightsOn: v }))}
+            setIsFlickering={setIsFlickering}
+            playSound={playSound}
+            showComment={showComment}
+            incrementItemClicks={incrementItemClicks}
+            triggerVibration={triggerVibration}
+            setShowLock={setShowLock}
+            unlockEasterEgg={unlockEasterEgg}
+          />
           
           <div className="wall wall-right">
             <div className="poster item egg"
