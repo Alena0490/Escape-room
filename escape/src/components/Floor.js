@@ -5,6 +5,12 @@ import RadioTune from "../sounds/am-tuning-104200.mp3";
 import Alien from "../sounds/alien-underworld-sound-287342.mp3";
 import Paper from "../sounds/paper-rustle-81855.mp3";
 
+/**
+ * Floor
+ * - Rug (toggle rugUp + play sound + comment)
+ * - Contract (easter egg + play sound + comment)
+ */
+
 const Floor = ({
   playSound,
   playSequence,

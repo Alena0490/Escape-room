@@ -1,18 +1,17 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import "./Room.css";
 import CodeLock from "./CodeLock";
 import Shelf from "./Shelf";
 import Floor from "./Floor.js";
 import Ceiling from "./Ceiling.js";
 import BackWall from "./BackWall.js";
+import RightWall from "./RightWall.js"
 import RoomNavigation from "./RoomNavigation";
 import AudioController from "./AudioController";
 import useTilt from "../hooks/useTilt.js";
 import useSetAudio from "../hooks/useSetAudio.js"
 /** Sounds */
-import switchSound from "../sounds/light-switch-382712.mp3";
 import Ghost from "../sounds/ghost-6979.mp3";
-import Mirror from "../sounds/creepy-moan-87456.mp3";
 import CardboardBox from "../sounds/cardboard-box-open-182560.mp3";
 import Paper from "../sounds/paper-rustle-81855.mp3"
 import JumpScare from "../sounds/075283-quotbehind-youquot-whispe.mp3"
@@ -45,9 +44,6 @@ const Room = () => {
     return () => document.removeEventListener("pointerdown", onDocPointerDown, true);
   }, []);
 
-  const onIndex = useRef(0);
-  const offIndex = useRef(0);
-
   /** === VIEW NAVIGATION === */
   const views = ["back-view", "left-view", "front-view", "right-view"];
   const walls = ["wall-back", "wall-left", "wall-front", "wall-right"];
@@ -70,8 +66,6 @@ const Room = () => {
     const roomWrap = wrapRef.current;
     if (!roomWrap || !roomRef.current) return;
 
-    setActiveView(viewIndexRef.current);
-
     // reset tilt on view change
     resetTilt();
 
@@ -83,6 +77,8 @@ const Room = () => {
       rotationYRef.current += 90;
     }
 
+    setActiveView(viewIndexRef.current);
+
     roomWrap.classList.remove(...views);
     roomWrap.classList.add(views[viewIndexRef.current]);
     roomWrap.classList.add("rotating");
@@ -93,76 +89,8 @@ const Room = () => {
 
     applyTransform();
   };
-
-  /** === SWITCH === */
-  // Preload switch sound
-  useEffect(() => {
-    const a = new Audio(switchSound);
-    a.preload = "auto";
-    a.load();            //ask borwser for fetch+decode
-  }, []);
-
-  const handleSwitchClick = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    e.nativeEvent.stopImmediatePropagation?.();
-    const roomCanvas = document.getElementById("room");
-    const switchEl = e.currentTarget;
-    const mirrorEl = document.querySelector(".mirror");
-
-    playSound(switchSound);
-
-    if (roomCanvas.classList.contains("dark")) {
-      // LIGHTS ON
-      setTimeout(() => {
-        roomCanvas.classList.remove("dark");
-        switchEl.classList.add("on");
-
-        setIsFlickering(true);
-        setTimeout(() => setIsFlickering(false), 1200);
-
-        if (mirrorEl) mirrorEl.classList.add("lit");
-        setGameState(prev => ({ ...prev, lightsOn: true }));
-
-        const onMessages = [
-          "Much better.",
-          "Finally some light!",
-          "Ah, I can see everything clearly now.",
-          "Feels safer with the lights on…"
-        ];
-        const msg = onMessages[onIndex.current];
-        switchEl.setAttribute("data-comment", msg);
-        showComment(msg);
-        onIndex.current = (onIndex.current + 1) % onMessages.length;
-      }, 300);
-    } else {
-      // LIGHTS OFF
-      setTimeout(() => {
-        roomCanvas.classList.add("dark");
-        switchEl.classList.remove("on");
-        if (mirrorEl) mirrorEl.classList.remove("lit");
-
-        setGameState(prev => ({ ...prev, lightsOn: false }));
-
-        // rotating OFF message
-        const offMessages = [
-          "Ugh... it's too dark, I can't see a thing.",
-          "Creepy... I should turn the lights back on.",
-          "Wait, what was that?! Better keep it bright.",
-          "Nope, not staying in the dark!"
-        ];
-        const msg = offMessages[offIndex.current];
-        switchEl.setAttribute("data-comment", msg);
-        showComment(msg);
-        offIndex.current = (offIndex.current + 1) % offMessages.length;
-      }, 300);
-    }
-
-    // ✅ Global feedback
-    incrementItemClicks("light-switch");
-    triggerVibration(30);
-  };
-
+ 
+ 
   // Destructure state for convenience
   const {lightsOn} = gameState;
 
@@ -202,15 +130,15 @@ const Room = () => {
   };
 
   /** Count unique clicked items */
-  const incrementItemClicks = (id) => {
-    let clicked = JSON.parse(localStorage.getItem("clickedItems") || "[]");
-
+  const incrementItemClicks = useCallback((id) => {
+    const key = "clickedItems";
+    const clicked = JSON.parse(localStorage.getItem(key) || "[]");
     if (!clicked.includes(id)) {
-      clicked.push(id);
-      localStorage.setItem("clickedItems", JSON.stringify(clicked));
-      localStorage.setItem("itemsClicked", clicked.length); // store number
+      const updated = [...clicked, id];
+      localStorage.setItem(key, JSON.stringify(updated));
+      localStorage.setItem("itemsClicked", updated.length);
     }
-  };
+  }, []);
 
   /** Easter eggs */
   const unlockEasterEgg = (id) => {
@@ -504,55 +432,18 @@ const Room = () => {
             unlockEasterEgg={unlockEasterEgg}
           />
           
-          <div className="wall wall-right">
-            <div className="poster item egg"
-              data-title="Some old poster" 
-              data-comment="What the hell is the chainsaw commercial doing there? Are they sponsoring this freak show or what?"
-              onClick={(e) => {
-                e.stopPropagation(); 
-                unlockEasterEgg("poster"); // save to LocalStorage
-                const msg = e.currentTarget.getAttribute("data-comment");
-                    if (msg) showComment(msg, "easter-egg");
-                incrementItemClicks("poster");
-                triggerVibration(30);
-              }}
-            >
-              <span className="visually-hidden">Old faded poster</span>
-            </div>
-
-            <div className="mirror item" 
-              data-title="An old mirror"
-              data-comment="How do I look? Eh, hello, Mr. Ghost, please don't kill me."
-              onClick={(e) => {
-                e.stopPropagation(); 
-                playSound(Mirror);
-                incrementItemClicks("mirror");
-                const msg = e.currentTarget.getAttribute("data-comment");
-                if (msg) showComment(msg);
-                triggerVibration(30);
-              }}
-            >
-              <span className="visually-hidden">Old mirror flashing letters Friday 13th</span>
-            </div>
-
-             <div
-                className="item mirror-crack egg"
-                data-title="Crack in the mirror"
-                data-comment="What is it? Is there a fu**ing camera inside…?"
-                onClick={(e) => {
-                  e.stopPropagation(); 
-                  unlockEasterEgg("mirror-crack"); // save to LocalStorage
-                  const msg = e.currentTarget.getAttribute("data-comment");
-                  if (msg) showComment(msg, "easter-egg");
-                  incrementItemClicks("mirror-crack");
-                  triggerVibration(30);
-                }}
-              >
-                <span className="visually-hidden">Crack in the mirror</span>
-              </div>
-          </div>
+          <RightWall
+            lightsOn={gameState.lightsOn}
+            playSound={playSound}
+            showComment={showComment}
+            incrementItemClicks={incrementItemClicks}
+            triggerVibration={triggerVibration}
+            unlockEasterEgg={unlockEasterEgg}
+          />
                  
-          <Ceiling lightsOn={lightsOn} />
+          <Ceiling 
+            lightsOn={lightsOn} 
+          />
           
           <Floor
             playSound={playSound}

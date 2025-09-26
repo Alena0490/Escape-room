@@ -1,0 +1,101 @@
+.wall-right {
+  left: 0;
+  transform: rotateY(90deg) translateX(calc(-1 * var(--depth)));
+  transform-origin: left;
+  background-color: var(--color-success);
+}
+
+.poster {
+  width: var(--item-size);
+  height: 15vmin;
+  background-image: url("../img/poster.webp");
+  position: absolute;
+  top: 20%;
+  border-radius: var(--border-radius-sm);
+  left: 10vmin;
+  box-shadow: 0 0 1px #000a, inset 0 0 1px rgba(0, 0, 0, 0.425);
+  border: 0.5vmin solid var(--color-bg-light);
+}
+
+.front-view .wall-back .poster {
+  cursor: pointer;
+}
+
+
+.mirror {
+    width: 65vmin;
+    height: 68vmin;
+    background-image: url("../img/mirror.webp");
+    filter: sepia(0.2);
+    position: absolute;
+    bottom: 0;
+    right: 4%;
+    box-shadow: none;
+    border: none;
+}
+
+.mirror::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 65vmin;
+  height: 68vmin;
+  background: url("../img/mirror-hover.webp");
+  background-size: contain;
+  background-position: center;
+  background-repeat: no-repeat;
+  filter: brightness(1.2);
+  opacity: 0;
+  transition: opacity .4s ease-in;
+  pointer-events: none;
+}
+
+.mirror.lit::after {
+  background: url("../img/mirror-lit.webp");
+  background-size: contain;
+  background-position: center;
+  background-repeat: no-repeat;
+  pointer-events: none;
+}
+
+.mirror:hover::after,
+.mirror:active::after {
+  animation: ghostFlash 1.5s ease forwards;
+}
+
+.mirror.lit:hover::after,
+.mirror.lit:active::after {
+  animation: ghostFlash 5s ease forwards;
+}
+
+/* EASTER EGGS */
+.mirror-crack {
+   width: var(--item-size);
+    height: var(--item-size);
+    background-color: transparent;
+    position: absolute;
+    bottom: 30%;
+    right: 7%;
+    border: none;
+    z-index: 200;
+    cursor: pointer;
+    pointer-events: auto;
+}
+
+@media (max-width: 650px) {  
+    .poster {
+        width: 28vmin;
+        height: 21vmin;
+        margin: 2%;
+        top: 25%;
+        left: 5vmin;
+    }
+
+     .mirror,
+    .mirror::after {
+        width: 68vmin;
+        height: 70vmin;
+        right: 3%;
+    }
+}

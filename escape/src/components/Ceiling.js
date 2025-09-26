@@ -1,5 +1,9 @@
 import { lazy, Suspense, memo } from "react";
 import "./Ceiling.css"
+/**
+ * Ceiling
+ * - Ghost (unclickable)
+ */
 const GhostComponent = lazy(() => import("./GhostComponent"));
 
 const Ceiling = ({ lightsOn }) => (

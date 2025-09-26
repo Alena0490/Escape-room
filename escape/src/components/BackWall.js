@@ -4,6 +4,14 @@ import switchSound from "../sounds/light-switch-382712.mp3";
 import Door from "../sounds/door-handle-1-401153.mp3"
 import Click from "../sounds/mouse-click-290204.mp3"
 
+/**
+ * BackWall
+ * - Door Lock (play sound + open CodeLock + comment)
+ * - Door (play sound + comment)
+ * - Switch (play sound + setLightsOn + comment)
+ * - Graffiti (easter egg + comment)
+ */
+
 const BackWall = ({
   // states from Room
   isActive,
@@ -20,6 +28,7 @@ const BackWall = ({
     const onIndex = useRef(0);
     const offIndex = useRef(0);
 
+    /** SWITCH */
   // Switch Sound preload
   useEffect(() => {
     const a = new Audio(switchSound);
@@ -97,6 +106,7 @@ const BackWall = ({
     ]
   );
 
+  /** DOOR LOCK */
   const handleLockClick = useCallback(
     (e) => {
       e.stopPropagation();
@@ -110,6 +120,7 @@ const BackWall = ({
     [playSound, showComment, incrementItemClicks, setShowLock, triggerVibration]
   );
 
+  /** DOOR */
   const handleDoorClick = useCallback(
     (e) => {
       e.stopPropagation();
@@ -131,6 +142,7 @@ const BackWall = ({
     [incrementItemClicks, triggerVibration, showComment, playSound]
   );
 
+  /** GRAFFITI */
   const handleChalkClick = useCallback(
     (e) => {
       e.stopPropagation();
@@ -143,7 +155,6 @@ const BackWall = ({
     [incrementItemClicks, triggerVibration, unlockEasterEgg, showComment]
   );
   // ---------------------------------------------------------------------------
-
     return (
         <div   
             className={`wall wall-back ${isActive ? "active" : ""}`} 
