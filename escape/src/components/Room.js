@@ -629,6 +629,13 @@ const Room = () => {
             className="cube table" 
             data-title="A weird table" 
             data-comment="Nice, I really need this for my living room. Wait, what is there?"
+            onClick={(e) => {
+              e.stopPropagation(); 
+              const msg = e.currentTarget.getAttribute("data-comment");
+              if (msg) showComment(msg);
+              incrementItemClicks("table");
+              triggerVibration(30);
+            }}
           >
             <span className="visually-hidden">A wooden table with skull decoration</span>
 
