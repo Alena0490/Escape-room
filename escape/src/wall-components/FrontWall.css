@@ -1,0 +1,30 @@
+.wall-front {
+  transform: translateZ(calc(1 * var(--depth))) rotateY(180deg);
+  background-color: var(--color-bg-stone);
+}
+
+/* EASTER EGGS */
+.painting {
+  width: 30vmin;
+  height: 40vmin;
+  background-image: url("../img/self-portrait.webp");
+  position: absolute;
+  top: 15%;
+  border-radius: var(--border-radius-sm);
+  left: 50vmin;
+  filter: drop-shadow(5px 3px 2px #000a);
+}
+
+.left-view .painting {
+  filter: drop-shadow(-5px -3px 2px #000a);
+  cursor: pointer;
+}
+
+@media (max-width: 650px) {
+    .painting {
+        width: 37vmin;
+        height: 52vmin;
+        left: 45vmin;
+        top: 17%;
+  }  
+}

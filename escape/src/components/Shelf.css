@@ -61,7 +61,7 @@
 .shelf-level > .cube-bottom,
 .cube.shelf > .cube-bottom {
   transform: rotateX(-90deg) translateZ(calc(1.5 * var(--cubescale)));
-  background-color: rgba(0, 255, 0, 0.7);
+  background-color: var( --color-text-faint);
 }
 
 .shelf-level > .cube-back,

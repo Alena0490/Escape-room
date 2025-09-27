@@ -3,6 +3,7 @@
   height: calc(2 * var(--depth));
   transform: rotateX(-90deg) translateY(calc(1 * var(--depth))) rotateY(180deg);
   transform-origin: bottom;
+  background-color: var(--color-border);
   background-image: 
    repeating-linear-gradient(
       to right,

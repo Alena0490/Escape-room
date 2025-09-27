@@ -1,6 +1,5 @@
 @import url("https://fonts.googleapis.com/css2?family=Noto+Emoji:wght@300..700&display=swap");
 
-
 :root {
   /* Backgrounds */
   --color-bg-deep: #00060D;
@@ -91,7 +90,6 @@
 .room-wrap.back-view  .wall-front,
 .room-wrap.left-view  .wall-left,
 .room-wrap.right-view .wall-right {
-  opacity: 0;
   pointer-events: none;
 }
 
@@ -116,16 +114,14 @@
   height: 100vh;
   max-height: 150vw;
   position: relative;
-  transform-style: preserve-3d;
   transform: rotateX(var(--rotateX)) rotateY(var(--rotateY));
   transition: transform .1s;
   z-index: 1;
   pointer-events: none;
   font-size: var(--font-middle);
   user-select: none;
-  will-change: transform;
   transform-style: preserve-3d;
-  will-change: transform
+  will-change: transform;
 }
 
 #room:not(.dark)::after {
@@ -158,7 +154,6 @@
 .room .wall {
   background-size: cover;
   background-position: center;
-  transition: opacity .5s ease;
   z-index: 2;
   backface-visibility: hidden;
   background-color: var(--color-bg-stone);
@@ -169,6 +164,7 @@
   background-size: cover;
   background-repeat: repeat-x;
   transform-style: preserve-3d;
+  transition: opacity .5s ease; 
   pointer-events: auto;
 }
 
@@ -199,18 +195,6 @@
   top: 0;
 }
 
-.wall-front {
-  transform: translateZ(calc(1 * var(--depth))) rotateY(180deg);
-  background-color: var(--color-error);
-}
-
-.wall-left {
-  right: 0;
-  transform: rotateY(-90deg) translateX(calc(1 * var(--depth)));
-  transform-origin: right;
-  background-color: magenta;
-}
-
 .room-wrap.rotating *,
 .room-wrap.rotating {
   pointer-events: none;
@@ -231,15 +215,6 @@
 }
 .room-wrap.right-view {
   --rotateY: 270deg;
-}
-
-.front-view .wall-back,
-.back-view .wall-front {
-  pointer-events: none;
- }
-
-.room {
-  transform: rotateX(var(--rotateX)) rotateY(var(--rotateY));
 }
 
 /*-- CUBE REUSABLE --*/
@@ -336,6 +311,7 @@
 
 .cube.table {
   --cubescale: 30vmin;
+  background-color: var( --color-text-faint);
   right: 0;
   bottom: 0;
   transform: translateZ(calc(var(--depth) - calc(0.5 * var(--cubescale))));
@@ -453,10 +429,6 @@
   transition: filter .6s ease-out, transform 0.3s ease-out; 
 }
 
-.bookshelf {
-  transition: none !important;
-}
-
 .item:not(#hover-not):hover,
 .item:not(#hover-not):active {
   filter: brightness(1.2) drop-shadow(3px 3px 3px var(--color-warning));
@@ -465,48 +437,6 @@
 .flat.door:hover,
 .flat.door:active {
   filter: brightness(1.1) sepia(0.3) drop-shadow(3px 3px 3px var(--color-warning)) !important;
-}
-
-/* EASTER EGGS */
-.painting {
-  width: 30vmin;
-  height: 40vmin;
-  background-image: url("../img/self-portrait.webp");
-  position: absolute;
-  top: 15%;
-  border-radius: var(--border-radius-sm);
-  left: 50vmin;
-  filter: drop-shadow(5px 3px 2px #000a);
-}
-
-.left-view .painting {
-  filter: drop-shadow(-5px -3px 2px #000a);
-  cursor: pointer;
-}
-
-.wall-left #lightboard {
-  background-image: url("../img/board.svg");
-  background-size: contain;
-  background-repeat: no-repeat;
-  background-position: center center;
-  position: absolute;
-  bottom: -.5%;
-  left: .5%;
-  width: 100px;
-  height: 65px;
-  transform: skew(-4deg);
-  filter: brightness(0.4) 
-          var(--shadow) 
-          drop-shadow(0 0 0px transparent);
-  z-index: 800;
-  transition: filter .6s ease-out; /* zkráceno na 0.6s */
-  cursor: pointer;
-}
-
-.wall-left #lightboard:hover {
-  filter: brightness(1.3) 
-          drop-shadow(3px 3px 3px var(--color-warning))
-          drop-shadow(0 0 9px rgba(255, 255, 200, 0.7));
 }
 
 /* OTHER */
@@ -641,7 +571,7 @@
   max-width: 65ch;
   line-height: 1.4;
   height: 60%;
-  color: var--(--color-text-main);
+  color: var(--color-text-main);
   padding: 0.5rem 0.75rem;
   display: grid;
   align-content: end;
@@ -753,13 +683,6 @@
     bottom: 5%;
   }
 
-  .painting {
-    width: 37vmin;
-    height: 52vmin;
-    left: 45vmin;
-    top: 17%;
-  }
-
   .item.ouija {
     width: 25vmin;
     height: var(--item-size);
@@ -832,13 +755,13 @@
   }
 }
 
-@keyframes ghostFlash {
-  0%   { opacity: 0; }
-  20%  { opacity: 0.9; }
-  50%  { opacity: 0.5; }
-  100% { opacity: 0; }
+@supports (content-visibility: hidden) {
+  .room-wrap.front-view:not(.rotating) .wall-back,
+  .room-wrap.back-view:not(.rotating)  .wall-front,
+  .room-wrap.left-view:not(.rotating)  .wall-left,
+  .room-wrap.right-view:not(.rotating) .wall-right {
+    content-visibility: hidden;
+    contain-intrinsic-size: 100vmin 100vmin; /* rezerva pro layout */
+  }
 }
-
-
-
 

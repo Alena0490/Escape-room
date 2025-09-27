@@ -2,7 +2,7 @@
   left: 0;
   transform: rotateY(90deg) translateX(calc(-1 * var(--depth)));
   transform-origin: left;
-  background-color: var(--color-success);
+  background-color: var( --color-bg-stone);
 }
 
 .poster {
@@ -98,4 +98,11 @@
         height: 70vmin;
         right: 3%;
     }
+}
+
+@keyframes ghostFlash {
+  0%   { opacity: 0; }
+  20%  { opacity: 0.9; }
+  50%  { opacity: 0.5; }
+  100% { opacity: 0; }
 }

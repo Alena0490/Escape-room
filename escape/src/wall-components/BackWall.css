@@ -1,6 +1,6 @@
 .wall-back {
   transform: translateZ(calc(-1 * var(--depth)));
-  background-color: var(--color-warning);
+  background-color: var(--color-bg-stone);
 }
 
 .door {

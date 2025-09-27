@@ -4,7 +4,7 @@ import "./Ceiling.css"
  * Ceiling
  * - Ghost (unclickable)
  */
-const GhostComponent = lazy(() => import("./GhostComponent"));
+const GhostComponent = lazy(() => import("../components/GhostComponent.js"));
 
 const Ceiling = ({ lightsOn }) => (
   <div className="wall wall-top">

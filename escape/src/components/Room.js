@@ -1,20 +1,25 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import "./Room.css";
+/** Items */
 import CodeLock from "./CodeLock";
-import Shelf from "./Shelf";
-import Floor from "./Floor.js";
-import Ceiling from "./Ceiling.js";
-import BackWall from "./BackWall.js";
-import RightWall from "./RightWall.js"
 import RoomNavigation from "./RoomNavigation";
 import AudioController from "./AudioController";
+/** Walls */
+import Floor from "../wall-components/Floor.js"
+import Ceiling from "../wall-components/Ceiling.js";
+import BackWall from "../wall-components/BackWall.js";
+import RightWall from "../wall-components/RightWall.js"
+import LeftWall from "../wall-components/LeftWall.js";
+import FrontWall from "../wall-components/FrontWall.js";
+/** Hooks */
 import useTilt from "../hooks/useTilt.js";
 import useSetAudio from "../hooks/useSetAudio.js"
 /** Sounds */
 import Ghost from "../sounds/ghost-6979.mp3";
 import CardboardBox from "../sounds/cardboard-box-open-182560.mp3";
 import Paper from "../sounds/paper-rustle-81855.mp3"
-import JumpScare from "../sounds/075283-quotbehind-youquot-whispe.mp3"
+
+const VIEWS = ["back-view", "left-view", "front-view", "right-view"];
 
 const Room = () => {
   const wrapRef = useRef(null);
@@ -45,8 +50,6 @@ const Room = () => {
   }, []);
 
   /** === VIEW NAVIGATION === */
-  const views = ["back-view", "left-view", "front-view", "right-view"];
-  const walls = ["wall-back", "wall-left", "wall-front", "wall-right"];
   const rotationYRef = useRef(0);
   const viewIndexRef = useRef(0);
   const {
@@ -62,7 +65,7 @@ const Room = () => {
       maxYaw: 3,
     });
 
-  const updateView = (direction) => {
+  const updateView = useCallback((direction) => {
     const roomWrap = wrapRef.current;
     if (!roomWrap || !roomRef.current) return;
 
@@ -70,26 +73,21 @@ const Room = () => {
     resetTilt();
 
     if (direction === "left") {
-      viewIndexRef.current = (viewIndexRef.current + 1) % views.length;
+      viewIndexRef.current = (viewIndexRef.current + 1) % VIEWS.length;
       rotationYRef.current -= 90;
     } else if (direction === "right") {
-      viewIndexRef.current = (viewIndexRef.current - 1 + views.length) % views.length;
+      viewIndexRef.current = (viewIndexRef.current - 1 + VIEWS.length) % VIEWS.length;
       rotationYRef.current += 90;
     }
 
     setActiveView(viewIndexRef.current);
 
-    roomWrap.classList.remove(...views);
-    roomWrap.classList.add(views[viewIndexRef.current]);
+    roomWrap.classList.remove(...VIEWS);
+    roomWrap.classList.add(VIEWS[viewIndexRef.current]);
     roomWrap.classList.add("rotating");
     setTimeout(() => roomWrap.classList.remove("rotating"), 500);
-
-    document.querySelectorAll(".room .wall").forEach((el) => el.classList.remove("active"));
-    document.querySelector(`.wall.${walls[viewIndexRef.current]}`)?.classList.add("active");
-
     applyTransform();
-  };
- 
+}, [resetTilt, applyTransform]);
  
   // Destructure state for convenience
   const {lightsOn} = gameState;
@@ -155,33 +153,9 @@ const Room = () => {
   };
 
   /** Load game state from localStorage on component mount */
-  useEffect(() => {
-    const savedState = localStorage.getItem('escapeRoomState');
-    if (savedState) {
-      const parsedState = JSON.parse(savedState);
-      setGameState(parsedState);
-      
-      // Apply visual states based on saved data
-      const roomCanvas = document.getElementById("room");
-      const switchEl = document.querySelector(".switch");
-      const mirrorEl = document.querySelector(".mirror");
-      const doorEl = document.querySelector(".door.item");
-      
-      if (roomCanvas && switchEl && mirrorEl) {
-        if (parsedState.lightsOn) {
-          roomCanvas.classList.remove("dark");
-          switchEl.classList.add("on");
-          mirrorEl.classList.add("lit");
-        } else {
-          roomCanvas.classList.add("dark");
-          switchEl.classList.remove("on");
-          mirrorEl.classList.remove("lit");
-        }
-      }   
-      if (doorEl && parsedState.doorOpen) {
-        doorEl.classList.add("open");
-      }
-    }
+ useEffect(() => {
+    const saved = localStorage.getItem("escapeRoomState");
+      if (saved) setGameState(JSON.parse(saved));
   }, []);
 
   /** Save game state to localStorage whenever it changes */
@@ -295,11 +269,14 @@ const Room = () => {
             const pad = 10;
             let top = e.clientY + pad;
             let left = e.clientX + pad;
-            const w = tooltip.offsetWidth, h = tooltip.offsetHeight;
-            if (left + w > innerWidth) left = e.clientX - w - pad;
-            if (top + h > innerHeight) top = e.clientY - h - pad;
-            tooltip.style.top = `${top}px`;
-            tooltip.style.left = `${left}px`;
+            const w  = tooltip.offsetWidth;
+            const h  = tooltip.offsetHeight;
+            const vw = window.innerWidth;
+            const vh = window.innerHeight;
+            if (left + w > vw) left = e.clientX - w - pad;
+            if (top + h > vh) top = e.clientY - h - pad;
+              tooltip.style.top = `${top}px`;
+              tooltip.style.left = `${left}px`;
           });
         };
 
@@ -358,7 +335,7 @@ const Room = () => {
     // Start the check
     checkElementsReady();
     return () => cleanupAll();   
-  }, [bindMouseTilt, bindNavFreezeTilt, applyTransform]);
+  }, [bindMouseTilt, bindNavFreezeTilt, applyTransform, updateView]);
 
   return (
     <div id="room" 
@@ -379,47 +356,19 @@ const Room = () => {
       </div>
       <div className="room-wrap" ref={wrapRef}>
         <div className="room" ref={roomRef}>
-          <div className="wall wall-front">
-            <div
-              className="item painting egg"
-              data-title="What a nice painting!"
-              data-comment="Strange… That voice—was it you? Did you just say something about the producers? Go on then. Tell me. I’m all ears."
-              onClick={(e) => {
-                unlockEasterEgg("painting"); // save to LocalStorage
-                incrementItemClicks("painting");
-                const msg = e.currentTarget.getAttribute("data-comment");
-                if (msg) showComment(msg, "easter-egg");
-              }}
-              onMouseEnter={() => playSound(JumpScare, { duration: 2.5, volume: 0.7 })} 
-            >
-                <span className="visually-hidden">A Van Gogh self portrait</span>
-            </div>
-          </div>
-          
-          <div className="wall wall-left">
-            <div
-            className="item lightboard egg"
-            id="lightboard"
-            data-title="Lightbox sign"
-            data-comment="`Behind the Glass`? …Seriously? That crazy reality show? What the hell would a sign like that be doing here?"
-             onClick={(e) => {
-                  unlockEasterEgg("light-sign"); // save to LocalStorage
-                  const msg = e.currentTarget.getAttribute("data-comment");
-                  if (msg) showComment(msg, "easter-egg");
-                  incrementItemClicks("lightbox-sign");
-                  triggerVibration(30);
-                }}>
-              <span className="visually-hidden">A Lightbox sign laying in the corner</span>
-            </div>
-            <Shelf
-              incrementItemClicks={incrementItemClicks}
-              playSound={playSound}
-              triggerVibration={triggerVibration}
-              showComment={showComment}
-              unlockEasterEgg={unlockEasterEgg}
-            />
-          </div>
-          
+          <FrontWall
+            playSound={playSound}
+            showComment={showComment}
+            unlockEasterEgg={unlockEasterEgg}
+            incrementItemClicks={incrementItemClicks}
+          />
+          <LeftWall
+            playSound={playSound}
+            showComment={showComment}
+            unlockEasterEgg={unlockEasterEgg}
+            incrementItemClicks={incrementItemClicks}
+            triggerVibration={triggerVibration}
+          />
           <BackWall
             isActive={activeView === 0}
             setLightsOn={(v) => setGameState(p => ({ ...p, lightsOn: v }))}
@@ -431,7 +380,6 @@ const Room = () => {
             setShowLock={setShowLock}
             unlockEasterEgg={unlockEasterEgg}
           />
-          
           <RightWall
             lightsOn={gameState.lightsOn}
             playSound={playSound}
@@ -440,11 +388,9 @@ const Room = () => {
             triggerVibration={triggerVibration}
             unlockEasterEgg={unlockEasterEgg}
           />
-                 
           <Ceiling 
             lightsOn={lightsOn} 
           />
-          
           <Floor
             playSound={playSound}
             playSequence={playSequence}
