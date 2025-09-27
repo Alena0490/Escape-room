@@ -26,15 +26,18 @@ const RoomNavigation = ({ updateView, showComment }) => {
   const handleHint = () => {
     const hints = [
       "Talk to the old spirits.",
-      "Admire the art.",
+      "Somewhere here is the key to decrypting the code.",
       "Get the code first.",
       "Don't forget to look into boxes.",
       "You need to search all the stuff.",
       "Play sports.",
+      "How about learning a little anatomy?",
+      "How about bringing back some old hits from the '80s?",
       "Read the book.",
       "It's always better with lights on.",
       "Don't be afraid of ghosts.",
       "Don't forget to check under the rug.",
+      "Don't be skeptical about the search for extraterrestrial intelligence.",
     ];
     
     const random = hints[Math.floor(Math.random() * hints.length)];
