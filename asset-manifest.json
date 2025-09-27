@@ -1,7 +1,7 @@
 {
   "files": {
-    "main.css": "/Escape-room/static/css/main.19facb68.css",
-    "main.js": "/Escape-room/static/js/main.5c3e8fc8.js",
+    "main.css": "/Escape-room/static/css/main.08e39904.css",
+    "main.js": "/Escape-room/static/js/main.d2518df2.js",
     "static/css/410.97742599.chunk.css": "/Escape-room/static/css/410.97742599.chunk.css",
     "static/js/410.40ab8af4.chunk.js": "/Escape-room/static/js/410.40ab8af4.chunk.js",
     "static/media/cassette.webp": "/Escape-room/static/media/cassette.e0df93bb9e2459862b7f.webp",
@@ -79,13 +79,13 @@
     "static/media/switch-dark.webp": "/Escape-room/static/media/switch-dark.117ba8e3857ca96467ee.webp",
     "static/media/medical-chest-side1.webp": "/Escape-room/static/media/medical-chest-side1.b9c9a1a93c8b7f974108.webp",
     "static/media/cardboard-top.webp": "/Escape-room/static/media/cardboard-top.bc8a5ddd289255043f51.webp",
-    "main.19facb68.css.map": "/Escape-room/static/css/main.19facb68.css.map",
-    "main.5c3e8fc8.js.map": "/Escape-room/static/js/main.5c3e8fc8.js.map",
+    "main.08e39904.css.map": "/Escape-room/static/css/main.08e39904.css.map",
+    "main.d2518df2.js.map": "/Escape-room/static/js/main.d2518df2.js.map",
     "410.97742599.chunk.css.map": "/Escape-room/static/css/410.97742599.chunk.css.map",
     "410.40ab8af4.chunk.js.map": "/Escape-room/static/js/410.40ab8af4.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.19facb68.css",
-    "static/js/main.5c3e8fc8.js"
+    "static/css/main.08e39904.css",
+    "static/js/main.d2518df2.js"
   ]
 }
