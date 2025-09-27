@@ -6,7 +6,7 @@ import switchSound from "../sounds/light-switch-382712.mp3";
 const audioCache = new Map();
 const activeAudioInstances = new Set();
 
-// Global audio manager
+// Globální audio manager
 const globalAudioManager = {
   isMuted: false,
   setMuted(muted) {
@@ -17,7 +17,7 @@ const globalAudioManager = {
   },
   
   stopAll() {
-    // Stop all active tasks
+    // Stop všechny aktivní instance
     activeAudioInstances.forEach(audio => {
       try {
         audio.pause();
@@ -27,7 +27,7 @@ const globalAudioManager = {
     });
     activeAudioInstances.clear();
 
-    // Stop all <audio> elements on page
+    // Stop všechny <audio> elementy na stránce
     document.querySelectorAll("audio").forEach(audio => {
       try {
         audio.pause();
@@ -70,7 +70,7 @@ const globalAudioManager = {
   }
 };
 
-// Set first global audit manager on window
+// Nastavení globálního audio manageru na window
 window.globalAudioManager = globalAudioManager;
 
 export default function useSetAudio() {
@@ -89,7 +89,7 @@ export default function useSetAudio() {
   }, []);
 
   const playSound = useCallback((src, options = {}) => {
-    // If muted, do no play anything
+    // Pokud je zvuk vypnutý, neprehrávej nic
     if (globalAudioManager.isMuted) {
       return null;
     }
@@ -102,16 +102,22 @@ export default function useSetAudio() {
     
     if (!base) {
       base = new Audio(src);
-      base.preload = "auto";
+      // For random/background sounds, use lazy loading
+      const isRandomSound = src.includes('empty-room') || src.includes('voices') || 
+                          src.includes('steps') || src.includes('laugh') || 
+                          src.includes('woman') || src.includes('lullaby');
+      
+      base.preload = isRandomSound ? "none" : "auto";
       audioCache.set(key, base);
     }
     
     const audio = base.cloneNode();
-    audio.muted = false; // assure it's not muted
+    audio.muted = false; // Ujisti se, že není muted
 
+    // Přidej do sledovaných instancí
     activeAudioInstances.add(audio);
 
-    // Cleanup after endng
+    // Cleanup při skončení
     let cleanup = () => {
       activeAudioInstances.delete(audio);
     };
@@ -175,7 +181,7 @@ export default function useSetAudio() {
         }
       }, duration * 1000);
       
-      // Cleanup timeout during unmount
+      // Cleanup timeout při unmount
       const originalCleanup = cleanup;
       cleanup = () => {
         clearTimeout(timeoutId);
@@ -191,7 +197,7 @@ export default function useSetAudio() {
       if (globalAudioManager.isMuted) break;
       
       const a = playSound(src, options);
-      if (!a) continue; // If muted, playSound returns null
+      if (!a) continue; // Pokud je muted, playSound vrátí null
       
       await new Promise((resolve) => {
         const d = options?.duration;
@@ -220,7 +226,7 @@ export default function useSetAudio() {
     intervalRefs.current.add(id);
   }, []);
 
-  // Cleanup all interval when unmounted
+  // Cleanup všech intervalů při unmount
   const cleanup = useCallback(() => {
     intervalRefs.current.forEach(id => clearInterval(id));
     intervalRefs.current.clear();

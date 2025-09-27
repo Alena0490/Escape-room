@@ -352,7 +352,7 @@ const Room = () => {
       <div className="overlay darkness"></div>
       <div className="overlay zoom"></div>
       <div className="ouija-overlay">
-          <span className="visually-hidden">Old Ouija boardwith pointer</span>
+          <span className="visually-hidden">Old Ouija board with pointer</span>
       </div>
       <div className="room-wrap" ref={wrapRef}>
         <div className="room" ref={roomRef}>
