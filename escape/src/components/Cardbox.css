@@ -1,0 +1,40 @@
+.cardbox {
+  bottom: 0;
+  transform: translateZ(calc(var(--depth) - calc(0.5 * var(--cubescale))));
+  box-shadow: none;
+  cursor: pointer;
+}
+
+.cardbox .cube-top {
+    background-image: url("../img/cardboard-top.webp");
+    background-size: contain;
+    border: 2px none;
+    box-shadow: none;
+}
+
+.cardbox .cube-left {
+    background-image: url("../img/box-side.webp");
+    background-size: cover;
+    border: none;
+    box-shadow: none;
+}
+
+.cardbox .cube-right {
+    background-image: url("../img/box-side.webp");
+    background-size: cover;
+    border: 1px none;
+    box-shadow: none;
+}
+
+.cardbox .cube-front {
+    background-image: url("../img/box-side.webp");
+    background-size: cover;
+    border: none
+}
+
+.cardbox .cube-back {
+    background-image: url("../img/box-side.webp");
+    background-size: cover;
+    box-shadow: none;
+    border: none;
+}

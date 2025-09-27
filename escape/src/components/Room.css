@@ -268,47 +268,6 @@
   background-color: transparent;
 }
 
-.cardbox {
-  bottom: 0;
-  transform: translateZ(calc(var(--depth) - calc(0.5 * var(--cubescale))));
-  box-shadow: none;
-  cursor: pointer;
-}
-
-.cardbox .cube-top {
-    background-image: url("../img/cardboard-top.webp");
-    background-size: contain;
-    border: 2px none;
-    box-shadow: none;
-}
-
-.cardbox .cube-left {
-    background-image: url("../img/box-side.webp");
-    background-size: cover;
-    border: none;
-    box-shadow: none;
-}
-
-.cardbox .cube-right {
-    background-image: url("../img/box-side.webp");
-    background-size: cover;
-    border: 1px none;
-    box-shadow: none;
-}
-
-.cardbox .cube-front {
-    background-image: url("../img/box-side.webp");
-    background-size: cover;
-    border: none
-}
-
-.cardbox .cube-back {
-    background-image: url("../img/box-side.webp");
-    background-size: cover;
-    box-shadow: none;
-    border: none;
-}
-
 .item:active {
   transform: scale(0.95);
   transition: transform .1s;
@@ -344,11 +303,6 @@
 .item:not(#hover-not):hover,
 .item:not(#hover-not):active {
   filter: brightness(1.2) drop-shadow(3px 3px 3px var(--color-warning));
-}
-
-.flat.door:hover,
-.flat.door:active {
-  filter: brightness(1.1) sepia(0.3) drop-shadow(3px 3px 3px var(--color-warning)) !important;
 }
 
 /* OTHER */
@@ -573,14 +527,13 @@
   }
 
   .item:not(.ouija) {
-    /* transform: translateZ(0); */
     backface-visibility: hidden;
   }
 }
 
 @media (max-width: 650px) {  
   .room-wrap.rotating .room {
-    will-change: transform; /* použít jen v animaci */
+    will-change: transform;
   }
 
   .zoomed .room-wrap {

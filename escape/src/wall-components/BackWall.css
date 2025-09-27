@@ -3,6 +3,11 @@
   background-color: var(--color-bg-stone);
 }
 
+.flat.door:hover,
+.flat.door:active {
+  filter: brightness(1.1) sepia(0.3) drop-shadow(3px 3px 3px var(--color-warning)) !important;
+}
+
 .door {
   width: 31%;
   height: 60%;

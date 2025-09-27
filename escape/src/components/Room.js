@@ -5,6 +5,7 @@ import CodeLock from "./CodeLock";
 import RoomNavigation from "./RoomNavigation";
 import AudioController from "./AudioController";
 import Table from "./Table.js";
+import Cardbox from "./Cardbox.js";
 /** Walls */
 import Floor from "../wall-components/Floor.js"
 import Ceiling from "../wall-components/Ceiling.js";
@@ -15,9 +16,6 @@ import FrontWall from "../wall-components/FrontWall.js";
 /** Hooks */
 import useTilt from "../hooks/useTilt.js";
 import useSetAudio from "../hooks/useSetAudio.js"
-/** Sounds */
-import CardboardBox from "../sounds/cardboard-box-open-182560.mp3";
-import Paper from "../sounds/paper-rustle-81855.mp3"
 
 const VIEWS = ["back-view", "left-view", "front-view", "right-view"];
 
@@ -400,26 +398,13 @@ const Room = () => {
             incrementItemClicks={incrementItemClicks}
             unlockEasterEgg={unlockEasterEgg}
             triggerVibration={triggerVibration}
-          />
-          
-          <div className="cube cardbox" 
-            data-title="A random box"
-            data-comment="There is just a piece of paper. It says: 'KEY: book, ball, mirror, cassette, skull, rug'"
-            onClick={(e) => {
-              e.stopPropagation(); 
-              playSequence([
-                { src: CardboardBox, options: { duration: 2.5, fadeIn: 0.2 } },
-                { src: Paper, options: { volume: 0.5,  start: 0.2 } }
-              ]);
-              const msg = e.currentTarget.getAttribute("data-comment");
-              if (msg) showComment(msg);
-              incrementItemClicks("cardbox");
-              triggerVibration(30);
-            }}
-          >
-            <span className="visually-hidden">Cardboard box</span>
-          </div>
-          
+          />          
+          <Cardbox
+            playSequence={playSequence}
+            showComment={showComment}
+            incrementItemClicks={incrementItemClicks}
+            triggerVibration={triggerVibration}
+          />         
           <Table
             playSound={playSound}
             showComment={showComment}
