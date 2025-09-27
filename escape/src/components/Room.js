@@ -4,6 +4,7 @@ import "./Room.css";
 import CodeLock from "./CodeLock";
 import RoomNavigation from "./RoomNavigation";
 import AudioController from "./AudioController";
+import Table from "./Table.js";
 /** Walls */
 import Floor from "../wall-components/Floor.js"
 import Ceiling from "../wall-components/Ceiling.js";
@@ -15,7 +16,6 @@ import FrontWall from "../wall-components/FrontWall.js";
 import useTilt from "../hooks/useTilt.js";
 import useSetAudio from "../hooks/useSetAudio.js"
 /** Sounds */
-import Ghost from "../sounds/ghost-6979.mp3";
 import CardboardBox from "../sounds/cardboard-box-open-182560.mp3";
 import Paper from "../sounds/paper-rustle-81855.mp3"
 
@@ -24,7 +24,7 @@ const VIEWS = ["back-view", "left-view", "front-view", "right-view"];
 const Room = () => {
   const wrapRef = useRef(null);
   const roomRef = useRef(null);
-  const { playSound, playSequence, fadeOutAudio } = useSetAudio();
+  const { playSound, playSequence, fadeOutAudio, stopAllAudio, setMuted, isMuted } = useSetAudio();
   const [isFlickering, setIsFlickering] = useState(false);
   const [activeView, setActiveView] = useState(0); // 0 = back-view
   const [gameState, setGameState] = useState({
@@ -54,16 +54,16 @@ const Room = () => {
   const viewIndexRef = useRef(0);
   const {
     applyTransform,       // pitch+yaw
-      resetTilt,          // tilt back to 0/0
-      bindMouseTilt,      // mousemove/mouseleave
-      bindNavFreezeTilt,  // reset when clicking on .room-nav
-    } = useTilt({
-      roomRef,
-      wrapRef,
-      rotationYRef,
-      maxPitch: 6,
-      maxYaw: 3,
-    });
+    resetTilt,          // tilt back to 0/0
+    bindMouseTilt,      // mousemove/mouseleave
+    bindNavFreezeTilt,  // reset when clicking on .room-nav
+  } = useTilt({
+    roomRef,
+    wrapRef,
+    rotationYRef,
+    maxPitch: 6,
+    maxYaw: 3,
+  });
 
   const updateView = useCallback((direction) => {
     const roomWrap = wrapRef.current;
@@ -87,7 +87,7 @@ const Room = () => {
     roomWrap.classList.add("rotating");
     setTimeout(() => roomWrap.classList.remove("rotating"), 500);
     applyTransform();
-}, [resetTilt, applyTransform]);
+  }, [resetTilt, applyTransform]);
  
   // Destructure state for convenience
   const {lightsOn} = gameState;
@@ -101,9 +101,9 @@ const Room = () => {
 
   /** Start time -Save to LocalStorage */
   useEffect(() => {
-      if (!localStorage.getItem("gameStartTime")) {
-        localStorage.setItem("gameStartTime", Date.now());
-      }
+    if (!localStorage.getItem("gameStartTime")) {
+      localStorage.setItem("gameStartTime", Date.now());
+    }
   }, []);
 
   /*** ENDING SCREEN  */
@@ -153,9 +153,9 @@ const Room = () => {
   };
 
   /** Load game state from localStorage on component mount */
- useEffect(() => {
+  useEffect(() => {
     const saved = localStorage.getItem("escapeRoomState");
-      if (saved) setGameState(JSON.parse(saved));
+    if (saved) setGameState(JSON.parse(saved));
   }, []);
 
   /** Save game state to localStorage whenever it changes */
@@ -171,7 +171,7 @@ const Room = () => {
     if (className) div.className = className;
     dialog.appendChild(div);
 
-    // 🔹 Display length based on number of characters
+    // Display length based on number of characters
     const len = text.length;
     let displayTime = 8000; // default 8s
 
@@ -183,14 +183,14 @@ const Room = () => {
       displayTime = 5000;    // short
     }
 
-    // 🔹 Closing message (lokální fade-out + remove)
+    // Closing message (lokální fade-out + remove)
     const closeMessage = () => {
       if (!div.isConnected) return;
       div.style.opacity = "0";
       setTimeout(() => div.remove(), 300);
     };
 
-    // ⏳ Close after the message
+    // Close after the message
     setTimeout(closeMessage, displayTime);
   };
 
@@ -275,8 +275,8 @@ const Room = () => {
             const vh = window.innerHeight;
             if (left + w > vw) left = e.clientX - w - pad;
             if (top + h > vh) top = e.clientY - h - pad;
-              tooltip.style.top = `${top}px`;
-              tooltip.style.left = `${left}px`;
+            tooltip.style.top = `${top}px`;
+            tooltip.style.left = `${left}px`;
           });
         };
 
@@ -339,15 +339,17 @@ const Room = () => {
 
   return (
     <div id="room" 
-  className={`
-    ${lightsOn ? "" : "dark"}
-    ${isFlickering ? "lights-glitch" : ""}
-  `.trim()}
-  >
-     <AudioController 
+      className={`
+        ${lightsOn ? "" : "dark"}
+        ${isFlickering ? "lights-glitch" : ""}
+      `.trim()}
+    >
+      <AudioController 
         lightsOn={lightsOn}
         playSound={playSound}
         fadeOutAudio={fadeOutAudio}
+        isMuted={isMuted}
+        stopAllAudio={stopAllAudio}
       />
       <div className="overlay darkness"></div>
       <div className="overlay zoom"></div>
@@ -418,42 +420,12 @@ const Room = () => {
             <span className="visually-hidden">Cardboard box</span>
           </div>
           
-          <div 
-            className="cube table" 
-            data-title="A weird table" 
-            data-comment="Nice, I really need this for my living room. Wait, what is there?"
-            onClick={(e) => {
-              e.stopPropagation(); 
-              const msg = e.currentTarget.getAttribute("data-comment");
-              if (msg) showComment(msg);
-              incrementItemClicks("table");
-              triggerVibration(30);
-            }}
-          >
-            <span className="visually-hidden">A wooden table with skull decoration</span>
-
-            <div
-              className="item ouija"
-              data-title="OUIJA"
-              data-comment="Oh, what, the pointer is moving! Creepy... 'T - O - G - E - T out of the room, you need to solve the riddles. You need to use just one last or the only number from each one. But first you need to find the key.' Because why make it easy, right?"
-              onClick={(e) => {
-                e.stopPropagation(); 
-                playSound(Ghost);
-                incrementItemClicks("ouija");
-                const msg = e.currentTarget.getAttribute("data-comment");
-                if (msg) showComment(msg);
-                triggerVibration(30);
-                // show detail
-              const overlay = document.querySelector(".ouija-overlay");
-                overlay.classList.add("active");
-                setTimeout(() => {
-                  overlay.classList.remove("active");
-                }, 5500); // ⏳ remove detail
-              }}
-              >
-              <span className="visually-hidden">OUIJA board</span>
-            </div>          
-          </div>
+          <Table
+            playSound={playSound}
+            showComment={showComment}
+            incrementItemClicks={incrementItemClicks}
+            triggerVibration={triggerVibration}
+          />
         </div>
       </div>
       <CodeLock
@@ -467,10 +439,14 @@ const Room = () => {
         getItemsClicked={getItemsClicked}
         getEasterEggsCount={getEasterEggsCount}
         calculateGameTime={calculateGameTime}
+        stopAllAudio={stopAllAudio} 
       />
       <RoomNavigation
         updateView={updateView}
         showComment={showComment}
+        setMuted={setMuted}
+        isMuted={isMuted}
+        stopAllAudio={stopAllAudio}
       />
       <div id="tooltip"></div>
       <div id="itemCur"></div>

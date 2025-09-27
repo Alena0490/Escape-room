@@ -69,7 +69,13 @@
 }
 
 .room-nav #turnRight {
+  left: 6em;
+}
+
+.room-nav #sound {
   right: 0;
+  background-color: var(--color-glow);
+  opacity: 0.8;
 }
 
 .room-nav .hidden {

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useCallback, memo  } from "react";
+import { useRef, useCallback, memo  } from "react";
 import "./BackWall.css"
 import switchSound from "../sounds/light-switch-382712.mp3";
 import Door from "../sounds/door-handle-1-401153.mp3"
@@ -27,14 +27,6 @@ const BackWall = ({
 
     const onIndex = useRef(0);
     const offIndex = useRef(0);
-
-    /** SWITCH */
-  // Switch Sound preload
-  useEffect(() => {
-    const a = new Audio(switchSound);
-    a.preload = "auto";
-    a.load();
-  }, []);
 
    // --- handlers --------------------------------------------------------------
   const handleSwitchClick = useCallback(

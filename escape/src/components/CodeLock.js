@@ -18,6 +18,7 @@ const CodeLock = ({
   getHintsUsed,
   getItemsClicked,
   getEasterEggsCount,
+  stopAllAudio, 
 }) => {
   const [code, setCode] = useState("");
   const [showWinScreen, setShowWinScreen] = useState(false);
@@ -114,6 +115,7 @@ const CodeLock = ({
           items={getItemsClicked()}
           eggCount={getEasterEggsCount()} 
           onRestart={handleRestart}
+          stopAllAudio={stopAllAudio} 
         />
       )}
     </>

@@ -309,97 +309,9 @@
     border: none;
 }
 
-.cube.table {
-  --cubescale: 30vmin;
-  background-color: transparent;
-  right: 0;
-  bottom: 0;
-  transform: translateZ(calc(var(--depth) - calc(0.5 * var(--cubescale))));
-  cursor: pointer;
-  z-index: 10;
-}
-
 .item:active {
   transform: scale(0.95);
   transition: transform .1s;
-}
-
-.item.ouija {
-  position: relative;
-  bottom: 24vmin;
-  left: 45%;
-  transform: translateX(-50%);
-  width: 23vmin;
-  height: var(--item-size);
-  background: transparent;
-  cursor: pointer;
-  z-index: 810;
-  border: none;
-  filter: none;
-  box-shadow: none;
-  pointer-events: all;
-  /* border: 3px solid red; */
-}
-
-.ouija-overlay {
-  position: absolute;
-  top: 20%;
-  left: 10%;
-  transform: translate(-50%, -50%);
-  width: 80vw;
-  height: 50vh;
-  background-image: url("../img/ouija.webp");
-  background-size: contain;
-  background-position: center center;
-  background-repeat: no-repeat;
-  opacity: 0;               
-  pointer-events: none;      
-  transition: opacity .3s;
-  z-index: 999;   
-}
-
-.ouija-overlay.active {
-  opacity: 1;
-  animation: ouijaFlash 5.4s ease forwards;
-}
-
-.item.ouija div {
-  background: none;
-  box-shadow: none;
-  border: none;
-}
-
-.cube.table .cube-top {
-    background-image: url("../img/table-top.webp");
-    background-size: contain;
-}
-
-.cube.table .cube-left {
-    background-image: url("../img/table-side.webp");
-    background-size: contain;
-    box-shadow: none;
-    border: none;
-}
-
-.cube.table .cube-right {
-    background-image: url("../img/table-side.webp");
-    background-size: contain;
-    box-shadow: none;
-    border: none;
-}
-
-.cube.table .cube-front {
-    background-image: url("../img/table-side.webp");
-    background-size: contain;
-    box-shadow: none;
-    border: none;
-}
-
-.cube.table .cube-back {
-    background-image: url("../img/table-side.webp");
-    background-size: contain;
-    box-shadow: none;
-    border: none;
 }
 
 /*-- OBJECTS --*/
@@ -484,9 +396,9 @@
     rgba(0, 10, 20, 0) 70%,
     rgba(0, 10, 20, 1) 100%
   );
-  opacity: 0.35;
-  mix-blend-mode: multiply;
-  pointer-events: none;
+    opacity: 0.35;
+    mix-blend-mode: multiply;
+    pointer-events: none;
 }
 .zoomed .overlay.zoom {
   opacity: 0.85;
@@ -682,12 +594,6 @@
     scale: 1.2;
     bottom: 5%;
   }
-
-  .item.ouija {
-    width: 25vmin;
-    height: var(--item-size);
-    transform: scale3d(1.9, 1.5, 1.5);
-  }
 }
 
 @media (max-width: 548px) {
@@ -723,37 +629,6 @@
   90%   { opacity: 0.1; }
   100%  { opacity: 0; }    
   }
-
-  @keyframes ouijaFlash {
-    /* phase 1 – show table */
-  0% {
-    opacity: 0;
-    transform: translateY(20px) scale(0.9);
-    filter: brightness(0.6);
-  }
-  10% {
-    opacity: 1;
-    transform: translateY(0) scale(1.05) rotate(-2deg);
-    filter: brightness(1.3);
-  }
-  20% {
-    transform: translateY(0) scale(1) rotate(0deg);
-    filter: brightness(1);
-  }
-
-  /* phase 2 – stable*/
-  70% {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-
-  /* phase 3 – disappear */
-  100% {
-    opacity: 0;
-    transform: translateY(-30px) scale(0.9); /* mizí směrem nahoru */
-    filter: brightness(0.5);
-  }
-}
 
 @supports (content-visibility: hidden) {
   .room-wrap.front-view:not(.rotating) .wall-back,
