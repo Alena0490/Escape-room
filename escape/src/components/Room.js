@@ -34,7 +34,6 @@ const Room = () => {
   useEffect(() => {
     if (roomRef.current) {
       roomRef.current.style.setProperty("--rotateX", "0deg");
-      roomRef.current.style.setProperty("--rotateY", "0deg");
     }
   }, []);
 
@@ -86,7 +85,7 @@ const Room = () => {
     const roomWrap = wrapRef.current;
     if (!roomWrap || !roomRef.current) return;
 
-    // reset tilt on view change (safe even if reduced)
+    // Reset tilt on view change (safe even with reduced motion)
     resetTilt();
 
     if (direction === "left") {
@@ -122,7 +121,7 @@ const Room = () => {
     }
   }, []);
 
-  /** Stats */
+  /** Game statistics */
   const calculateGameTime = useCallback(() => {
     const startTime = localStorage.getItem("gameStartTime");
     if (!startTime) return "00:00";
@@ -134,7 +133,7 @@ const Room = () => {
 
   const getHintsUsed = useCallback(() => localStorage.getItem("hintsUsed") || "0", []);
 
-  const getItemsClicked   = useCallback(() => {
+  const getItemsClicked = useCallback(() => {
     let clicked = JSON.parse(localStorage.getItem("clickedItems") || "[]");
     return clicked.length;
   }, []);
@@ -174,7 +173,7 @@ const Room = () => {
     localStorage.setItem("escapeRoomState", JSON.stringify(gameState));
   }, [gameState]);
 
-  /** Comments dialog */
+  /** Comment (dialog) */
   const showComment = useCallback((text, className = "") => {
     const dialog = document.querySelector("#dialog");
     const div = document.createElement("div");
@@ -182,7 +181,7 @@ const Room = () => {
     if (className) div.className = className;
     dialog.appendChild(div);
 
-    // Show duration heuristic
+    // Heuristic to choose display duration
     const len = text.length;
     let displayTime = 8000;
     if (len > 300) displayTime = 20000;
@@ -197,7 +196,7 @@ const Room = () => {
     setTimeout(closeMessage, displayTime);
   }, []);
 
-  /** One-time init for input & helpers */
+  /** One-time init: input & helpers */
   useEffect(() => {
     let cleanupAll = () => {};
 
@@ -316,7 +315,12 @@ const Room = () => {
         const swipeCleanup     = initSwipeSupport();
         const tooltipCleanup   = initTooltip();
         // Bind tilt only if NOT reduced motion
-        const unbindMouseTilt  = prefersReduced ? () => {} : bindMouseTilt();
+        const isTouch =
+          "ontouchstart" in window ||
+          navigator.maxTouchPoints > 0 ||
+          window.matchMedia?.("(pointer: coarse)")?.matches;
+
+        const unbindMouseTilt = (!isTouch && !prefersReduced) ? bindMouseTilt() : () => {};
         const unbindNavFreeze  = prefersReduced ? () => {} : bindNavFreezeTilt();
         
 
