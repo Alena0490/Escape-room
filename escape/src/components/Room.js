@@ -30,6 +30,14 @@ const Room = () => {
   const [gameState, setGameState] = useState({ lightsOn: false, doorOpen: false });
   const [showLock, setShowLock] = useState(false);
 
+  // Room tilting
+  useEffect(() => {
+    if (roomRef.current) {
+      roomRef.current.style.setProperty("--rotateX", "0deg");
+      roomRef.current.style.setProperty("--rotateY", "0deg");
+    }
+  }, []);
+
   /** Dialog close on outside click */
   useEffect(() => {
     const dialog = document.getElementById("dialog");
@@ -69,7 +77,6 @@ const Room = () => {
   useEffect(() => {
     if (prefersReduced) {
       resetTilt?.();
-      // ensure pitch is 0 and don't override yaw (rotation stays)
       if (roomRef.current) roomRef.current.style.setProperty("--rotateX", "0deg");
     }
   }, [prefersReduced, resetTilt]);
@@ -104,9 +111,9 @@ const Room = () => {
   const { lightsOn } = gameState;
 
   /** Vibration feedback */
-  const triggerVibration = (duration = 50) => {
+  const triggerVibration = useCallback((duration = 50) => {
     if ("vibrate" in navigator) navigator.vibrate(duration);
-  };
+  }, []);
 
   /** Start time */
   useEffect(() => {
@@ -116,21 +123,21 @@ const Room = () => {
   }, []);
 
   /** Stats */
-  const calculateGameTime = () => {
+  const calculateGameTime = useCallback(() => {
     const startTime = localStorage.getItem("gameStartTime");
     if (!startTime) return "00:00";
     const elapsed = Date.now() - parseInt(startTime, 10);
     const minutes = Math.floor(elapsed / 60000);
     const seconds = Math.floor((elapsed % 60000) / 1000);
     return `${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
-  };
+  }, []);
 
-  const getHintsUsed = () => localStorage.getItem("hintsUsed") || "0";
+  const getHintsUsed = useCallback(() => localStorage.getItem("hintsUsed") || "0", []);
 
-  const getItemsClicked = () => {
+  const getItemsClicked   = useCallback(() => {
     let clicked = JSON.parse(localStorage.getItem("clickedItems") || "[]");
     return clicked.length;
-  };
+  }, []);
 
   /** Count unique clicked items */
   const incrementItemClicks = useCallback((id) => {
@@ -144,18 +151,18 @@ const Room = () => {
   }, []);
 
   /** Easter eggs */
-  const unlockEasterEgg = (id) => {
+  const unlockEasterEgg = useCallback((id) => {
     let eggs = JSON.parse(localStorage.getItem("easterEggs") || "{}");
     if (!eggs[id]) {
       eggs[id] = true;
       localStorage.setItem("easterEggs", JSON.stringify(eggs));
     }
-  };
+  }, []);
 
-  const getEasterEggsCount = () => {
+  const getEasterEggsCount = useCallback(() => {
     const eggs = JSON.parse(localStorage.getItem("easterEggs") || "{}");
     return Object.keys(eggs).length;
-  };
+  }, []);
 
   /** Load/save game state */
   useEffect(() => {
@@ -168,7 +175,7 @@ const Room = () => {
   }, [gameState]);
 
   /** Comments dialog */
-  const showComment = (text, className = "") => {
+  const showComment = useCallback((text, className = "") => {
     const dialog = document.querySelector("#dialog");
     const div = document.createElement("div");
     div.innerHTML = text;
@@ -188,7 +195,7 @@ const Room = () => {
       setTimeout(() => div.remove(), 300);
     };
     setTimeout(closeMessage, displayTime);
-  };
+  }, []);
 
   /** One-time init for input & helpers */
   useEffect(() => {
@@ -311,6 +318,8 @@ const Room = () => {
         // Bind tilt only if NOT reduced motion
         const unbindMouseTilt  = prefersReduced ? () => {} : bindMouseTilt();
         const unbindNavFreeze  = prefersReduced ? () => {} : bindNavFreezeTilt();
+        
+
         initCubes();
 
         return () => {
