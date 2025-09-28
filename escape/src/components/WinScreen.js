@@ -9,6 +9,7 @@ const WinScreen = ({
   hints,
   items,
   eggCount,
+  score,
   onRestart,
   stopAllAudio,
 }) => {
@@ -81,6 +82,11 @@ const WinScreen = ({
           <p>Hints Used: {hints ?? 0}</p>
           <p>Items Searched: {items ?? 0}</p>
           <p className="bonus">Bonus points: {eggCount ?? 0} of 7</p>
+          <p className="final-score">
+            <strong>Score:</strong>
+            <span className="num">{score}</span> 
+            <span className="max">/ 350</span>
+          </p>
         </div>
 
         <button ref={btnRef} className="win-button" onClick={handleRestart}>

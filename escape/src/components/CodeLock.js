@@ -4,6 +4,15 @@ import "./CodeLock.css";
 // lazy after win
 const WinScreen = lazy(() => import("./WinScreen"));
 
+//FINAL SCORE Base + weights;
+const BASE_SCORE = 100;
+const computeScore = ({ items, eggs, hints }) => {
+  const itemPts = items * 5;
+  const eggPts = eggs * 20;
+  const hintPenalty = hints * 10;
+  return Math.max(0, BASE_SCORE + itemPts + eggPts - hintPenalty);
+};
+
 const CodeLock = ({
   showLock,
   setShowLock,
@@ -159,10 +168,15 @@ const CodeLock = ({
       {showWinScreen && (
         <Suspense fallback={null}>
           <WinScreen
-            time={calculateGameTime?.()}
-            hints={getHintsUsed?.()}
-            items={getItemsClicked?.()}
-            eggCount={getEasterEggsCount?.()}
+            time={calculateGameTime()}
+            hints={getHintsUsed()}
+            items={getItemsClicked()}
+            eggCount={getEasterEggsCount()}
+            score={computeScore({
+              items: getItemsClicked(),
+              eggs: getEasterEggsCount(),
+              hints: Number(getHintsUsed() || 0)
+            })}
             onRestart={handleRestart}
             stopAllAudio={stopAllAudio}
           />
