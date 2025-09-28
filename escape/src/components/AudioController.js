@@ -1,35 +1,24 @@
-import { useEffect, useState, useMemo, useRef, useCallback } from "react";
-/** Random sounds - loaded on demand **/
-import EmptyRoom from "../sounds/empty-room-horror-sound-sfx-3339.mp3";
-import VoicesShort from "../sounds/schizophrenic-voices-62486.mp3";
-import Steps from "../sounds/steps-approaching-in-the-darknes.mp3";
-import Voices from "../sounds/015922-whispers-39schizophrenic3.mp3";
-import Laugh from "../sounds/evil-laughing-256454.mp3";
-import EvilLaugh from "../sounds/evil-laughter-353177.mp3";
-import CrazyWoman from "../sounds/female-horror-voice-they-know-no.mp3";
-import WomanInsomnia from "../sounds/halloween-horror-voice-insomnia.mp3";
-import Lullaby from "../sounds/music-box-lullaby-23919.mp3";
+import { useEffect, useState, useMemo, useRef, useCallback, memo } from "react";
 
 /**
  * AudioController
  * - ambient: hraje ve tmě po tom, co se aspoň jednou rozsvítilo
- * - náhodné spooky zvuky: respektují mute i světlo
- * - isMuted může být boolean nebo funkce vracející boolean
+ * - random spooky: respektuje mute i světlo
+ * - lazy import: zvuky se stahují až při přehrání
  */
 const AudioController = ({ lightsOn, playSound, fadeOutAudio, isMuted, stopAllAudio }) => {
   const [hasBeenLitBefore, setHasBeenLitBefore] = useState(false);
 
-  // === Refs pro stabilní čtení aktuálních stavů (kvůli timeoutům/intervalům) ===
-  const ambientRef = useRef(null);
-  const lightsRef = useRef(lightsOn);
+  // === Refs pro stabilní čtení aktuálních stavů ===
+  const ambientRef   = useRef(null);
+  const lightsRef    = useRef(lightsOn);
   const litBeforeRef = useRef(false);
-  const mutedRef = useRef(getMuted(isMuted));
+  const mutedRef     = useRef(getMuted(isMuted));
 
   useEffect(() => { lightsRef.current = lightsOn; }, [lightsOn]);
   useEffect(() => { litBeforeRef.current = hasBeenLitBefore; }, [hasBeenLitBefore]);
   useEffect(() => { mutedRef.current = getMuted(isMuted); }, [isMuted]);
 
-  // Pomocná funkce – sjednotí boolean/funkci
   function getMuted(mutedProp) {
     return typeof mutedProp === "function" ? !!mutedProp() : !!mutedProp;
   }
@@ -39,20 +28,36 @@ const AudioController = ({ lightsOn, playSound, fadeOutAudio, isMuted, stopAllAu
     if (lightsOn && !hasBeenLitBefore) setHasBeenLitBefore(true);
   }, [lightsOn, hasBeenLitBefore]);
 
-  // === Náhodné spooky zvuky (respektují mute i světlo) ===
-  const spookySounds = useMemo(() => [
-    EmptyRoom, VoicesShort, Steps, Laugh, EvilLaugh, CrazyWoman, WomanInsomnia, Lullaby
-  ], []);
+  // === LAZY loaders pro random sounds (se základní hlasitostí) ===
+  const spookyLoaders = useMemo(
+    () => [
+      { load: () => import("../sounds/empty-room-horror-sound-sfx-3339.mp3"),                 volume: 0.3 },
+      { load: () => import("../sounds/schizophrenic-voices-62486.mp3"),                       volume: 0.3 },
+      { load: () => import("../sounds/steps-approaching-in-the-darknes.mp3"),                 volume: 0.6 }, // hlasitější kroky
+      { load: () => import("../sounds/evil-laughing-256454.mp3"),                             volume: 0.3 },
+      { load: () => import("../sounds/evil-laughter-353177.mp3"),                             volume: 0.3 },
+      { load: () => import("../sounds/female-horror-voice-they-know-no.mp3"),                 volume: 0.3 },
+      { load: () => import("../sounds/halloween-horror-voice-insomnia.mp3"),                  volume: 0.3 },
+      { load: () => import("../sounds/music-box-lullaby-23919.mp3"),                          volume: 0.3 },
+    ],
+    []
+  );
 
-  const playRandomSpooky = useCallback(() => {
+  // === Random zvuk – LAZY import + přehrání ===
+  const playRandomSpooky = useCallback(async () => {
     if (mutedRef.current) return;
-    const s = spookySounds[Math.floor(Math.random() * spookySounds.length)];
-    const volume = s === Steps ? 0.6 : 0.3;
-    try { playSound(s, { volume }); } catch (e) { console.error("❌ playRandomSpooky:", e); }
-  }, [spookySounds, playSound]);
+    const pick = spookyLoaders[Math.floor(Math.random() * spookyLoaders.length)];
+    try {
+      const mod = await pick.load();
+      const url = mod?.default || mod; // bundlery vrací URL v default
+      playSound(url, { volume: pick.volume });
+    } catch (e) {
+      console.error("❌ playRandomSpooky:", e);
+    }
+  }, [spookyLoaders, playSound]);
 
+  // === Interval pro náhodné zvuky (respektuje mute) ===
   useEffect(() => {
-    // zruš případný starý interval
     if (window.spookyIntervalId) {
       clearInterval(window.spookyIntervalId);
       window.spookyIntervalId = null;
@@ -62,10 +67,9 @@ const AudioController = ({ lightsOn, playSound, fadeOutAudio, isMuted, stopAllAu
       if (window.gameEnded) return;
       if (mutedRef.current) return;
 
-      // světlo: když je rozsvíceno, hraj častěji; ve tmě méně
-      const randomCheck = Math.random();
-      const shouldPlay = lightsRef.current ? randomCheck < 0.75 : randomCheck < 0.2;
-      if (shouldPlay) playRandomSpooky();
+      const r = Math.random();
+      const shouldPlay = lightsRef.current ? r < 0.75 : r < 0.2;
+      if (shouldPlay) void playRandomSpooky();
     }, 30000);
 
     return () => {
@@ -74,21 +78,19 @@ const AudioController = ({ lightsOn, playSound, fadeOutAudio, isMuted, stopAllAu
     };
   }, [playRandomSpooky]);
 
-  // === Ambient logika – jedna efektová „pravda“ ===
+  // === Ambient logika (LAZY import) ===
   useEffect(() => {
-    // 1) Pokud je MUTE → ambient vypnout (když běží) a nic nespouštět
+    // 1) MUTE → vypnout a nic nespouštět
     if (mutedRef.current) {
       if (ambientRef.current) {
-        try {
-          fadeOutAudio(ambientRef.current, 400);
-        } catch {}
+        try { fadeOutAudio(ambientRef.current, 400); } catch {}
         ambientRef.current = null;
         window.roomAmbientAudio = null;
       }
       return;
     }
 
-    // 2) Pokud je SVĚTLO ZAPNUTO → ambient vypnout
+    // 2) Světlo ON → vypnout ambient
     if (lightsRef.current) {
       if (ambientRef.current) {
         const a = ambientRef.current;
@@ -99,23 +101,28 @@ const AudioController = ({ lightsOn, playSound, fadeOutAudio, isMuted, stopAllAu
       return;
     }
 
-    // 3) TMA + už se někdy rozsvítilo → pokud nic nehraje, po krátké prodlevě spusť ambient
+    // 3) TMA + už se někdy rozsvítilo + nic nehraje → po 400ms spusť ambient (lazy import)
     if (!lightsRef.current && litBeforeRef.current && !ambientRef.current) {
       const tid = setTimeout(() => {
-        // ochrana proti závodu – zkontroluj aktuální stavy z refů
-        if (!mutedRef.current && !lightsRef.current && litBeforeRef.current && !ambientRef.current) {
-          const a = playSound(Voices, { volume: 0.3 });
-          if (a) {
-            a.loop = true;
-            ambientRef.current = a;
-            window.roomAmbientAudio = a; // volitelně zrcadlit do globálu
+        (async () => {
+          if (mutedRef.current || lightsRef.current || !litBeforeRef.current || ambientRef.current) return;
+          try {
+            const mod = await import("../sounds/015922-whispers-39schizophrenic3.mp3");
+            const url = mod?.default || mod;
+            const a = playSound(url, { volume: 0.3 });
+            if (a) {
+              a.loop = true;
+              ambientRef.current = a;
+              window.roomAmbientAudio = a; // pokud používáš jinde
+            }
+          } catch (e) {
+            console.error("❌ ambient import/play:", e);
           }
-        }
+        })();
       }, 400);
       return () => clearTimeout(tid);
     }
   }, [lightsOn, hasBeenLitBefore, isMuted, playSound, fadeOutAudio]);
-  // ↑ Záměrně závislosti na prop hodnotách – refy eliminují „stale closures“ uvnitř timeoutu
 
   // === Cleanup při unmount ===
   useEffect(() => {
@@ -136,4 +143,4 @@ const AudioController = ({ lightsOn, playSound, fadeOutAudio, isMuted, stopAllAu
   return null;
 };
 
-export default AudioController;
+export default memo(AudioController);

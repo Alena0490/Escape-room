@@ -1,28 +1,73 @@
-import { useEffect } from "react";
-import "./WinScreen.css"
+// WinScreen.js
+import { useEffect, useRef, useCallback, memo } from "react";
+import "./WinScreen.css";
 
-const WinScreen = ({ 
-  time, 
-  hints, 
+const GRACE_MS = 4500; // How long to wait before hard-stopping audio if we can't detect 'ended'
+
+const WinScreen = ({
+  time,
+  hints,
   items,
-  eggCount, 
+  eggCount,
   onRestart,
-  stopAllAudio
+  stopAllAudio,
 }) => {
-  // Stop all background sounds when win screen appears
+  const btnRef = useRef(null);
+  const timerRef = useRef(null);
+  const cleanupRef = useRef(() => {});
+
+  // Focus primary action on mount
   useEffect(() => {
-    if (stopAllAudio) {
-      // Small delay to let win sounds finish first
-      const timeoutId = setTimeout(() => {
-        stopAllAudio();
-      }, 3200);
-      
-      return () => clearTimeout(timeoutId);
+    btnRef.current?.focus();
+  }, []);
+
+  // Make sure the game is considered ended while this screen is visible
+  useEffect(() => {
+    window.gameEnded = true;
+  }, []);
+
+  // Stop all audio after win cue finishes (or after GRACE_MS as a fallback)
+  useEffect(() => {
+    if (!stopAllAudio) return;
+
+    // If you expose the win fanfare instance as window.winFanfare elsewhere,
+    // we prefer waiting for its 'ended' event to avoid cutting it.
+    const fanfare = window.winFanfare;
+    const stop = () => {
+      try { stopAllAudio(); } catch {}
+    };
+
+    if (fanfare && typeof fanfare.addEventListener === "function") {
+      const onEnded = () => {
+        stop();
+        if (timerRef.current) { clearTimeout(timerRef.current); timerRef.current = null; }
+      };
+      fanfare.addEventListener("ended", onEnded, { once: true });
+
+      // Fallback in case 'ended' never fires
+      timerRef.current = setTimeout(stop, GRACE_MS);
+
+      cleanupRef.current = () => {
+        fanfare.removeEventListener("ended", onEnded);
+        if (timerRef.current) { clearTimeout(timerRef.current); timerRef.current = null; }
+      };
+    } else {
+      // No explicit fanfare instance known → use a simple grace period
+      timerRef.current = setTimeout(stop, GRACE_MS);
+      cleanupRef.current = () => {
+        if (timerRef.current) { clearTimeout(timerRef.current); timerRef.current = null; }
+      };
     }
+
+    return () => cleanupRef.current();
   }, [stopAllAudio]);
 
+  const handleRestart = useCallback(() => {
+    onRestart?.();
+  }, [onRestart]);
+
   return (
-    <section className="win-screen">
+    <section className="win-screen" role="dialog" aria-modal="true" aria-live="polite">
       <div id="win" className="win">
         <p className="win-content">Congratulations</p>
 
@@ -32,13 +77,13 @@ const WinScreen = ({
 
         <div className="win-stats">
           <h3>Statistics:</h3>
-          <p>Time: {time}</p>
-          <p>Hints Used: {hints}</p>
-          <p>Items Searched: {items}</p>
-          <p className="bonus">Bonus points: {eggCount} of 7</p>
+          <p>Time: {time ?? "00:00"}</p>
+          <p>Hints Used: {hints ?? 0}</p>
+          <p>Items Searched: {items ?? 0}</p>
+          <p className="bonus">Bonus points: {eggCount ?? 0} of 7</p>
         </div>
 
-        <button className="win-button" onClick={onRestart}>
+        <button ref={btnRef} className="win-button" onClick={handleRestart}>
           Play again
         </button>
       </div>
@@ -46,4 +91,4 @@ const WinScreen = ({
   );
 };
 
-export default WinScreen;
+export default memo(WinScreen);

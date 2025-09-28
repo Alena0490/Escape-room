@@ -85,10 +85,10 @@ input:focus-visible {
 .code-lock .close {
   position: absolute;
   display: inline-block;
-  top: 0.5rem;
+  top: -0.2rem;
   right: 0.5rem;
   cursor: pointer;
-  font-size: var(--font-large);
+  font-size: var(--font-xlarge);
   margin-left: 0.5rem;
   color: var(--color-text-dim);
   transition: transform 0.2s ease-out;

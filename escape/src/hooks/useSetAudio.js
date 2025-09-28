@@ -6,7 +6,7 @@ import switchSound from "../sounds/light-switch-382712.mp3";
 const audioCache = new Map();
 const activeAudioInstances = new Set();
 
-// Globální audio manager
+// Global audio manager
 const globalAudioManager = {
   isMuted: false,
   setMuted(muted) {
@@ -17,7 +17,7 @@ const globalAudioManager = {
   },
   
   stopAll() {
-    // Stop všechny aktivní instance
+    // Stop all active tasks
     activeAudioInstances.forEach(audio => {
       try {
         audio.pause();
@@ -27,7 +27,7 @@ const globalAudioManager = {
     });
     activeAudioInstances.clear();
 
-    // Stop všechny <audio> elementy na stránce
+    // Stop all <audio> elements on page
     document.querySelectorAll("audio").forEach(audio => {
       try {
         audio.pause();
@@ -70,7 +70,7 @@ const globalAudioManager = {
   }
 };
 
-// Nastavení globálního audio manageru na window
+// Set global audio manageru on window
 window.globalAudioManager = globalAudioManager;
 
 export default function useSetAudio() {
@@ -89,7 +89,7 @@ export default function useSetAudio() {
   }, []);
 
   const playSound = useCallback((src, options = {}) => {
-    // Pokud je zvuk vypnutý, neprehrávej nic
+    // If muted, do no play anything
     if (globalAudioManager.isMuted) {
       return null;
     }
@@ -112,12 +112,11 @@ export default function useSetAudio() {
     }
     
     const audio = base.cloneNode();
-    audio.muted = false; // Ujisti se, že není muted
-
-    // Přidej do sledovaných instancí
+    audio.muted = false; // Make sure it is not muted
+    // Add to watched
     activeAudioInstances.add(audio);
 
-    // Cleanup při skončení
+    // Cleanup after end
     let cleanup = () => {
       activeAudioInstances.delete(audio);
     };
@@ -181,7 +180,7 @@ export default function useSetAudio() {
         }
       }, duration * 1000);
       
-      // Cleanup timeout při unmount
+      // Cleanup timeout during unmount
       const originalCleanup = cleanup;
       cleanup = () => {
         clearTimeout(timeoutId);
@@ -197,7 +196,7 @@ export default function useSetAudio() {
       if (globalAudioManager.isMuted) break;
       
       const a = playSound(src, options);
-      if (!a) continue; // Pokud je muted, playSound vrátí null
+      if (!a) continue; // If muted, playSound returns null
       
       await new Promise((resolve) => {
         const d = options?.duration;
@@ -226,7 +225,7 @@ export default function useSetAudio() {
     intervalRefs.current.add(id);
   }, []);
 
-  // Cleanup všech intervalů při unmount
+  // Clean all intervallls when unmounted
   const cleanup = useCallback(() => {
     intervalRefs.current.forEach(id => clearInterval(id));
     intervalRefs.current.clear();
@@ -237,7 +236,7 @@ export default function useSetAudio() {
     playSequence, 
     fadeOutAudio, 
     cleanup,
-    // Accessto global manager
+    // Access to global manager
     stopAllAudio: () => globalAudioManager.stopAll(),
     setMuted: (muted) => globalAudioManager.setMuted(muted),
     isMuted: () => globalAudioManager.isMuted
