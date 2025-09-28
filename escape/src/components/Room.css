@@ -436,7 +436,7 @@
   width: 100%;
   max-width: 65ch;
   line-height: 1.4;
-  height: 60%;
+  height: 70%;
   color: var(--color-text-main);
   padding: 0.5rem 0.75rem;
   display: grid;
@@ -504,6 +504,71 @@
   border: 0;
 }
 
+/** MEDIA */
+/* =========================================================
+   1) System setting: reduce motion
+   ========================================================= */
+@media (prefers-reduced-motion: reduce) {
+  :root { scroll-behavior: auto !important; }
+  /* Flicker overlay lives on #room.lights-glitch::after */
+  #room.lights-glitch::after {
+    animation: none !important;
+    opacity: 0 !important;
+  }
+
+  /* Noise animation when dark */
+  #room.dark .overlay.darkness::before {
+    animation: none !important;
+  }
+
+  /* Reveal on hover/focus (both normal and .lit state), no animation */
+  .mirror:hover .shadow-ghost,
+  .mirror:focus .shadow-ghost,
+  .mirror.lit:hover .shadow-ghost,
+  .mirror.lit:focus .shadow-ghost {
+    animation: none;
+    transition: none !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+  }
+
+  /* if the bobbing is on .item.ouija or inside it */
+  .item.ouija,
+  .item.ouija * {
+    animation: none !important;
+    transition: none !important;
+  }
+
+  /* if you use helper classes for the bobbing, cover them too */
+  .item.ouija.float,
+  .item.ouija.is-floating,
+  .ouija.float,
+  .ouija.is-floating {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+/* =========================================================
+   2) Manual kill-switch via class (no JS needed)
+   Add class="reduced-motion" to #room to force-disable motion
+   ========================================================= */
+#room.reduced-motion,
+#room.reduced-motion * {
+  animation: none !important;
+  transition: none !important;
+}
+
+#room.reduced-motion.lights-glitch::after {
+  animation: none !important;
+  opacity: 0 !important;
+}
+
+/* Noise when dark */
+#room.reduced-motion.dark .overlay.darkness::before {
+  animation: none !important;
+}
+
 @media (max-width: 989px) {
   .room-wrap {
     overflow: hidden;
@@ -559,6 +624,7 @@
   }
 }
 
+/** ANIMATIONS */
 @keyframes shake {
   0%, 100% { transform: translateX(0); }
   20%, 60% { transform: translateX(-6px); }

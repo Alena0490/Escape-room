@@ -7,15 +7,16 @@ import AudioController from "./AudioController";
 import Table from "./Table.js";
 import Cardbox from "./Cardbox.js";
 /** Walls */
-import Floor from "../wall-components/Floor.js"
+import Floor from "../wall-components/Floor.js";
 import Ceiling from "../wall-components/Ceiling.js";
 import BackWall from "../wall-components/BackWall.js";
-import RightWall from "../wall-components/RightWall.js"
+import RightWall from "../wall-components/RightWall.js";
 import LeftWall from "../wall-components/LeftWall.js";
 import FrontWall from "../wall-components/FrontWall.js";
 /** Hooks */
 import useTilt from "../hooks/useTilt.js";
-import useSetAudio from "../hooks/useSetAudio.js"
+import useSetAudio from "../hooks/useSetAudio.js";
+import usePrefersReducedMotion from "../hooks/usePrefersReducedMotion";
 
 const VIEWS = ["back-view", "left-view", "front-view", "right-view"];
 
@@ -23,15 +24,13 @@ const Room = () => {
   const wrapRef = useRef(null);
   const roomRef = useRef(null);
   const { playSound, playSequence, fadeOutAudio, stopAllAudio, setMuted, isMuted } = useSetAudio();
+
   const [isFlickering, setIsFlickering] = useState(false);
   const [activeView, setActiveView] = useState(0); // 0 = back-view
-  const [gameState, setGameState] = useState({
-    lightsOn: false,
-    doorOpen: false,
-  });
+  const [gameState, setGameState] = useState({ lightsOn: false, doorOpen: false });
   const [showLock, setShowLock] = useState(false);
 
-  /** DIALOGS */
+  /** Dialog close on outside click */
   useEffect(() => {
     const dialog = document.getElementById("dialog");
     const onDocPointerDown = (e) => {
@@ -47,14 +46,17 @@ const Room = () => {
     return () => document.removeEventListener("pointerdown", onDocPointerDown, true);
   }, []);
 
-  /** === VIEW NAVIGATION === */
+  /** View & tilt */
+  const prefersReduced = usePrefersReducedMotion();
+
   const rotationYRef = useRef(0);
   const viewIndexRef = useRef(0);
+
   const {
     applyTransform,       // pitch+yaw
-    resetTilt,          // tilt back to 0/0
-    bindMouseTilt,      // mousemove/mouseleave
-    bindNavFreezeTilt,  // reset when clicking on .room-nav
+    resetTilt,            // reset to 0/0
+    bindMouseTilt,        // mousemove/mouseleave
+    bindNavFreezeTilt,    // reset when clicking on .room-nav
   } = useTilt({
     roomRef,
     wrapRef,
@@ -63,11 +65,21 @@ const Room = () => {
     maxYaw: 3,
   });
 
+  // If user prefers reduced motion, just clear tilt once (do not touch rotation)
+  useEffect(() => {
+    if (prefersReduced) {
+      resetTilt?.();
+      // ensure pitch is 0 and don't override yaw (rotation stays)
+      if (roomRef.current) roomRef.current.style.setProperty("--rotateX", "0deg");
+    }
+  }, [prefersReduced, resetTilt]);
+
+  // Update view (rotation logic unchanged)
   const updateView = useCallback((direction) => {
     const roomWrap = wrapRef.current;
     if (!roomWrap || !roomRef.current) return;
 
-    // reset tilt on view change
+    // reset tilt on view change (safe even if reduced)
     resetTilt();
 
     if (direction === "left") {
@@ -84,41 +96,36 @@ const Room = () => {
     roomWrap.classList.add(VIEWS[viewIndexRef.current]);
     roomWrap.classList.add("rotating");
     setTimeout(() => roomWrap.classList.remove("rotating"), 500);
+
     applyTransform();
   }, [resetTilt, applyTransform]);
- 
-  // Destructure state for convenience
-  const {lightsOn} = gameState;
 
-  /** Vibration feedback for mobile devices */
+  // Convenience
+  const { lightsOn } = gameState;
+
+  /** Vibration feedback */
   const triggerVibration = (duration = 50) => {
-    if ('vibrate' in navigator) {
-      navigator.vibrate(duration);
-    }
+    if ("vibrate" in navigator) navigator.vibrate(duration);
   };
 
-  /** Start time -Save to LocalStorage */
+  /** Start time */
   useEffect(() => {
     if (!localStorage.getItem("gameStartTime")) {
       localStorage.setItem("gameStartTime", Date.now());
     }
   }, []);
 
-  /*** ENDING SCREEN  */
-  // Statistics functions
+  /** Stats */
   const calculateGameTime = () => {
-    const startTime = localStorage.getItem('gameStartTime');
-    if (!startTime) return '00:00';
-    
-    const elapsed = Date.now() - parseInt(startTime);
+    const startTime = localStorage.getItem("gameStartTime");
+    if (!startTime) return "00:00";
+    const elapsed = Date.now() - parseInt(startTime, 10);
     const minutes = Math.floor(elapsed / 60000);
     const seconds = Math.floor((elapsed % 60000) / 1000);
-    return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+    return `${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
   };
 
-  const getHintsUsed = () => {
-    return localStorage.getItem('hintsUsed') || '0';
-  };
+  const getHintsUsed = () => localStorage.getItem("hintsUsed") || "0";
 
   const getItemsClicked = () => {
     let clicked = JSON.parse(localStorage.getItem("clickedItems") || "[]");
@@ -150,18 +157,17 @@ const Room = () => {
     return Object.keys(eggs).length;
   };
 
-  /** Load game state from localStorage on component mount */
+  /** Load/save game state */
   useEffect(() => {
     const saved = localStorage.getItem("escapeRoomState");
     if (saved) setGameState(JSON.parse(saved));
   }, []);
 
-  /** Save game state to localStorage whenever it changes */
   useEffect(() => {
-    localStorage.setItem('escapeRoomState', JSON.stringify(gameState));
+    localStorage.setItem("escapeRoomState", JSON.stringify(gameState));
   }, [gameState]);
-  
-  /** Display comment dialog */
+
+  /** Comments dialog */
   const showComment = (text, className = "") => {
     const dialog = document.querySelector("#dialog");
     const div = document.createElement("div");
@@ -169,40 +175,31 @@ const Room = () => {
     if (className) div.className = className;
     dialog.appendChild(div);
 
-    // Display length based on number of characters
+    // Show duration heuristic
     const len = text.length;
-    let displayTime = 8000; // default 8s
+    let displayTime = 8000;
+    if (len > 300) displayTime = 20000;
+    else if (len > 120) displayTime = 12000;
+    else if (len < 50) displayTime = 5000;
 
-    if (len > 300) {
-      displayTime = 20000;   // extra long
-    } else if (len > 120) {
-      displayTime = 12000;   // long
-    } else if (len < 50) {
-      displayTime = 5000;    // short
-    }
-
-    // Closing message (lokální fade-out + remove)
     const closeMessage = () => {
       if (!div.isConnected) return;
       div.style.opacity = "0";
       setTimeout(() => div.remove(), 300);
     };
-
-    // Close after the message
     setTimeout(closeMessage, displayTime);
   };
 
+  /** One-time init for input & helpers */
   useEffect(() => {
     let cleanupAll = () => {};
 
-    // wait then elements are ready
     const checkElementsReady = () => {
       const roomWrap = wrapRef.current;
       const room = roomRef.current;
       const roomCanvas = document.getElementById("room");
-      
+
       if (!roomWrap || !room || !roomCanvas) {
-        // try again after 50s
         setTimeout(checkElementsReady, 50);
         return;
       }
@@ -230,15 +227,13 @@ const Room = () => {
           if (touchStartX === null) return;
           const touchEndX = e.changedTouches[0].screenX;
           const diffX = touchStartX - touchEndX;
-          if (Math.abs(diffX) > 30) {
-            diffX > 0 ? updateView("left") : updateView("right");
-          }
+          if (Math.abs(diffX) > 30) diffX > 0 ? updateView("left") : updateView("right");
           touchStartX = null;
         };
-        
+
         roomWrap.addEventListener("touchstart", onTouchStart, { passive: true });
         roomWrap.addEventListener("touchend", onTouchEnd);
-        
+
         return () => {
           roomWrap.removeEventListener("touchstart", onTouchStart);
           roomWrap.removeEventListener("touchend", onTouchEnd);
@@ -267,8 +262,8 @@ const Room = () => {
             const pad = 10;
             let top = e.clientY + pad;
             let left = e.clientX + pad;
-            const w  = tooltip.offsetWidth;
-            const h  = tooltip.offsetHeight;
+            const w = tooltip.offsetWidth;
+            const h = tooltip.offsetHeight;
             const vw = window.innerWidth;
             const vh = window.innerHeight;
             if (left + w > vw) left = e.clientX - w - pad;
@@ -300,22 +295,22 @@ const Room = () => {
         document.addEventListener("mouseover", onOver);
         document.addEventListener("mouseout", onOut);
 
-        // cleanup – přesně jako dřív vracej funkci
         return () => {
           document.removeEventListener("mouseover", onOver);
           document.removeEventListener("mouseout", onOut);
           document.removeEventListener("mousemove", onMove);
         };
       };
-      
+
       const init = () => {
         requestAnimationFrame(() => updateView());
 
         const keyboardCleanup  = initKeyboardSupport();
         const swipeCleanup     = initSwipeSupport();
         const tooltipCleanup   = initTooltip();
-        const unbindMouseTilt  = bindMouseTilt();
-        const unbindNavFreeze  = bindNavFreezeTilt();
+        // Bind tilt only if NOT reduced motion
+        const unbindMouseTilt  = prefersReduced ? () => {} : bindMouseTilt();
+        const unbindNavFreeze  = prefersReduced ? () => {} : bindNavFreezeTilt();
         initCubes();
 
         return () => {
@@ -328,21 +323,21 @@ const Room = () => {
       };
 
       cleanupAll = init();
-    };    
-        
-    // Start the check
+    };
+
     checkElementsReady();
-    return () => cleanupAll();   
-  }, [bindMouseTilt, bindNavFreezeTilt, applyTransform, updateView]);
+    return () => cleanupAll();
+  }, [bindMouseTilt, bindNavFreezeTilt, applyTransform, updateView, prefersReduced]);
 
   return (
-    <div id="room" 
+    <div
+      id="room"
       className={`
         ${lightsOn ? "" : "dark"}
         ${isFlickering ? "lights-glitch" : ""}
       `.trim()}
     >
-      <AudioController 
+      <AudioController
         lightsOn={lightsOn}
         playSound={playSound}
         fadeOutAudio={fadeOutAudio}
@@ -352,8 +347,9 @@ const Room = () => {
       <div className="overlay darkness"></div>
       <div className="overlay zoom"></div>
       <div className="ouija-overlay">
-          <span className="visually-hidden">Old Ouija board with pointer</span>
+        <span className="visually-hidden">Old Ouija board with pointer</span>
       </div>
+
       <div className="room-wrap" ref={wrapRef}>
         <div className="room" ref={roomRef}>
           <FrontWall
@@ -371,7 +367,7 @@ const Room = () => {
           />
           <BackWall
             isActive={activeView === 0}
-            setLightsOn={(v) => setGameState(p => ({ ...p, lightsOn: v }))}
+            setLightsOn={(v) => setGameState((p) => ({ ...p, lightsOn: v }))}
             setIsFlickering={setIsFlickering}
             playSound={playSound}
             showComment={showComment}
@@ -388,9 +384,7 @@ const Room = () => {
             triggerVibration={triggerVibration}
             unlockEasterEgg={unlockEasterEgg}
           />
-          <Ceiling 
-            lightsOn={lightsOn} 
-          />
+          <Ceiling lightsOn={lightsOn} />
           <Floor
             playSound={playSound}
             playSequence={playSequence}
@@ -398,13 +392,13 @@ const Room = () => {
             incrementItemClicks={incrementItemClicks}
             unlockEasterEgg={unlockEasterEgg}
             triggerVibration={triggerVibration}
-          />          
+          />
           <Cardbox
             playSequence={playSequence}
             showComment={showComment}
             incrementItemClicks={incrementItemClicks}
             triggerVibration={triggerVibration}
-          />         
+          />
           <Table
             playSound={playSound}
             showComment={showComment}
@@ -413,6 +407,7 @@ const Room = () => {
           />
         </div>
       </div>
+
       <CodeLock
         showLock={showLock}
         setShowLock={setShowLock}
@@ -424,8 +419,9 @@ const Room = () => {
         getItemsClicked={getItemsClicked}
         getEasterEggsCount={getEasterEggsCount}
         calculateGameTime={calculateGameTime}
-        stopAllAudio={stopAllAudio} 
+        stopAllAudio={stopAllAudio}
       />
+
       <RoomNavigation
         updateView={updateView}
         showComment={showComment}
@@ -433,6 +429,7 @@ const Room = () => {
         isMuted={isMuted}
         stopAllAudio={stopAllAudio}
       />
+
       <div id="tooltip"></div>
       <div id="itemCur"></div>
       <div id="dialog" role="status" aria-live="polite"></div>
