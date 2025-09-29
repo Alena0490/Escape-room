@@ -53,6 +53,10 @@
 
   /*Shadow*/
   --shadow: drop-shadow(3px 3px 3px black);
+
+  /*Rotation*/
+  --rotateX: 0deg;
+  --rotateY: 0deg;
 }
 
 #room {
@@ -84,6 +88,9 @@
   --cubescale: 20vmin;
   transition: transform .4s ease;
   will-change: transform;
+  touch-action: pan-y;         /* swiping sideways is not blocked by the layout.  */
+  overscroll-behavior: contain;/* less "bounce" and reflow at edges */
+
 }
 
 .room-wrap.front-view .wall-back,
@@ -114,7 +121,7 @@
   height: 100vh;
   max-height: 150vw;
   position: relative;
-  transform: rotateX(var(--rotateX)) rotateY(var(--rotateY));
+  transform: translateZ(0) rotateX(var(--rotateX)) rotateY(var(--rotateY));
   transition: transform .1s;
   z-index: 1;
   pointer-events: none;
@@ -340,7 +347,7 @@
   height: 100%;
   z-index: 99;
   pointer-events: none;
-  transition: all .15s steps(3);
+  transition: opacity .15s steps(3);
   opacity: 0;
 }
 
@@ -373,7 +380,6 @@
     width: 100%;
     padding: 0;
     overflow: hidden;
-    position: fixed;
     align-content: center;
     top: 0;
     left: 0;
@@ -384,12 +390,12 @@
 #room.lights-glitch::after {
   content: "";
   position: absolute;
-  top: 50% !important;
-  left: 50% !important;
-  right: 0 !important;
-  bottom: 0 !important;
-  width: 100vw !important;
-  height: 100vh !important;
+  top: 50%;
+  left: 50%;
+  right: 0;
+  bottom: 0;
+  width: 100vw;
+  height: 100vh;
   background: var(--color-bg-light);
   opacity: 0;
   pointer-events: none;

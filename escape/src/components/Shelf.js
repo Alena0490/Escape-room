@@ -11,7 +11,7 @@ import Ball from "../sounds/small-ball-393217.mp3";
 import Pickup from "../sounds/item-removed-from-box-140495.mp3";
 
 const Shelf = ({ incrementItemClicks, playSound, triggerVibration, showComment, unlockEasterEgg }) => {
-  // ✅ PRELOAD: after firs users interaction
+   // PRELOAD: after first user interaction
   useEffect(() => {
     const urls = [Pickup, Cassette, Ball, Phone, Book, FirstAid, MetalBox];
 
@@ -33,11 +33,11 @@ const Shelf = ({ incrementItemClicks, playSound, triggerVibration, showComment, 
 
   const handleItemClick = useCallback(
     (id, sound, comment, options = {}, eggId = null) => {
-      if (sound) playSound(sound, options);
-      incrementItemClicks(id);
-      if (eggId) unlockEasterEgg(eggId);
-      if (comment) showComment(comment, eggId ? "easter-egg" : "");
-      triggerVibration(30);
+      if (sound) playSound?.(sound, options);
+      incrementItemClicks?.(id);
+      if (eggId) unlockEasterEgg?.(eggId);
+      if (comment) showComment?.(comment, eggId ? "easter-egg" : "");
+      triggerVibration?.(30);
     },
     [playSound, incrementItemClicks, unlockEasterEgg, showComment, triggerVibration]
   );
@@ -60,13 +60,14 @@ const Shelf = ({ incrementItemClicks, playSound, triggerVibration, showComment, 
           className="item skull"
           data-title="A Shiny Skull"
           data-comment="Wow, it has full set of teeth!"
+          aria-label="Skull"
           role="button"
           tabIndex={0}
-          onClick={(e) => handleItemClick("skull", Pickup, e.currentTarget.dataset.comment)}
+          onClick={(e) => { e.stopPropagation();handleItemClick("skull", Pickup, e.currentTarget.dataset.comment)}}
           onKeyDown={onKeyActivate((c) => handleItemClick("skull", Pickup, c), "Wow, it has full set of teeth!")}
         >
           <div className="item-inner">
-            <span className="visually-hidden">A metalic skull</span>
+            <span className="visually-hidden">A metallic skull</span>
           </div>
         </div>
 
@@ -74,9 +75,10 @@ const Shelf = ({ incrementItemClicks, playSound, triggerVibration, showComment, 
           className="item cassette"
           data-title="Some old cassette"
           data-comment="What do we have there? Bryan Adams - Summer of ... Oh no. Stuck forever in my head."
+          aria-label="Cassette"
           role="button"
           tabIndex={0}
-          onClick={(e) => handleItemClick("cassette", Cassette, e.currentTarget.dataset.comment, { duration: 2 })}
+          onClick={(e) => { e.stopPropagation();handleItemClick("cassette", Cassette, e.currentTarget.dataset.comment, { duration: 2 })}}
           onKeyDown={onKeyActivate(
             (c) => handleItemClick("cassette", Cassette, c, { duration: 2 }),
             "What do we have there? Bryan Adams - Summer of ... Oh no. Stuck forever in my head."
@@ -91,9 +93,10 @@ const Shelf = ({ incrementItemClicks, playSound, triggerVibration, showComment, 
           className="item ball"
           data-title="A random billiard ball"
           data-comment="What number is this? Does it matter? It's just a ball."
+          aria-label="Billiard ball, number 8"
           role="button"
           tabIndex={0}
-          onClick={(e) => handleItemClick("ball", Ball, e.currentTarget.dataset.comment)}
+          onClick={(e) => { e.stopPropagation();handleItemClick("ball", Ball, e.currentTarget.dataset.comment)}}
           onKeyDown={onKeyActivate((c) => handleItemClick("ball", Ball, c), "What number is this? Does it matter? It's just a ball.")}
         >
           <div className="item item-inner">
@@ -107,24 +110,26 @@ const Shelf = ({ incrementItemClicks, playSound, triggerVibration, showComment, 
           className="item globe egg"
           data-title="An old globe"
           data-comment="Where is Czechia? Europe, right? Damn, I hate geography. Wait, what… is there a mic in the stand?"
+          aria-label="Globe"
           role="button"
           tabIndex={0}
-          onClick={(e) => handleItemClick("globe", Pickup, e.currentTarget.dataset.comment, {}, "globe")}
+          onClick={(e) => { e.stopPropagation();handleItemClick("globe", Pickup, e.currentTarget.dataset.comment, {}, "globe")}}
           onKeyDown={onKeyActivate((c) => handleItemClick("globe", Pickup, c, {}, "globe"),
             "Where is Czechia? Europe, right? Damn, I hate geography. Wait, what… is there a mic in the stand?")}
         >
           <div className="item-inner item">
-            <span className="visually-hidden">An Old Globe</span>
+            <span className="visually-hidden">An old Globe</span>
           </div>
         </div>
 
         <div
           className="item phone"
-          data-title="Ancient Technology"
+          data-title="Ancient technology"
           data-comment="Maybe it still works? I'll call my mom. 6-0-2 Oh no! My finger got stuck!"
+          aria-label="Rotary phone"
           role="button"
           tabIndex={0}
-          onClick={(e) => handleItemClick("phone", Phone, e.currentTarget.dataset.comment, { duration: 4.2 })}
+          onClick={(e) => { e.stopPropagation();handleItemClick("phone", Phone, e.currentTarget.dataset.comment, { duration: 4.2 })}}
           onKeyDown={onKeyActivate((c) => handleItemClick("phone", Phone, c, { duration: 4.2 }),
             "Maybe it still works? I'll call my mom. 6-0-2 Oh no! My finger got stuck!")}
         >
@@ -137,9 +142,10 @@ const Shelf = ({ incrementItemClicks, playSound, triggerVibration, showComment, 
           className="item book"
           data-title="An old book"
           data-comment="He gazed up at the enormous face. Forty years it had taken him to learn what kind of smile was hidden beneath the dark moustache. O cruel, needless misunderstanding! O stubborn, self-willed exile from the loving breast! Two gin-scented tears trickled down the sides of his nose. But it was all right, everything was all right, the struggle was finished. He had won the victory over himself. He loved Big Brother. I know this book!"
+          aria-label="Book"
           role="button"
           tabIndex={0}
-          onClick={(e) => handleItemClick("book", Book, e.currentTarget.dataset.comment)}
+          onClick={(e) => { e.stopPropagation();handleItemClick("book", Book, e.currentTarget.dataset.comment)}}
           onKeyDown={onKeyActivate((c) => handleItemClick("book", Book, c),
             "He gazed up at the enormous face. Forty years it had taken him to learn what kind of smile was hidden beneath the dark moustache. O cruel, needless misunderstanding! O stubborn, self-willed exile from the loving breast! Two gin-scented tears trickled down the sides of his nose. But it was all right, everything was all right, the struggle was finished. He had won the victory over himself. He loved Big Brother. I know this book!")}
         >
@@ -153,11 +159,12 @@ const Shelf = ({ incrementItemClicks, playSound, triggerVibration, showComment, 
         <div
           className="item item-cube left-cube"
           id="hover-not"
-          data-title="An army Medical Kit"
+          data-title="Army Medical Kit"
           data-comment="I hope there is something useful inside. Ouch, my finger! Thank goodness I have this first aid kit."
+          aria-label="Medical kit"
           role="button"
           tabIndex={0}
-          onClick={(e) => handleItemClick("first-aid", FirstAid, e.currentTarget.dataset.comment, { duration: 6 })}
+          onClick={(e) => { e.stopPropagation();handleItemClick("first-aid", FirstAid, e.currentTarget.dataset.comment, { duration: 6 })}}
           onKeyDown={onKeyActivate((c) => handleItemClick("first-aid", FirstAid, c, { duration: 6 }),
             "I hope there is something useful inside. Ouch, my finger! Thank goodness I have this first aid kit.")}
         >
@@ -169,11 +176,12 @@ const Shelf = ({ incrementItemClicks, playSound, triggerVibration, showComment, 
         <div
           className="item item-cube right-cube"
           id="hover-not"
-          data-title="An army metal box"
+          data-title="Heavy metal box"
           data-comment="No way I could open this! The lock looks rusted solid and the whole thing feels like a ton of bricks."
+          aria-label="Metal box"
           role="button"
           tabIndex={0}
-          onClick={(e) => handleItemClick("metal-box", MetalBox, e.currentTarget.dataset.comment)}
+          onClick={(e) => { e.stopPropagation();handleItemClick("metal-box", MetalBox, e.currentTarget.dataset.comment)}}
           onKeyDown={onKeyActivate((c) => handleItemClick("metal-box", MetalBox, c),
             "No way I could open this! The lock looks rusted solid and the whole thing feels like a ton of bricks.")}
         >

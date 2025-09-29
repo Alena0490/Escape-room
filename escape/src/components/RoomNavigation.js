@@ -20,7 +20,7 @@ const HINTS = [
 const RoomNavigation = ({ updateView, showComment, setMuted, isMuted, stopAllAudio }) => {
   const [muted, setMutedState] = useState(() => localStorage.getItem("muted") === "1");
 
-  // sync z LS + do globálního manageru
+  // Sync from localStorage and propagate to the global audio manager
   useEffect(() => {
     const saved = localStorage.getItem("muted") === "1";
     setMutedState(saved);
@@ -36,7 +36,7 @@ const RoomNavigation = ({ updateView, showComment, setMuted, isMuted, stopAllAud
     else if (window.__audioCtx?.resume) { try { window.__audioCtx.resume(); } catch {} }
   }, [muted, isMuted, setMuted, stopAllAudio]);
 
-  // klávesa M
+  // Keyboard shortcut: M toggles mute
   useEffect(() => {
     const onKey = (e) => {
       const tag = (e.target.tagName || "").toLowerCase();
@@ -66,20 +66,40 @@ const RoomNavigation = ({ updateView, showComment, setMuted, isMuted, stopAllAud
 
   return (
     <nav className="room-nav">
-      <button id="turnLeft"  data-title="Turn Left"  aria-label="Turn left"  onClick={handleTurnLeft}>
-        <i>👈</i><span className="hidden">Turn Left</span>
+      <button 
+        id="turnLeft" 
+        type="button" 
+        data-title="Turn Left"  
+        aria-label="Turn left"  
+        onClick={handleTurnLeft}>
+          <i>👈</i><span className="hidden">Turn Left</span>
       </button>
 
-      <button id="turnRight" data-title="Turn Right" aria-label="Turn right" onClick={handleTurnRight}>
-        <i>👉</i><span className="hidden">Turn Right</span>
+      <button
+        id="turnRight"
+        type="button" 
+        data-title="Turn Right" 
+        aria-label="Turn right" 
+        onClick={handleTurnRight}>
+          <i>👉</i><span className="hidden">Turn Right</span>
       </button>
 
-      <button id="zoom" data-title="Look" aria-label="Zoom" onClick={handleZoom}>
-        <i>🔎</i><span className="hidden">Look</span>
+      <button 
+        id="zoom" 
+        type="button"
+        data-title="Look" 
+        aria-label="Zoom" 
+        onClick={handleZoom}>
+          <i>🔎</i><span className="hidden">Look</span>
       </button>
 
-      <button id="hint" data-title="Hint!" aria-label="Show hint" onClick={handleHint}>
-        <i>💡</i><span className="hidden">Hint</span>
+      <button 
+        id="hint" 
+        type="button"
+        data-title="Hint!" 
+        aria-label="Show hint" 
+        onClick={handleHint}>
+          <i>💡</i><span className="hidden">Hint</span>
       </button>
 
       <button

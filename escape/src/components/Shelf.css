@@ -22,7 +22,7 @@
 .cube.shelf .cube > div,
 .cube.shelf > div {
   transform-style: preserve-3d;
-  filter: unset;
+  filter: none;
   background-size: var(--cubescale) auto;
   border: 2px solid var(--color-bg-deep);
 }
@@ -61,7 +61,7 @@
 .shelf-level > .cube-bottom,
 .cube.shelf > .cube-bottom {
   transform: rotateX(-90deg) translateZ(calc(1.5 * var(--cubescale)));
-  background-color: var( --color-text-faint);
+  background-color: var(--color-text-faint);
 }
 
 .shelf-level > .cube-back,
@@ -172,7 +172,7 @@
   cursor: pointer;
 }
 
-.cube.cube.metal-box > .cube-right {
+.cube.metal-box > .cube-right {
   background-image: url("../img/metallic-box-top.webp");
   background-size: cover;
   background-position: center;
@@ -202,7 +202,7 @@
   background-size: contain;
   background-position: bottom center;
   background-repeat: no-repeat;
-  transition: all 0.3s ease;
+  transition: transform 0.3s ease;
   cursor: pointer;
 }
 

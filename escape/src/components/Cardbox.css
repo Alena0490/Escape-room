@@ -1,6 +1,6 @@
 .cardbox {
   bottom: 0;
-  transform: translateZ(calc(var(--depth) - calc(0.5 * var(--cubescale))));
+  transform: translateZ(calc(var(--depth) - 0.5 * var(--cubescale)));
   box-shadow: none;
   cursor: pointer;
 }
@@ -8,7 +8,7 @@
 .cardbox .cube-top {
     background-image: url("../img/cardboard-top.webp");
     background-size: contain;
-    border: 2px none;
+    border: none;
     box-shadow: none;
 }
 
@@ -22,7 +22,7 @@
 .cardbox .cube-right {
     background-image: url("../img/box-side.webp");
     background-size: cover;
-    border: 1px none;
+    border: none;
     box-shadow: none;
 }
 

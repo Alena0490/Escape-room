@@ -3,7 +3,7 @@
   width: 65%;
   height: 60%;
   bottom: 0;
-  left: 0%;
+  left: 0;
   background-image: url("../img/ghost.webp");
   background-size: contain;
   background-position: bottom left;
@@ -15,9 +15,10 @@
 }
 
 @media (max-width: 750px) {
-    .shadow-ghost {
-        animation: ghost-fade 2s ease-in-out forwards;
-    }
+  .shadow-ghost {
+    animation: ghost-fade-mobile 1.2s ease-out forwards;
+    will-change: opacity;
+  }
 }
 
 @keyframes ghost-fade {
@@ -25,4 +26,11 @@
   20%  { opacity: 0.4; transform: scale(1); }
   80%  { opacity: 0.3; transform: scale(1); }
   100% { opacity: 0; transform: scale(1.05); }
+}
+
+@keyframes ghost-fade-mobile {
+  0%   { opacity: 0;    transform: scale(0.98); }
+  30%  { opacity: 0.35; transform: scale(1.00); }
+  70%  { opacity: 0.25; transform: scale(1.00); }
+  100% { opacity: 0;    transform: scale(1.01); }
 }

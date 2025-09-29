@@ -100,11 +100,17 @@ const Room = () => {
 
     roomWrap.classList.remove(...VIEWS);
     roomWrap.classList.add(VIEWS[viewIndexRef.current]);
+    // uvnitř updateView, hned po classList.add(VIEWS[...])
+    if (!prefersReduced) {
+      roomWrap.classList.add("rotating");
+      setTimeout(() => roomWrap.classList.remove("rotating"), 500);
+    }
+
     roomWrap.classList.add("rotating");
     setTimeout(() => roomWrap.classList.remove("rotating"), 500);
 
     applyTransform();
-  }, [resetTilt, applyTransform]);
+  }, [resetTilt, applyTransform, prefersReduced]);
 
   // Convenience
   const { lightsOn } = gameState;

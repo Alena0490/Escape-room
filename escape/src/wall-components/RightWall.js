@@ -38,6 +38,11 @@ const RightWall = ({
         triggerVibration(30);
     }, [playSound, incrementItemClicks, showComment, triggerVibration]);
 
+    //Miror aria handlers
+    const handleMirrorEnter = useCallback((e) => { if (lightsOn) e.currentTarget.setAttribute("aria-label","Mirror: Friday the 13th appears"); }, [lightsOn]);
+
+    const handleMirrorLeave = useCallback((e) => { e.currentTarget.setAttribute("aria-label","Mirror"); }, []);
+
     /** Mirror crack (egg) */
     const handleMirrorCrackClick = useCallback(
         (e) => {
@@ -61,10 +66,16 @@ const RightWall = ({
               <span className="visually-hidden">Old faded poster</span>
             </div>
 
-            <div className={`mirror item ${lightsOn ? "lit" : ""}`} 
-              data-title="An old mirror"
-              data-comment="How do I look? Eh, hello, Mr. Ghost, please don't kill me."
-              onClick={handleMirrorClick}
+            <div 
+                className={`mirror item ${lightsOn ? "lit" : ""}`} 
+                role="button"
+                tabIndex={0}
+                data-title="An old mirror"
+                data-comment="How do I look? Eh, hello, Mr. Ghost, please don't kill me."
+                aria-label={lightsOn ? "Mirror: Friday the 13th appears" : "Mirror"}
+                onFocus={handleMirrorEnter}
+                onBlur={handleMirrorLeave}
+                onClick={handleMirrorClick}
             >
               <span className="visually-hidden">Old mirror flashing letters Friday 13th</span>
             </div>

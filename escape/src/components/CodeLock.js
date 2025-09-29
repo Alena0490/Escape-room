@@ -1,10 +1,9 @@
 import { useState, useCallback, useEffect, useRef, memo, lazy, Suspense } from "react";
 import "./CodeLock.css";
 
-// lazy after win
 const WinScreen = lazy(() => import("./WinScreen"));
 
-//FINAL SCORE Base + weights;
+/** CALCULATE THE SCORE */
 const BASE_SCORE = 100;
 const computeScore = ({ items, eggs, hints }) => {
   const itemPts = items * 5;
@@ -31,7 +30,7 @@ const CodeLock = ({
   const formRef = useRef(null);
   const warmedRef = useRef(false);
 
-  // Prewarm sounds only on the first gesture inside the form
+// Sounds preload
   useEffect(() => {
     if (!showLock) return;
     const el = formRef.current;
@@ -44,7 +43,6 @@ const CodeLock = ({
         const err    = (await import("../sounds/error-126627.mp3")).default;
         const door   = (await import("../sounds/opening-metal-door-98518.mp3")).default;
         const win    = (await import("../sounds/success-fanfare-trumpets-6185.mp3")).default;
-
         [whoosh, err, door, win].forEach((src) => {
           const a = new Audio();
           a.preload = "auto";
@@ -55,15 +53,16 @@ const CodeLock = ({
     };
 
     el.addEventListener("pointerdown", warm, { once: true, capture: true });
-    return () => el.removeEventListener("pointerdown", warm, true);
+    return () => el.removeEventListener("pointerdown", warm, { capture: true });
   }, [showLock]);
 
+//Closing form
   const onClose = useCallback(async () => {
-    setShowLock(false);
     try {
       const whoosh = (await import("../sounds/whoosh-blow-flutter-shortwav-146.mp3")).default;
       playSound?.(whoosh, { start: 0.1 });
     } catch {}
+    setTimeout(() => setShowLock(false), 500);
   }, [playSound, setShowLock]);
 
   const handleChange = useCallback((e) => {
@@ -71,20 +70,22 @@ const CodeLock = ({
     setCode(v);
   }, []);
 
+// Submit form
   const handleSubmit = useCallback(async (e) => {
     e.preventDefault();
 
+// Check if the code is correct
     if (code === "483920") {
       try {
         const door = (await import("../sounds/opening-metal-door-98518.mp3")).default;
         const win  = (await import("../sounds/success-fanfare-trumpets-6185.mp3")).default;
-
         playSequence?.([
           { src: door, options: { fadeIn: 0.2, duration: 2.5 } },
           { src: win,  options: { volume: 1, start: 0.1 } },
         ]);
       } catch {}
 
+      //The code is correct - Win
       if (window.roomAmbientAudio) {
         fadeOutAudio?.(window.roomAmbientAudio, 1500);
         window.roomAmbientAudio = null;
@@ -102,6 +103,8 @@ const CodeLock = ({
 
       window.gameEnded = true;
       setTimeout(() => setShowWinScreen(true), 2700);
+      
+      // The code isn't correct - Error
     } else {
       try {
         const err = (await import("../sounds/error-126627.mp3")).default;
@@ -111,16 +114,9 @@ const CodeLock = ({
     }
 
     setCode("");
-  }, [
-    code,
-    playSequence,
-    fadeOutAudio,
-    showComment,
-    setShowLock,
-    playSound,
-    setShowWinScreen
-  ]);
+  }, [code, playSequence, fadeOutAudio, showComment, setShowLock, playSound, setShowWinScreen]);
 
+  //Restart the game
   const handleRestart = useCallback(() => {
     try { stopAllAudio?.(); } catch {}
     localStorage.clear();
@@ -136,18 +132,22 @@ const CodeLock = ({
           className="code-lock active"
           onSubmit={handleSubmit}
         >
-          <h3>Enter the code</h3>
+          <h3 id="code-lock-title">Enter the code</h3>
 
           <span
-            type="button"
             className="close"
             aria-label="Close form"
             onClick={onClose}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onClose(); } }}
           >
             <span aria-hidden>×</span>
           </span>
 
+          <label htmlFor="code-input" className="visually-hidden">6-digit code</label>
           <input
+            id="code-input"
             type="text"
             inputMode="numeric"
             pattern="[0-9]*"
@@ -157,6 +157,7 @@ const CodeLock = ({
             value={code}
             onChange={handleChange}
             autoFocus
+            aria-labelledby="code-lock-title"
           />
 
           <button type="submit" className="code-submit" disabled={code.length !== 6}>
