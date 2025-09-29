@@ -67,10 +67,15 @@
     left: calc(65% - 4vmin);
     width: 11%;
     height: 14%;
-    filter: brightness(0.9) sepia(0.3) contrast(1.2)drop-shadow(1px 2px 2px black);
+    filter: brightness(0.9) sepia(0.3) contrast(1.2) drop-shadow(1px 2px 2px black);
     transform: rotate(20deg);
     background-image: url("../img/contract.webp");
     z-index: 200;
+}
+
+.rug:focus-visible,
+.contract:focus-visible {
+  filter: brightness(1.1) sepia(0.3) drop-shadow(3px 3px 3px var(--color-warning));
 }
 
 @media (max-width: 750px) {

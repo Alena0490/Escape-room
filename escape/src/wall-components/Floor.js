@@ -5,6 +5,12 @@ import RadioTune from "../sounds/am-tuning-104200.mp3";
 import Alien from "../sounds/alien-underworld-sound-287342.mp3";
 import Paper from "../sounds/paper-rustle-81855.mp3";
 
+// Different lines for lifting vs. putting the rug back
+const RUG_MSG_UP =
+  "Yuck… it's so dirty. Wait, there's a radio underneath. There are some scratched letters: 'BIG EAR'. Maybe I could try this frequency. WOW! I've got the signal — so weird.";
+const RUG_MSG_DOWN =
+  "Alright, back down you go… The dust can keep its secrets for now. I'll get back to the radio later.";
+
 const Floor = ({
   playSound,
   playSequence,
@@ -13,10 +19,9 @@ const Floor = ({
   unlockEasterEgg,
   triggerVibration,
 }) => {
-  // 🔹 1) PREWARM – after the first users interaction
+  // 🔹 1) PREWARM – after the first user’s interaction
   useEffect(() => {
     const srcs = [Rug, RadioTune];
-
     const warm = () => {
       window.removeEventListener("pointerdown", warm, true);
       try {
@@ -28,7 +33,6 @@ const Floor = ({
         });
       } catch {}
     };
-
     window.addEventListener("pointerdown", warm, true);
     return () => window.removeEventListener("pointerdown", warm, true);
   }, []);
@@ -55,21 +59,19 @@ const Floor = ({
     localStorage.setItem("rugUp", next ? "1" : "0");
 
     if (!wasUp) {
-      // 🔹 2) Start the sequence IMMEDIATELY
+      // lifting the rug
       playSequence([
         { src: Rug,       options: { duration: 1,   fadeIn: 0.2 } },
         { src: RadioTune, options: { duration: 4.2, fadeIn: 0.2 } },
         { src: Alien,     options: { volume: 0.3,   start: 2   } },
       ]);
- 
-      showComment(
-        "Yuck, it's so dirty. Wait, there is a radio under. There are some scratched letters: 'BIG EAR'. Maybe I could try this frequency. WOW! I've got the signal, it's so weird."
-      );
+      e.currentTarget.setAttribute("data-comment", RUG_MSG_UP);
+      showComment(RUG_MSG_UP);
     } else {
+      // putting it back down
       playSound(Rug, { duration: 0.8, volume: 0.7 });
-      showComment(
-        "Yuck, it's so dirty. Wait, there is a radio under. There are some scratched letters: 'BIG EAR'. Maybe I could try this frequency. WOW! I've got the signal, it's so weird."
-      );
+      e.currentTarget.setAttribute("data-comment", RUG_MSG_DOWN);
+      showComment(RUG_MSG_DOWN);
     }
 
     triggerVibration(30);
@@ -93,7 +95,8 @@ const Floor = ({
       <div
         className={`rug flat item ${rugUp ? "rug-up" : ""}`}
         data-title="Some old rug"
-        data-comment="Yuck, it's so dirty. Wait, there is a radio under. There are some scratched letters: 'BIG EAR'. Maybe I could try this frequency. WOW! I've got the signal, it's so weird."
+        /* reflect current state for tooltips/inspectors */
+        data-comment={rugUp ? RUG_MSG_DOWN : RUG_MSG_UP}
         role="button"
         tabIndex={0}
         onClick={handleRugClick}
@@ -114,7 +117,7 @@ const Floor = ({
         role="button"
         tabIndex={0}
         onClick={handleContractClick}
-        onKeyDown={(e) => e.key === "Enter" && handleContractClick(e)}
+        onKeyDown={(e) => e.key === "Enter" || e.key === " " ? (e.preventDefault(), handleContractClick(e)) : null}
       >
         <span className="visually-hidden">Crumpled document lying on the floor</span>
       </div>

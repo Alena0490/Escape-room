@@ -1,4 +1,4 @@
-.room .wall-top {
+.room .wall.wall-top {
   top: 0;
   height: calc(2 * var(--depth));
   transform: rotateX(90deg) translateY(calc(-1 * var(--depth))) rotateY(180deg);
@@ -6,7 +6,6 @@
   background-color: var(--color-border);
   background-image: url("../img/ceiling.webp");
   background-size: cover;
-  background-repeat: repeat;
   background-position: top right;
 }
 

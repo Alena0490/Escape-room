@@ -100,6 +100,18 @@
   pointer-events: none;
 }
 
+/* Improves hover on side walls */
+.room-wrap.left-view  .wall-left  .item::after,
+.room-wrap.right-view .wall-right .item::after {
+  content: "";
+  position: absolute;
+  inset-inline: calc(-1 * clamp(8px, 1.6vmin, 18px));
+  pointer-events: auto;
+  background: transparent;
+  transform: translateZ(0.2px);
+}
+
+/* Do not click when the room is rotating */
 .room-wrap.front-view:not(.rotating) .wall-back,
 .room-wrap.back-view:not(.rotating)  .wall-front,
 .room-wrap.left-view:not(.rotating)  .wall-left,
@@ -437,7 +449,7 @@
   position: fixed;
   z-index: 999;
   pointer-events: none;
-  bottom: 3.5rem;
+  bottom: 4rem;
   left: 0;
   width: 100%;
   max-width: 65ch;

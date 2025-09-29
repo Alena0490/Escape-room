@@ -48,7 +48,7 @@ const Table = ({
 
   const onKeyActivate = useCallback((fn) => (e) => {
     const k = e.key;
-    if (k === "Enter" || k === " ") {
+    if (k === "Enter" || k === " " || k === "Spacebar") {
       e.preventDefault();
       fn(e);
     }
@@ -60,6 +60,7 @@ const Table = ({
       data-title="A weird table"
       data-comment="Nice, I really need this for my living room. Wait, what is there?"
       role="button"
+      aria-label="A weird table. A wooden table with skull decoration."
       tabIndex={0}
       onClick={handleTableClick}
       onKeyDown={onKeyActivate(handleTableClick)}

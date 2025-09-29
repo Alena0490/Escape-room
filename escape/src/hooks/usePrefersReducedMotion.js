@@ -4,16 +4,32 @@ export default function usePrefersReducedMotion() {
   const [reduce, setReduce] = useState(false);
 
   useEffect(() => {
-    if (!window.matchMedia) return;
+    if (typeof window === "undefined" || typeof window.matchMedia !== "function") {
+      // No media query support (SSR or very old browser)
+      setReduce(false);
+      return;
+    }
+
     const mql = window.matchMedia("(prefers-reduced-motion: reduce)");
     const onChange = (e) => setReduce(!!e.matches);
 
-    // set initial state
+    // Initial state
     setReduce(mql.matches);
 
-    // modern API only
-    mql.addEventListener?.("change", onChange);
-    return () => mql.removeEventListener?.("change", onChange);
+    // Modern API
+    if (typeof mql.addEventListener === "function") {
+      mql.addEventListener("change", onChange);
+      return () => mql.removeEventListener("change", onChange);
+    }
+
+    // Fallback for Safari / old engines
+    if (typeof mql.addListener === "function") {
+      mql.addListener(onChange);
+      return () => mql.removeListener(onChange);
+    }
+
+    // Last resort: no-op cleanup
+    return () => {};
   }, []);
 
   return reduce;

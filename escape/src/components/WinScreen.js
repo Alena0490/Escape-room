@@ -68,16 +68,26 @@ const WinScreen = ({
   }, [onRestart]);
 
   return (
-    <section className="win-screen" role="dialog" aria-modal="true" aria-live="polite">
+    <section 
+      className="win-screen" 
+      role="dialog" 
+      aria-modal="true" 
+      aria-labelledby="win-title"
+      aria-describedby="win-message win-stats"
+      aria-live="polite">
       <div id="win" className="win">
-        <p className="win-content">Congratulations</p>
+        <h1 className="win-content">You made it!</h1>
 
         <p className="win-message">
-          It was a long day... Let's get out of here. Finally, fresh air!
+          It was a long day… Let's get out of here. Finally, fresh air!
         </p>
 
-        <div className="win-stats">
-          <h3>Statistics:</h3>
+        <div
+          id="win-stats" 
+          className="win-stats"
+          aria-live="polite"
+          aria-atomic="true">
+          <h2>Statistics:</h2>
           <p>Time: {time ?? "00:00"}</p>
           <p>Hints Used: {hints ?? 0}</p>
           <p>Items Searched: {items ?? 0}</p>
@@ -89,7 +99,12 @@ const WinScreen = ({
           </p>
         </div>
 
-        <button ref={btnRef} className="win-button" onClick={handleRestart}>
+        <button 
+          ref={btnRef} 
+          className="win-button" 
+          type="button"
+          onClick={handleRestart}
+          aria-label="Restart the game">
           Play again
         </button>
       </div>

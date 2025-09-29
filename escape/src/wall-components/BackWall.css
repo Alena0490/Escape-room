@@ -56,7 +56,7 @@
 .switch {
   width: 7vmin;
   height: 9vmin;
-  background-image: url("../img/switch-dark.webp");
+  background-image: url("../img/switch.webp");
   background-size: contain;
   bottom: 36vmin;
   left: 54%;
@@ -71,7 +71,7 @@
 
 /* switch off */
 #room.dark .switch {
-    background-image: url("../img/switch.webp");
+    background-image: url("../img/switch-dark.webp");
     background-color: rgba(0,0,0,0);
     pointer-events: auto;
     margin: 2rem;
@@ -121,6 +121,20 @@
   z-index: 800;
 }
 
+.flat.door:focus-visible,
+.switch:focus-visible,
+.lock:focus-visible {
+  filter: brightness(1.1) sepia(0.3) drop-shadow(3px 3px 3px var(--color-warning));
+}
+
+.chalk-message:focus-visible {
+  filter: brightness(1.1) drop-shadow(1px 1px 1px var(--color-warning));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .door::after { transition: none; }
+}
+
 @media (max-width: 650px) {
     .lock {
     width: 17%;
@@ -136,3 +150,8 @@
     left: 52%;
   }
 }
+
+@media (max-height: 420px) {
+  .door { min-height: unset; }
+}
+

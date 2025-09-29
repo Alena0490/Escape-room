@@ -131,6 +131,7 @@ const CodeLock = ({
           name="code-lock"
           className="code-lock active"
           onSubmit={handleSubmit}
+          autoComplete="off"
         >
           <h3 id="code-lock-title">Enter the code</h3>
 
@@ -145,7 +146,10 @@ const CodeLock = ({
             <span aria-hidden>×</span>
           </span>
 
-          <label htmlFor="code-input" className="visually-hidden">6-digit code</label>
+          <label 
+            htmlFor="code-input" 
+            className="visually-hidden">6-digit code
+          </label>
           <input
             id="code-input"
             type="text"
@@ -158,6 +162,7 @@ const CodeLock = ({
             onChange={handleChange}
             autoFocus
             aria-labelledby="code-lock-title"
+            autoComplete="off"
           />
 
           <button type="submit" className="code-submit" disabled={code.length !== 6}>

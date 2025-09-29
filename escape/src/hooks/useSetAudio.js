@@ -1,8 +1,7 @@
 import { useCallback, useRef, useEffect } from "react";
-
-// Import critical sound for preloading
 import switchSound from "../sounds/light-switch-382712.mp3";
 
+// Shared caches (module singletons)
 const audioCache = new Map();
 const activeAudioInstances = new Set();
 
@@ -11,14 +10,11 @@ const globalAudioManager = {
   isMuted: false,
   setMuted(muted) {
     this.isMuted = muted;
-    if (muted) {
-      this.stopAll();
-    }
+    if (muted) this.stopAll();
   },
-  
   stopAll() {
-    // Stop all active tasks
-    activeAudioInstances.forEach(audio => {
+    // Stop tracked clones
+    activeAudioInstances.forEach((audio) => {
       try {
         audio.pause();
         audio.currentTime = 0;
@@ -27,8 +23,8 @@ const globalAudioManager = {
     });
     activeAudioInstances.clear();
 
-    // Stop all <audio> elements on page
-    document.querySelectorAll("audio").forEach(audio => {
+    // Stop any <audio> elements in DOM (if present)
+    document.querySelectorAll("audio").forEach((audio) => {
       try {
         audio.pause();
         audio.currentTime = 0;
@@ -36,7 +32,7 @@ const globalAudioManager = {
       } catch {}
     });
 
-    // Stop ambient audio
+    // Ambient (game-specific)
     if (window.roomAmbientAudio) {
       try {
         window.roomAmbientAudio.pause();
@@ -46,146 +42,213 @@ const globalAudioManager = {
       window.roomAmbientAudio = null;
     }
 
-    // Stop spooky interval
+    // Spooky interval (game-specific)
     if (window.spookyIntervalId) {
       clearInterval(window.spookyIntervalId);
       window.spookyIntervalId = null;
     }
 
-    // Stop Web Audio API context
+    // Web Audio API context
     if (window.__audioCtx?.suspend) {
-      try { 
-        window.__audioCtx.suspend(); 
-      } catch {}
+      try { window.__audioCtx.suspend(); } catch {}
     }
 
-    // Stop extra SFX
     if (typeof window.__stopAllSFX === "function") {
-      try { 
-        window.__stopAllSFX(); 
-      } catch {}
+      try { window.__stopAllSFX(); } catch {}
     }
 
     console.log("🔇 All audio stopped");
-  }
+  },
 };
 
-// Set global audio manageru on window
-window.globalAudioManager = globalAudioManager;
+// Expose global audio manager (SSR-safe)
+if (typeof window !== "undefined") {
+  window.globalAudioManager = globalAudioManager;
+}
 
 export default function useSetAudio() {
-  const intervalRefs = useRef(new Set());
+  const intervalRefs = useRef(new Set()); // setInterval ids
+  const timeoutRefs = useRef(new Set());  // setTimeout ids
 
-  // Preload only switch sound for immediate interaction
+  // Preload immediate SFX (switch)
   useEffect(() => {
     try {
       const audio = new Audio(switchSound);
       audio.preload = "auto";
-      audio.load();
+      audio.load?.();
       audioCache.set(String(switchSound), audio);
     } catch (error) {
       console.warn("Failed to preload switch sound:", error);
     }
   }, []);
 
+  // Autoplay unlock on first user gesture (HTMLMedia + WebAudio)
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const unlock = (e) => {
+      if (e.type === "keydown" && e.key !== "Enter" && e.key !== " ") return;
+      if (window.__audioUnlocked) return;
+      window.__audioUnlocked = true;
+      try {
+        const Ctx = window.AudioContext || window.webkitAudioContext;
+        if (Ctx) {
+          window.__audioCtx = window.__audioCtx || new Ctx();
+          window.__audioCtx.resume?.();
+        }
+      } catch {}
+      try {
+        const el = new Audio(switchSound);
+        el.volume = 0;
+        el.muted = true;
+        el.play()?.then(() => { try { el.pause(); el.currentTime = 0; } catch {} }).catch(() => {});
+      } catch {}
+      document.removeEventListener("pointerdown", unlock, true);
+      document.removeEventListener("touchstart", unlock, true);
+      document.removeEventListener("keydown", unlock, true);
+    };
+    document.addEventListener("pointerdown", unlock, true);
+    document.addEventListener("touchstart", unlock, true);
+    document.addEventListener("keydown", unlock, true);
+    return () => {
+      document.removeEventListener("pointerdown", unlock, true);
+      document.removeEventListener("touchstart", unlock, true);
+      document.removeEventListener("keydown", unlock, true);
+    };
+  }, []);
+
   const playSound = useCallback((src, options = {}) => {
-    // If muted, do no play anything
     if (globalAudioManager.isMuted) {
+      // Do not play anything when muted
       return null;
     }
 
-    const settings = typeof options === "number" ? { duration: options } : options;
-    const { start = 0, duration = null, volume = 1, fadeIn = 0, fadeOut = 0 } = settings;
+    const settings =
+      typeof options === "number" ? { duration: options } : options;
+    const {
+      start = 0,
+      duration = null, // seconds
+      volume = 1,
+      fadeIn = 0,      // seconds
+      fadeOut = 0,     // seconds
+    } = settings;
 
     const key = String(src);
     let base = audioCache.get(key);
-    
     if (!base) {
       base = new Audio(src);
-      // For random/background sounds, use lazy loading
-      const isRandomSound = src.includes('empty-room') || src.includes('voices') || 
-                          src.includes('steps') || src.includes('laugh') || 
-                          src.includes('woman') || src.includes('lullaby');
-      
+      const isRandomSound =
+        src.includes("empty-room") ||
+        src.includes("voices") ||
+        src.includes("steps") ||
+        src.includes("laugh") ||
+        src.includes("woman") ||
+        src.includes("lullaby");
       base.preload = isRandomSound ? "none" : "auto";
       audioCache.set(key, base);
     }
-    
-    const audio = base.cloneNode();
-    audio.muted = false; // Make sure it is not muted
-    // Add to watched
+
+    const audio = base.cloneNode(true);
+    audio.muted = false;
+
+    // Seek to start safely (after metadata)
+    const seekToStart = () => {
+      try { audio.currentTime = start; } catch {}
+    };
+    if (audio.readyState >= 1) {
+      seekToStart();
+    } else {
+      audio.addEventListener("loadedmetadata", seekToStart, { once: true });
+    }
+
+    // Track instance
     activeAudioInstances.add(audio);
 
-    // Cleanup after end
-    let cleanup = () => {
-      activeAudioInstances.delete(audio);
+    // Timers attached to this audio
+    let fadeInId = null;
+    let fadeOutId = null;
+    let durationId = null;
+    let finalized = false;
+
+    const clearTimers = () => {
+      if (fadeInId) { clearInterval(fadeInId); intervalRefs.current.delete(fadeInId); fadeInId = null; }
+      if (fadeOutId) { clearInterval(fadeOutId); intervalRefs.current.delete(fadeOutId); fadeOutId = null; }
+      if (durationId) { clearTimeout(durationId); timeoutRefs.current.delete(durationId); durationId = null; }
     };
 
-    audio.addEventListener('ended', cleanup);
-    audio.addEventListener('pause', cleanup);
+    const finalize = () => {
+      if (finalized) return;
+      finalized = true;
+      clearTimers();
+      try {
+        audio.pause();
+        audio.currentTime = 0;
+      } catch {}
+      activeAudioInstances.delete(audio);
+      audio.removeEventListener("ended", onEnd);
+      audio.removeEventListener("pause", onEnd);
+      audio.removeEventListener("loadedmetadata", seekToStart);
+    };
 
-    audio.currentTime = start;
-    audio.volume = fadeIn > 0 ? 0 : volume;
-    
-    audio.play().catch(console.warn);
+    const onEnd = () => finalize();
 
-    // fade-in
+    audio.addEventListener("ended", onEnd, { once: true });
+    audio.addEventListener("pause", onEnd, { once: true });
+
+    // Initial volume (handle fade-in)
+    audio.volume = Math.max(0, Math.min(1, fadeIn > 0 ? 0 : volume));
+
+    audio.play().catch((err) => {
+      console.warn("Audio play failed:", err);
+      finalize();
+    });
+
+    // Fade-in
     if (fadeIn > 0) {
-      const steps = Math.ceil(fadeIn * 20);
+      const steps = Math.max(1, Math.ceil(fadeIn * 20));
       const inc = volume / steps;
       const tick = (fadeIn * 1000) / steps;
       let i = 0;
-      const id = setInterval(() => {
+      fadeInId = setInterval(() => {
         if (globalAudioManager.isMuted) {
-          clearInterval(id);
-          return;
+          clearInterval(fadeInId); intervalRefs.current.delete(fadeInId); fadeInId = null;
+          return finalize();
         }
         i += 1;
-        audio.volume = Math.min(volume, inc * i);
-        if (i >= steps) clearInterval(id);
+        audio.volume = Math.min(volume, audio.volume + inc);
+        if (i >= steps) {
+          clearInterval(fadeInId); intervalRefs.current.delete(fadeInId); fadeInId = null;
+          audio.volume = volume;
+        }
       }, tick);
-      intervalRefs.current.add(id);
+      intervalRefs.current.add(fadeInId);
     }
 
-    // auto stop / fade-out
+    // Auto stop / fade-out after duration
     if (duration) {
-      const timeoutId = setTimeout(() => {
+      durationId = setTimeout(() => {
         if (fadeOut > 0) {
-          const steps = Math.ceil(fadeOut * 20);
-          const dec = audio.volume / steps;
+          const steps = Math.max(1, Math.ceil(fadeOut * 20));
           const tick = (fadeOut * 1000) / steps;
           let v = audio.volume;
-          const id = setInterval(() => {
+          const dec = v / steps;
+          fadeOutId = setInterval(() => {
             if (globalAudioManager.isMuted) {
-              clearInterval(id);
-              audio.pause();
-              audio.currentTime = 0;
-              cleanup();
-              return;
+              clearInterval(fadeOutId); intervalRefs.current.delete(fadeOutId); fadeOutId = null;
+              return finalize();
             }
-            v -= dec;
-            audio.volume = Math.max(0, v);
+            v = Math.max(0, v - dec);
+            audio.volume = v;
             if (v <= 0) {
-              clearInterval(id);
-              audio.pause();
-              audio.currentTime = 0;
-              cleanup();
+              clearInterval(fadeOutId); intervalRefs.current.delete(fadeOutId); fadeOutId = null;
+              finalize();
             }
           }, tick);
-          intervalRefs.current.add(id);
+          intervalRefs.current.add(fadeOutId);
         } else {
-          audio.pause();
-          audio.currentTime = 0;
-          cleanup();
+          finalize();
         }
       }, duration * 1000);
-      
-      // Cleanup timeout during unmount
-      const originalCleanup = cleanup;
-      cleanup = () => {
-        clearTimeout(timeoutId);
-        originalCleanup();
-      };
+      timeoutRefs.current.add(durationId);
     }
 
     return audio;
@@ -194,51 +257,64 @@ export default function useSetAudio() {
   const playSequence = useCallback(async (list) => {
     for (const { src, options } of list) {
       if (globalAudioManager.isMuted) break;
-      
       const a = playSound(src, options);
-      if (!a) continue; // If muted, playSound returns null
-      
+      if (!a) continue;
+
       await new Promise((resolve) => {
-        const d = options?.duration;
-        if (d) return setTimeout(resolve, d * 1000);
-        a.onended = resolve;
-        setTimeout(resolve, 30000);
+        let guard = setTimeout(() => { guard = null; resolve(); }, 30000); // safety cap
+        const done = () => {
+          if (guard) { clearTimeout(guard); guard = null; }
+          resolve();
+        };
+        a.addEventListener("ended", done, { once: true });
+        a.addEventListener("pause", done, { once: true });
+        a.addEventListener("error", done, { once: true });
       });
     }
   }, [playSound]);
 
   const fadeOutAudio = useCallback((audio, ms = 1000) => {
     if (!audio) return;
-    const start = audio.volume || 0;
-    const step = start / (ms / 50);
+    const start = Math.max(0, Math.min(1, audio.volume || 0));
+    const steps = Math.max(1, Math.ceil(ms / 50));
+    const dec = start / steps;
+    let v = start;
     const id = setInterval(() => {
-      if (globalAudioManager.isMuted || audio.volume <= step) {
+      if (globalAudioManager.isMuted) {
         audio.volume = 0;
-        audio.pause();
-        audio.currentTime = 0;
+        try { audio.pause(); audio.currentTime = 0; } catch {}
         activeAudioInstances.delete(audio);
         clearInterval(id);
-      } else {
-        audio.volume -= step;
+        intervalRefs.current.delete(id);
+        return;
+      }
+      v = Math.max(0, v - dec);
+      audio.volume = v;
+      if (v <= 0) {
+        try { audio.pause(); audio.currentTime = 0; } catch {}
+        activeAudioInstances.delete(audio);
+        clearInterval(id);
+        intervalRefs.current.delete(id);
       }
     }, 50);
     intervalRefs.current.add(id);
   }, []);
 
-  // Clean all intervallls when unmounted
+  // Clean all timers on unmount
   const cleanup = useCallback(() => {
-    intervalRefs.current.forEach(id => clearInterval(id));
+    intervalRefs.current.forEach((id) => clearInterval(id));
+    timeoutRefs.current.forEach((id) => clearTimeout(id));
     intervalRefs.current.clear();
+    timeoutRefs.current.clear();
   }, []);
 
-  return { 
-    playSound, 
-    playSequence, 
-    fadeOutAudio, 
+  return {
+    playSound,
+    playSequence,
+    fadeOutAudio,
     cleanup,
-    // Access to global manager
     stopAllAudio: () => globalAudioManager.stopAll(),
     setMuted: (muted) => globalAudioManager.setMuted(muted),
-    isMuted: () => globalAudioManager.isMuted
+    isMuted: () => globalAudioManager.isMuted,
   };
 }

@@ -28,6 +28,15 @@ const BackWall = ({
     const onIndex = useRef(0);
     const offIndex = useRef(0);
 
+  // Activate with Enter/Space for keyboard users
+  const onKeyActivate = useCallback((fn) => (e) => {
+    const k = e.key;
+    if (k === "Enter" || k === " " || k === "Spacebar") {
+      e.preventDefault();
+      fn(e);
+    }
+  }, []);
+
    // --- handlers --------------------------------------------------------------
   const handleSwitchClick = useCallback(
     (e) => {
@@ -73,8 +82,8 @@ const BackWall = ({
           setLightsOn(false);
 
           const offMessages = [
-            "Ugh... it's too dark, I can't see a thing.",
-            "Creepy... I should turn the lights back on.",
+            "Ugh… it's too dark, I can't see a thing.",
+            "Creepy… I should turn the lights back on.",
             "Wait, what was that?! Better keep it bright.",
             "Nope, not staying in the dark!",
           ];
@@ -121,7 +130,7 @@ const BackWall = ({
 
       if (e.currentTarget.classList.contains("open")) {
         const msg =
-          "It was a long day... Let's get out of here. Finally, fresh air!";
+          "It was a long day… Let's get out of here. Finally, fresh air!";
         e.currentTarget.setAttribute("data-comment", msg);
         showComment(msg);
       } else {
@@ -151,43 +160,58 @@ const BackWall = ({
         <div   
             className={`wall wall-back ${isActive ? "active" : ""}`} 
         >            
-            <div className="flat lock item" 
-                data-title="Door lock" 
-                data-comment="It says: 'Please, enter the code'"
-                onClick={handleLockClick} 
-                tabIndex={0}
+            <div 
+              className="flat lock item" 
+              data-title="Door lock" 
+              data-comment="It says: 'Please, enter the code'"
+              aria-label="Door lock"
+              onClick={handleLockClick}
+              onKeyDown={onKeyActivate(handleChalkClick)} 
+              tabIndex={0}
+              role="button"
             ></div>
 
-            <div className="flat door inner">
+            <div 
+              className="flat door inner"
+              aria-hidden="true">
                 <span className="visually-hidden">Numeric lock</span>
             </div>
             
             <div 
-                className="flat door item" 
-                data-title="Locked Door" 
-                data-comment="It's locked."
-                onClick={handleDoorClick} 
-                tabIndex={0}
+              className="flat door item" 
+              data-title="Locked Door" 
+              data-comment="It's locked."
+              aria-label="Locked door"
+              onClick={handleDoorClick}
+              onKeyDown={onKeyActivate(handleChalkClick)} 
+              tabIndex={0}
+              role="button"
             >
                 <span className="visually-hidden">Heavy metal door</span>
             </div>
 
             <div 
-                className="flat switch item" 
-                data-title="Light Switch" 
-                data-comment="Much better."
-                onClick={handleSwitchClick} 
-                tabIndex={0}
+              className="flat switch item" 
+              data-title="Light Switch" 
+              data-comment="Much better."
+              aria-label="Light switch"
+              onClick={handleSwitchClick}
+              onKeyDown={onKeyActivate(handleChalkClick)} 
+              tabIndex={0}
+              role="button"
             >
                 <span className="visually-hidden">Light switch</span>
             </div>
 
             <div
-                className="item chalk-message"
-                data-title="Strange graffiti writing"
-                data-comment="Wait, what: `Smile, you're not the first one here`? Is someone watching me?"
-                onClick={handleChalkClick} 
-                tabIndex={0}
+              className="item chalk-message"
+              data-title="Strange graffiti writing"
+              data-comment="Wait, what: `Smile, you're not the first one here`? Is someone watching me?"
+              aria-label="Graffiti message"
+              onClick={handleChalkClick}
+              onKeyDown={onKeyActivate(handleChalkClick)} 
+              tabIndex={0}
+              role="button"
             >
                 <span className="visually-hidden">Graffiti text on the wall</span>
             </div>

@@ -104,12 +104,19 @@
   font-style: normal;
   font-weight: bold;
   position: absolute;
+  text-align: center;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
   line-height: 2em;
   transform: scale(0.9);
+}
+
+@media (max-width: 900px) {
+  .room-nav {
+    margin: 0 0.2rem 0.5rem 0.2rem;
+  }
 }
 
 @supports (color: color-mix(in srgb, white, black)) {

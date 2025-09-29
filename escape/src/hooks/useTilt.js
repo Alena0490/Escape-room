@@ -82,7 +82,7 @@ const useTilt = ({ roomRef, wrapRef, rotationYRef, maxPitch = 6, maxYaw = 3 }) =
       if (e.target.closest('.room-nav')) resetTilt();
     };
 
-    // capture = true zaručí, že se to chytne dřív než jiné handlery
+    // Use capture=true so this runs before other click handlers
     el.addEventListener('click', handleNavClick, true);
 
     return () => {

@@ -28,7 +28,7 @@
     background-image: url("../img/mirror.webp");
     filter: sepia(0.2);
     position: absolute;
-    bottom: 0;
+    bottom: -1%;
     right: 4%;
     box-shadow: none;
     border: none;
