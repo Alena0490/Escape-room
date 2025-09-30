@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunkescape=self.webpackChunkescape||[]).push([[634],{634:(e,a,s)=>{e.exports=s.p+"static/media/evil-laughing-256454.48aa1ed636274f08cb4a.mp3"}}]);

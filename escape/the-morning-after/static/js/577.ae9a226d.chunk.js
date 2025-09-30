@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunkescape=self.webpackChunkescape||[]).push([[577],{577:(e,s,c)=>{e.exports=c.p+"static/media/halloween-horror-voice-insomnia.03749dc15c78e7483082.mp3"}}]);

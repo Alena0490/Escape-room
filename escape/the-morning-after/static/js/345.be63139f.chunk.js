@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunkescape=self.webpackChunkescape||[]).push([[345],{345:(e,s,a)=>{e.exports=a.p+"static/media/music-box-lullaby-23919.7ae4d35c921ee46d4f2e.mp3"}}]);

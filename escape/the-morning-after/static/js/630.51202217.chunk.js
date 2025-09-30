@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunkescape=self.webpackChunkescape||[]).push([[630],{630:(e,s,c)=>{e.exports=c.p+"static/media/success-fanfare-trumpets-6185.573bbc6be2c9e72da638.mp3"}}]);
