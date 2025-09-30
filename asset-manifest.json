@@ -1,8 +1,8 @@
 {
   "files": {
-    "main.css": "/Escape-room/static/css/main.390572fc.css",
-    "main.js": "/Escape-room/static/js/main.3f200ee7.js",
-    "static/css/407.63e2d4ae.chunk.css": "/Escape-room/static/css/407.63e2d4ae.chunk.css",
+    "main.css": "/Escape-room/static/css/main.89c3b788.css",
+    "main.js": "/Escape-room/static/js/main.6b063e3d.js",
+    "static/css/407.2a511dcf.chunk.css": "/Escape-room/static/css/407.2a511dcf.chunk.css",
     "static/js/407.c6d120a6.chunk.js": "/Escape-room/static/js/407.c6d120a6.chunk.js",
     "static/js/52.820f0e31.chunk.js": "/Escape-room/static/js/52.820f0e31.chunk.js",
     "static/js/984.843d708f.chunk.js": "/Escape-room/static/js/984.843d708f.chunk.js",
@@ -77,9 +77,9 @@
     "static/media/mouse-click-290204.mp3": "/Escape-room/static/media/mouse-click-290204.9beaaf7901db54abbe65.mp3",
     "static/media/billiard1.webp": "/Escape-room/static/media/billiard1.3865c3593e47f7cfe688.webp",
     "static/media/metallic-box-top.webp": "/Escape-room/static/media/metallic-box-top.970d129d5509776ef057.webp",
+    "index.html": "/Escape-room/index.html",
     "static/media/metallic-box.webp": "/Escape-room/static/media/metallic-box.5cb42fab1c26a62b7d5d.webp",
     "static/media/radio.webp": "/Escape-room/static/media/radio.b90c9ca9ce8673c72217.webp",
-    "index.html": "/Escape-room/index.html",
     "static/media/globe1.webp": "/Escape-room/static/media/globe1.43e1d2626eee70526b4f.webp",
     "static/media/box-side.webp": "/Escape-room/static/media/box-side.931cbf3767836c622515.webp",
     "static/media/phone.webp": "/Escape-room/static/media/phone.4a4a999d450dc03261b4.webp",
@@ -94,15 +94,15 @@
     "static/media/switch-dark.webp": "/Escape-room/static/media/switch-dark.117ba8e3857ca96467ee.webp",
     "static/media/medical-chest-side1.webp": "/Escape-room/static/media/medical-chest-side1.b9c9a1a93c8b7f974108.webp",
     "static/media/cardboard-top.webp": "/Escape-room/static/media/cardboard-top.bc8a5ddd289255043f51.webp",
-    "main.390572fc.css.map": "/Escape-room/static/css/main.390572fc.css.map",
-    "main.3f200ee7.js.map": "/Escape-room/static/js/main.3f200ee7.js.map",
-    "407.63e2d4ae.chunk.css.map": "/Escape-room/static/css/407.63e2d4ae.chunk.css.map",
+    "main.89c3b788.css.map": "/Escape-room/static/css/main.89c3b788.css.map",
+    "main.6b063e3d.js.map": "/Escape-room/static/js/main.6b063e3d.js.map",
+    "407.2a511dcf.chunk.css.map": "/Escape-room/static/css/407.2a511dcf.chunk.css.map",
     "407.c6d120a6.chunk.js.map": "/Escape-room/static/js/407.c6d120a6.chunk.js.map",
     "410.5c427e10.chunk.css.map": "/Escape-room/static/css/410.5c427e10.chunk.css.map",
     "410.926e5d8c.chunk.js.map": "/Escape-room/static/js/410.926e5d8c.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.390572fc.css",
-    "static/js/main.3f200ee7.js"
+    "static/css/main.89c3b788.css",
+    "static/js/main.6b063e3d.js"
   ]
 }
