@@ -8,6 +8,9 @@
   width: 30vmin;
   height: 40vmin;
   background-image: url("../img/self-portrait.webp");
+  background-size: contain;
+  background-position: center;
+  background-repeat: no-repeat;
   position: absolute;
   top: 15%;
   border-radius: var(--border-radius-sm);
@@ -18,6 +21,12 @@
 .left-view .painting {
   filter: drop-shadow(-5px -3px 2px #000a);
   cursor: pointer;
+}
+
+.painting:focus-visible {
+  filter:
+    drop-shadow(5px 3px 2px #000a)
+    drop-shadow(3px 3px 3px var(--color-warning));
 }
 
 @media (max-width: 650px) {

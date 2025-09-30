@@ -70,6 +70,7 @@ const RightWall = ({
     <div className="wall wall-right">
       <div
         className="poster item egg"
+        aria-label="Poster"
         data-title="Some old poster"
         data-comment="What the hell is the chainsaw commercial doing there? Are they sponsoring this freak show or what?"
         role="button"
@@ -92,7 +93,7 @@ const RightWall = ({
         onClick={handleMirrorClick}
         onKeyDown={onKeyActivate(handleMirrorClick)}
       >
-        <span className="visually-hidden">Old mirror flashing letters Friday 13th</span>
+        <span className="visually-hidden">Old mirror flashing letters Friday the 13th</span>
       </div>
 
       <div
@@ -101,6 +102,7 @@ const RightWall = ({
         data-comment="What is it? Is there a fu**ing camera inside…?"
         role="button"
         tabIndex={0}
+        aria-label="Crack in the mirror"
         onClick={handleMirrorCrackClick}
         onKeyDown={onKeyActivate(handleMirrorCrackClick)}
       >

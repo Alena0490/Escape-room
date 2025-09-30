@@ -163,11 +163,3 @@
   .door { min-height: unset; }
 }
 
-.room-wrap.rotating .wall,
-.room-wrap.rotating .item {
-  filter: none !important;
-  box-shadow: none !important;
-  mix-blend-mode: normal !important;
-  animation: none !important;
-}
-

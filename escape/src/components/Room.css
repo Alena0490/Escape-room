@@ -524,6 +524,16 @@
   border: 0;
 }
 
+/* EFFICIENCY - Turn off effects when rotating*/
+.room-wrap.rotating .wall,
+.room-wrap.rotating .item {
+  filter: none !important;
+  box-shadow: none !important;
+  mix-blend-mode: normal !important;
+  animation: none !important;
+}
+
+
 /** MEDIA */
 /* =========================================================
    1) System setting: reduce motion

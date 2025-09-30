@@ -49,46 +49,52 @@ const Floor = ({
     return localStorage.getItem("rugUp") === "1";
   });
 
-  const handleRugClick = useCallback((e) => {
-    e.stopPropagation();
-    incrementItemClicks("rug");
+  const handleRugClick = useCallback(
+    (e) => {
+      e.stopPropagation();
+      incrementItemClicks("rug");
 
-    const wasUp = rugUp;
-    const next = !rugUp;
-    setRugUp(next);
-    localStorage.setItem("rugUp", next ? "1" : "0");
+      const wasUp = rugUp;
+      const next = !rugUp;
+      setRugUp(next);
+      localStorage.setItem("rugUp", next ? "1" : "0");
 
-    if (!wasUp) {
-      // lifting the rug
-      playSequence([
-        { src: Rug,       options: { duration: 1,   fadeIn: 0.2 } },
-        { src: RadioTune, options: { duration: 4.2, fadeIn: 0.2 } },
-        { src: Alien,     options: { volume: 0.3,   start: 2   } },
-      ]);
-      e.currentTarget.setAttribute("data-comment", RUG_MSG_UP);
-      showComment(RUG_MSG_UP);
-    } else {
-      // putting it back down
-      playSound(Rug, { duration: 0.8, volume: 0.7 });
-      e.currentTarget.setAttribute("data-comment", RUG_MSG_DOWN);
-      showComment(RUG_MSG_DOWN);
-    }
+      if (!wasUp) {
+        // lifting the rug
+        playSequence([
+          { src: Rug,       options: { duration: 1,   fadeIn: 0.2 } },
+          { src: RadioTune, options: { duration: 4.2, fadeIn: 0.2 } },
+          { src: Alien,     options: { volume: 0.3,   start: 2   } },
+        ]);
+        e.currentTarget.setAttribute("data-comment", RUG_MSG_UP);
+        showComment(RUG_MSG_UP);
+      } else {
+        // putting it back down
+        playSound(Rug, { duration: 0.8, volume: 0.7 });
+        e.currentTarget.setAttribute("data-comment", RUG_MSG_DOWN);
+        showComment(RUG_MSG_DOWN);
+      }
 
-    triggerVibration(30);
-  }, [rugUp, incrementItemClicks, playSequence, playSound, showComment, triggerVibration]);
+      triggerVibration(30);
+    },
+    [rugUp, incrementItemClicks, playSequence, playSound, showComment, triggerVibration]
+  );
 
   /** CONTRACT */
-  const handleContractClick = useCallback((e) => {
-    e.stopPropagation();
-    playSound(Paper, { volume: 0.5, start: 0.2 });
-    unlockEasterEgg("contract");
-    showComment(
-      "A contract with television… Ten thousand euros. Guess I really signed my life away.",
-      "easter-egg"
-    );
-    incrementItemClicks("contract");
-    triggerVibration(30);
-  }, [playSound, unlockEasterEgg, showComment, incrementItemClicks, triggerVibration]);
+  const handleContractClick = useCallback(
+    (e) => {
+      e.stopPropagation();
+      playSound(Paper, { volume: 0.5, start: 0.2 });
+      unlockEasterEgg("contract");
+      showComment(
+        "A contract with television… Ten thousand euros. Guess I really signed my life away.",
+        "easter-egg"
+      );
+      incrementItemClicks("contract");
+      triggerVibration(30);
+    },
+    [playSound, unlockEasterEgg, showComment, incrementItemClicks, triggerVibration]
+  );
 
   return (
     <div className="wall wall-bottom">
@@ -99,9 +105,13 @@ const Floor = ({
         data-comment={rugUp ? RUG_MSG_DOWN : RUG_MSG_UP}
         role="button"
         tabIndex={0}
+        aria-label={rugUp ? "Rug – radio revealed" : "Rug"}
+        aria-pressed={rugUp ? "true" : "false"}
         onClick={handleRugClick}
         onKeyDown={(e) => {
-          if (e.key === "Enter" || e.key === " ") {
+          const k = e.key;
+          if (e.repeat) return;
+          if (k === "Enter" || k === " " || k === "Spacebar") {
             e.preventDefault();
             handleRugClick(e);
           }
@@ -116,8 +126,16 @@ const Floor = ({
         data-comment="A contract with television… Ten thousand euros. Guess I really signed my life away."
         role="button"
         tabIndex={0}
+        aria-label="Crumpled contract"
         onClick={handleContractClick}
-        onKeyDown={(e) => e.key === "Enter" || e.key === " " ? (e.preventDefault(), handleContractClick(e)) : null}
+        onKeyDown={(e) => {
+          const k = e.key;
+          if (e.repeat) return;
+          if (k === "Enter" || k === " " || k === "Spacebar") {
+            e.preventDefault();
+            handleContractClick(e);
+          }
+        }}
       >
         <span className="visually-hidden">Crumpled document lying on the floor</span>
       </div>
