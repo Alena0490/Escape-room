@@ -345,6 +345,7 @@
   padding: 0.5em 0.75em;
   line-height: 1.5em;
   font-size: var(--font-small);
+  font-style: italic;
   transition: all .3s ease;
   opacity: 0.8;
 }
@@ -458,6 +459,7 @@
   color: var(--color-text-main);
   padding: 0.5rem 0.75rem;
   display: grid;
+  font-style: italic;
   align-content: end;
   text-shadow: 0 0.1em 0.2em var(--color-overlay);
   overflow: hidden;

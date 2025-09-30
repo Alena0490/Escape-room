@@ -2,7 +2,7 @@
   left: 0;
   transform: rotateY(90deg) translateX(calc(-1 * var(--depth)));
   transform-origin: left;
-  background-color: var( --color-bg-stone);
+  background-color: var(--color-bg-stone);
 }
 
 .poster {
@@ -15,17 +15,15 @@
   left: 10vmin;
   box-shadow: 0 0 1px #000a, inset 0 0 1px rgba(0, 0, 0, 0.425);
   border: 0.5vmin solid var(--color-bg-light);
-}
-
-.front-view .wall-back .poster {
   cursor: pointer;
 }
-
 
 .mirror {
     width: 65vmin;
     height: 68vmin;
     background-image: url("../img/mirror.webp");
+    background-size: contain;
+    background-repeat: no-repeat;
     filter: sepia(0.2);
     position: absolute;
     bottom: -1%;
@@ -67,6 +65,20 @@
 .mirror.lit:hover::after,
 .mirror.lit:active::after {
   animation: ghostFlash 5s ease forwards;
+}
+
+/* keyboard focus (no outline) */
+mirror:focus-visible::after {
+  animation: ghostFlash 1.5s ease forwards;
+}
+
+.mirror.lit:focus-visible::after {
+  animation: ghostFlash 5s ease forwards;
+}
+
+.poster:focus-visible,
+.mirror-crack:focus-visible {
+  filter: brightness(1.2) drop-shadow(3px 3px 3px var(--color-warning));
 }
 
 /* EASTER EGGS */

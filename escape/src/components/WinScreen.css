@@ -180,6 +180,12 @@
   }
 }
 
+@media (maxwidth: 550px) {
+  .win h1.win-content {
+    width: 60%;
+  }
+}
+
 @media (max-width: 480px) {
     .win h1.win-content {
         margin-block: 1rem;
