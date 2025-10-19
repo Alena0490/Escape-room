@@ -23,7 +23,6 @@ An immersive React-based escape room game featuring atmospheric audio, interacti
   ![Game](flat-devices-mockup.png)
 
 - **UI Fragments**  
-  ![Code lock UI](flat-galaxy-fold-mockup.png)  
   ![Win screen](flat-galaxy-fold-mockup1.png)
 
 ---
@@ -266,3 +265,4 @@ Built with React, featuring immersive audio design and responsive gameplay mecha
 
 🐱 GitHub: github.com/Alena0490
 ﻿# Escape-room
+
