@@ -14,9 +14,6 @@ An immersive React-based escape room game featuring atmospheric audio, interacti
 
 ## 🖼️ Mockups & Screenshots
 
-> Add images to `docs/mockups/` and reference them here.  
-> Use descriptive alt text so the images are meaningful even without visuals.
-
 - **Overview / Start**  
   ![Start screen](modern-browser-mockup.png)
 - **Game**  
@@ -265,4 +262,5 @@ Built with React, featuring immersive audio design and responsive gameplay mecha
 
 🐱 GitHub: github.com/Alena0490
 ﻿# Escape-room
+
 
